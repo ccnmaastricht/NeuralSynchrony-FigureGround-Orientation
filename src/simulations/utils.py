@@ -46,3 +46,57 @@ def threshold_linear(x, slope, intercept, offset):
         The value of the function at the given input.
     '''
     return np.maximum(slope * x + intercept, offset)
+
+
+def inverse_complex_log_transform(X, Y, k=15.0, a=0.7, b=80, alpha=0.9):
+    '''
+    Inverse of the complex-logarithm transformation described in Schwartz
+    (1980) - doi:10.1016/0042-6989(80)90090-5.
+
+    Parameters
+    ----------
+    X : array_like
+        X coordinate in visual field.
+    Y : array_like
+        Y coordinate in visual field.
+
+    Returns
+    ------- 
+    X : array_like
+        X coordinate in cortical space.
+    Y : array_like
+        Y coordinate in cortical space.
+    '''
+
+    eccentricity = np.abs(X + Y * 1j)
+    polar_angle = np.angle(X + Y * 1j)
+
+    Z = eccentricity * np.exp(1j * alpha * polar_angle)
+    W = k * np.log((Z + a) / (Z + b)) - k * np.log(a / b)
+
+    X = np.real(W)
+    Y = np.imag(W)
+
+    return X, Y
+
+def pairwise_distance(X, Y):
+    '''
+    does not yet give the correct result!
+    Compute the pairwise distance between all pairs of points.
+
+    Parameters
+    ----------
+    X : array_like (1d array of all x-coordinates)
+        X coordinate space.
+    Y : array_like (1d array of all y-coordinates)
+        Y coordinate space.
+
+    Returns
+    ------- 
+    array_like
+        The pairwise distance between all pairs of points.
+    '''
+
+    return np.sqrt((X[:, None] - X[None, :])**2 + (Y[:, None] - Y[None, :])**2)
+
+    

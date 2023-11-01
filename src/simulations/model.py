@@ -1,18 +1,16 @@
 import numpy as np
 from scipy.integrate import odeint
 
-from utils import gaussian, threshold_linear
+from utils import gaussian, threshold_linear, inverse_complex_log_transform, pairwise_distance
 
 class V1Model:
-    def __init__(self, parameters):
-        self.omega = parameters['omega']
-        self.coupling = parameters['coupling']
-        self.lambda_ = parameters['lambda']
-        self.gamma = parameters['gamma']
-        self.num_populations = parameters['num_populations']
-        self.side_length = parameters['side_length']
-        self.eccentricity = parameters['eccentricity']
-        self.rf_parameters = parameters['rf_parameters']
+    def __init__(self, model_parameters, stimulus_parameters, rf_parameters):
+        self.omega = model_parameters['omega']
+        self.lambda_ = model_parameters['lambda']
+        self.gamma = model_parameters['gamma']
+        self.num_populations = model_parameters['num_populations']
+        
+        self._generate_receptive_fields(stimulus_parameters, rf_parameters)
         
     def update_coupling(self, coupling):
         """
@@ -25,16 +23,20 @@ class V1Model:
         """
         self.coupling = coupling
 
-    def simulate(self, initial_state, simulation_time, timestep = 1e-3):
+    def simulate(self, parameters):
         """
         Simulate the model for the given initial state and time.
 
         Parameters
         ----------
-        initial_state : array_like
-            The initial state of the system.
-        simulation_time : float
-            The time to simulate the model for.
+        parameters : dict
+            The parameters for the simulation.
+            - time_step : float
+                The time step of the simulation.
+            - simulation_time : float
+                The total simulation time.
+            - initial_state : array_like
+                The initial state of the system.
 
         Returns
         -------
@@ -44,36 +46,74 @@ class V1Model:
             The state of the system at each time point.
         """
 
-        time_vector = np.arange(0, simulation_time, self.timestep)
+        time_step = parameters['time_step']
+        simulation_time = parameters['simulation_time']
+        initial_state = parameters['initial_state']
+        
+
+        time_vector = np.arange(0, simulation_time, time_step)
         state = odeint(self._dynamics, initial_state, time_vector)
         return time_vector, state
 
-    def generate_receptive_fields(self, num_pixels):
+    def _generate_receptive_fields(self, stimulus_parameters, rf_parameters):
         """
-        Generate the receptive field parameters (coordinates and size) as well as actual receptive fields.
+        Generate receptive fields.
 
         Parameters
         ----------
-        num_pixels : int
-            The number of pixels in the stimulus.
+        stimulus_parameters : dict
+            The parameters of the stimulus.
+            - num_pixels : int
+                The number of pixels in the stimulus.
+            - radius : float
+                The radius of the stimulus.
+            - side_length : float
+                The side length of the stimulus.
+        rf_parameters : array_like
+            The parameters of the receptive field function.
+            - slope : float
+                The slope of the threshold linear function.
+            - intercept : float
+                The intercept of the threshold linear function.
+            - offset : float
+                The offset of the threshold linear function.
         """
-        lower_bound = self.eccentricity - self.side_length / 2
-        upper_bound = self.eccentricity + self.side_length / 2
+
+        num_pixels = stimulus_parameters['num_pixels']
+        radius = stimulus_parameters['radius']
+        side_length = stimulus_parameters['side_length']
+        
+        lower_bound = radius - side_length / 2
+        upper_bound = radius + side_length / 2
         r = np.linspace(lower_bound, upper_bound, self.num_populations)
         X, Y = np.meshgrid(r, r)
-        X = X.flatten()
-        Y = Y.flatten()
+        self.X = X.flatten()
+        self.Y = Y[::-1].flatten()
         
-        self.rf_coordinates = np.array([X, Y]).T
-        eccentricity = np.linalg.norm(self.rf_coordinates, axis=1)
+        eccentricity = np.sqrt(X**2 + Y**2)
 
-        self.sigma = threshold_linear(eccentricity, *self.rf_parameters) * 0.25
+        sigma = threshold_linear(eccentricity, *rf_parameters) * 0.25
 
         self.receptive_fields = np.zeros((self.num_populations, num_pixels))
         for i in range(self.num_populations):
-            rf = gaussian(X, Y, self.rf_coordinates[i, 0], self.rf_coordinates[i, 1], self.sigma[i])
+            rf = gaussian(X, Y, X[i], Y[i], sigma[i])
             self.receptive_fields[i, :] = rf / np.sum(rf)
     
+
+    def _generate_coupling(self):
+        """
+        Generate the coupling matrix.
+
+        """
+
+        X_cortex, Y_cortex = inverse_complex_log_transform(self.X, self.Y)
+        distances = pairwise_distance(X_cortex, Y_cortex)
+        self.coupling = np.exp(-distances / self.lambda_) * self.gamma # need to double check the equation in Maryam's thesis
+
+        
+        
+        
+
     def _dynamics(self, state, t):
         """
         The dynamics of the Kuramoto model.

@@ -11,6 +11,7 @@ class V1Model:
         self.num_populations = model_parameters['num_populations']
         
         self._generate_receptive_fields(stimulus_parameters, rf_parameters)
+        self._generate_coupling()
         
     def update_coupling(self, coupling):
         """
@@ -126,8 +127,8 @@ class V1Model:
             The change of the state based on the Kuramoto model.
         """
         theta = state.reshape((-1, 1))
-        phase_diff = theta.T - theta
-        dtheta = self.omega + np.sum(self.coupling * np.sin(phase_diff), axis=1)
+        phase_difference = theta.T - theta
+        dtheta = self.omega + np.sum(self.coupling * np.sin(phase_difference), axis=1)
         return dtheta
 
 

@@ -6,8 +6,8 @@ from utils import gaussian, threshold_linear, inverse_complex_log_transform, pai
 class V1Model:
     def __init__(self, model_parameters, stimulus_parameters, rf_parameters):
         self.omega = model_parameters['omega']
-        self.lambda_ = model_parameters['lambda']
-        self.gamma = model_parameters['gamma']
+        self.decay_rate = model_parameters['lambda']
+        self.max_coupling = model_parameters['gamma']
         self.num_populations = model_parameters['num_populations']
         
         self._generate_receptive_fields(stimulus_parameters, rf_parameters)
@@ -103,17 +103,12 @@ class V1Model:
     def _generate_coupling(self):
         """
         Generate the coupling matrix.
-
         """
-
         X_cortex, Y_cortex = inverse_complex_log_transform(self.X, self.Y)
         distances = pairwise_distance(X_cortex, Y_cortex)
-        self.coupling = np.exp(-distances / self.lambda_) * self.gamma # need to double check the equation in Maryam's thesis
+        self.coupling = np.exp(-self.decay_rate * distances) * self.max_coupling
 
         
-        
-        
-
     def _dynamics(self, state, t):
         """
         The dynamics of the Kuramoto model.

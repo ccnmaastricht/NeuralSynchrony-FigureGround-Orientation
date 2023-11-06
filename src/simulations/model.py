@@ -129,9 +129,6 @@ class V1Model:
         phase_diff = theta.T - theta
         dtheta = self.omega + np.sum(self.coupling * np.sin(phase_diff), axis=1)
         return dtheta
-    
-    def _generate_coupling(self, N):
-        pass
 
 
         

@@ -145,7 +145,7 @@ class V1Model:
         """
         theta = state.reshape((-1, 1))
         phase_difference = theta.T - theta
-        dtheta = self.omega + np.sum(self.coupling * np.sin(phase_difference), axis=1)
+        dtheta = self.omega + 1 / self.num_populations * np.sum(self.coupling * np.sin(phase_difference), axis=1)
         return dtheta
 
         

@@ -112,7 +112,7 @@ class V1Model:
         distances = pairwise_distance(X_cortex, Y_cortex)
         self.coupling = np.exp(-self.decay_rate * distances) * self.max_coupling
      
-    def _compute_omega(self, stimulus):
+    def compute_omega(self, stimulus):
         """
         Compute intrinsic frequencies based on the stimulus.
 

@@ -47,7 +47,6 @@ def threshold_linear(x, slope, intercept, offset):
     '''
     return np.maximum(slope * x + intercept, offset)
 
-
 def inverse_complex_log_transform(X, Y, k=15.0, a=0.7, b=80, alpha=0.9):
     '''
     Inverse of the complex-logarithm transformation described in Schwartz
@@ -99,4 +98,19 @@ def pairwise_distance(X, Y):
 
     return np.sqrt((X[:, None] - X[None, :])**2 + (Y[:, None] - Y[None, :])**2)
 
-    
+def order_parameter(theta):
+    '''
+    Compute the order parameter of a set of phases.
+
+    Parameters
+    ----------
+    theta : array_like
+        The phases.
+
+    Returns
+    ------- 
+    float (complex)
+        The order parameter.
+    '''
+
+    return np.mean(np.exp(1j * theta), axis=1)

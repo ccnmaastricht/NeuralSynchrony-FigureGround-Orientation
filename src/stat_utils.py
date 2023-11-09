@@ -31,6 +31,3 @@ def print_sample_info(metadata):
     std_age = metadata['Age'].std().__round__(3)
 
     print(f'{num_samples} particpants ({num_females} female, mean age = {mean_age}, standard deviation = {std_age})')
-
-def tost_p():
-    pass

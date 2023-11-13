@@ -2,7 +2,7 @@ import numpy as np
 from copy import copy
 from scipy.integrate import odeint
 
-from utils import gaussian, threshold_linear, inverse_complex_log_transform, pairwise_distance
+from sim_utils import gaussian, threshold_linear, inverse_complex_log_transform, pairwise_distance
 
 class V1Model:
     def __init__(self, parameters):

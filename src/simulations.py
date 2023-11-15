@@ -66,7 +66,6 @@ class V1Model:
         state : array_like
             The state of the system at each time point.
         """
-
         time_step = parameters['time_step']
         simulation_time = parameters['simulation_time']
         initial_state = parameters['initial_state']
@@ -91,8 +90,6 @@ class V1Model:
             - side_length : float
                 The side length of the stimulus.
         """
-
-        
         num_pixels = stimulus_parameters['num_pixels']
         radius = stimulus_parameters['radius']
         side_length = stimulus_parameters['side_length']

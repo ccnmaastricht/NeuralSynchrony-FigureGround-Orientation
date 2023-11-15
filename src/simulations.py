@@ -29,7 +29,7 @@ class V1Model:
         """
         mean_luminance = np.mean(stimulus)
         normalized_luminance = (stimulus - mean_luminance)**2 / (mean_luminance**2)
-        contrast = np.sqrt( np.matmul(self.receptive_fields, normalized_luminance) )
+        contrast = np.sqrt( np.matmul(self.receptive_fields, normalized_luminance) ) * 100
         frequency = self.contrast_slope * contrast + self.contrast_intercept
         self.omega = 2 * np.pi * frequency
         
@@ -73,7 +73,7 @@ class V1Model:
 
         time_vector = np.arange(0, simulation_time, time_step)
         state = odeint(self._dynamics, initial_state, time_vector)
-        return time_vector, state
+        return state, time_vector
     
     def _generate_receptive_fields(self, stimulus_parameters):
         """

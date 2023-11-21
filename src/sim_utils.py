@@ -139,3 +139,48 @@ def create_annulus(diameter, frequency, resolution):
     mask = radius <= diameter/2
     annulus = 0.5 * np.cos(radius * frequency * 2 * np.pi + np.pi) * mask
     return annulus
+
+def psychometric_function(predictors, slope1, slope2, intercept):
+    '''
+    Compute a two-dimensional psychometric function.
+
+    Parameters
+    ----------
+    predictors : array_like
+        The predictors.
+    slope1 : float
+        The slope of the first predictor.
+    slope2 : float
+        The slope of the second predictor.
+    intercept : float
+        The intercept.
+
+    Returns
+    -------
+    float
+        The probability of a correct response.
+    '''
+    logit = slope1 * predictors[0] + slope2 * predictors[1] + intercept
+    probability = 0.5 / (1 + np.exp(-logit)) + 0.5
+    return probability
+
+def get_num_blocks(desired, num_cores):
+    '''
+    Get the number of blocks for parallel processing.
+
+    Parameters
+    ----------
+    desired : int
+        The desired number of blocks.
+    num_cores : int
+        The number of cores.
+
+    Returns
+    -------
+    int
+        The number of blocks.
+    '''
+    bounds = np.array([np.floor(desired / num_cores), np.ceil(desired / num_cores)]) * num_cores
+    index = np.argmin(np.abs(bounds - desired))
+    return int(bounds[index])
+

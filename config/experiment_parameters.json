@@ -1,0 +1,6 @@
+{
+    "mean_contrast": 0.5,
+    "num_blocks": 30,
+    "num_contrast_heterogeneity": 30,
+    "num_grid_coarseness": 30
+}

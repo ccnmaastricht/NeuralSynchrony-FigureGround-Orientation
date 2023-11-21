@@ -1,0 +1,7 @@
+{
+    "num_populations": 400,
+    "lambda": 0.22,
+    "gamma": 24.63,
+    "contrast_slope": 0.25,
+    "contrast_intercept": 25
+}

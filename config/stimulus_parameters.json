@@ -1,0 +1,9 @@
+{
+    "resolution": 224,
+    "num_pixels": 50176,
+    "radius": 7,
+    "side_length": 4.9,
+    "annulus_diameter": 0.7,
+    "annulus_frequency": 5.7,
+    "annulus_resolution": 32
+}

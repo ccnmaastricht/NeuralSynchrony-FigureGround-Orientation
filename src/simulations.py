@@ -227,5 +227,3 @@ class StimulusGenerator():
             grid += np.random.randint(-randomness, randomness, size=grid.shape)
 
         return grid
-
-        

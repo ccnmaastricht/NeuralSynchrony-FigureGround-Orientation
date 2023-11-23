@@ -115,3 +115,27 @@ def order_parameter(theta):
 
     return np.mean(np.exp(1j * theta), axis=1)
 
+def create_annulus(diameter, frequency, resolution):
+    '''
+    Create a Gabor annulus.
+
+    Parameters
+    ----------
+    diameter : float
+        The diameter of the annulus.
+    frequency : float
+        The spatial frequency of the radial modulation.
+    resolution : int
+        The resolution of the annulus.
+
+    Returns
+    -------
+    array_like
+        The annulus.
+    '''
+    r = np.linspace(-diameter/2, diameter/2, resolution)
+    X, Y = np.meshgrid(r, -r)
+    radius = np.hypot(X, Y)
+    mask = radius <= diameter/2
+    annulus = 0.5 * np.cos(radius * frequency * 2 * np.pi + np.pi) * mask
+    return annulus

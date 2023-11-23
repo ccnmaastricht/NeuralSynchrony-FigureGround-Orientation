@@ -2,7 +2,7 @@ import numpy as np
 from copy import copy
 from scipy.integrate import odeint
 
-from utils import gaussian, threshold_linear, inverse_complex_log_transform, pairwise_distance
+from sim_utils import gaussian, threshold_linear, inverse_complex_log_transform, pairwise_distance, create_annulus
 
 class V1Model:
     def __init__(self, parameters):
@@ -17,6 +17,21 @@ class V1Model:
         
         self._generate_receptive_fields(parameters['stimulus'])
         self._generate_coupling()
+
+    def compute_omega(self, stimulus):
+        """
+        Compute intrinsic frequencies based on the stimulus.
+
+        Parameters
+        ----------
+        stimulus : array_like
+            The stimulus.
+        """
+        mean_luminance = np.mean(stimulus)
+        normalized_luminance = (stimulus - mean_luminance)**2 / (mean_luminance**2)
+        contrast = np.sqrt( np.matmul(self.receptive_fields, normalized_luminance) ) * 100
+        frequency = self.contrast_slope * contrast + self.contrast_intercept
+        self.omega = 2 * np.pi * frequency
         
     def update_coupling(self, coupling):
         """
@@ -51,7 +66,6 @@ class V1Model:
         state : array_like
             The state of the system at each time point.
         """
-
         time_step = parameters['time_step']
         simulation_time = parameters['simulation_time']
         initial_state = parameters['initial_state']
@@ -59,7 +73,7 @@ class V1Model:
 
         time_vector = np.arange(0, simulation_time, time_step)
         state = odeint(self._dynamics, initial_state, time_vector)
-        return time_vector, state
+        return state, time_vector
     
     def _generate_receptive_fields(self, stimulus_parameters):
         """
@@ -72,12 +86,10 @@ class V1Model:
             - num_pixels : int
                 The number of pixels in the stimulus.
             - radius : float
-                The radius of the stimulus.
+                The radius of the stimulus center.
             - side_length : float
                 The side length of the stimulus.
         """
-
-        
         num_pixels = stimulus_parameters['num_pixels']
         radius = stimulus_parameters['radius']
         side_length = stimulus_parameters['side_length']
@@ -111,21 +123,6 @@ class V1Model:
         X_cortex, Y_cortex = inverse_complex_log_transform(self.X, self.Y)
         distances = pairwise_distance(X_cortex, Y_cortex)
         self.coupling = np.exp(-self.decay_rate * distances) * self.max_coupling
-     
-    def compute_omega(self, stimulus):
-        """
-        Compute intrinsic frequencies based on the stimulus.
-
-        Parameters
-        ----------
-        stimulus : array_like
-            The stimulus.
-        """
-        mean_luminance = np.mean(stimulus)
-        normalized_luminance = (stimulus - mean_luminance)**2 / (mean_luminance**2)
-        contrast = np.sqrt( np.matmul(self.receptive_fields, normalized_luminance) )
-        frequency = self.contrast_slope * contrast + self.contrast_intercept
-        self.omega = 2 * np.pi * frequency
     
     def _dynamics(self, state, t):
         """
@@ -147,5 +144,88 @@ class V1Model:
         phase_difference = theta.T - theta
         dtheta = self.omega + 1 / self.num_populations * np.sum(self.coupling * np.sin(phase_difference), axis=1)
         return dtheta
+    
+
+class StimulusGenerator():
+    def __init__(self, parameters):
+        self.resolution = parameters['resolution']
+        annulus_diameter = parameters['annulus_diameter']
+        annulus_frequency = parameters['annulus_frequency']
+        self.annulus_resolution = parameters['annulus_resolution']
+
+        self.annulus = create_annulus(annulus_diameter, annulus_frequency, self.annulus_resolution)
+
+    def generate(self, scaling_factor, contrast_range, mean_contrast):
+        """
+        Generate a stimulus.
+
+        Parameters
+        ----------
+        scaling_factor : float
+            The scaling factor for the grid.
+        contrast_range : float
+            The range of the contrast.
+        mean_contrast : float
+            The mean contrast.
+
+        Returns
+        -------
+        array_like
+            The generated stimulus.
+        """
+        grid = self._get_grid(scaling_factor)
+        stimulus = np.ones((self.resolution, self.resolution)) * 0.5
+        indices = np.arange(self.annulus_resolution)
+        annulus_half_res = self.annulus_resolution // 2
+        for row, col in grid:
+            left, right = row - annulus_half_res, row + annulus_half_res
+            down, up = col - annulus_half_res, col + annulus_half_res
+
+            lower_row, upper_row = np.clip([left, right], 0, self.resolution)
+            lower_col, upper_col = np.clip([down, up], 0, self.resolution)
+
+            range_row = upper_row - lower_row
+            range_col = upper_col - lower_col
+
+            if left<0:
+                row_indices = indices[-range_row:]
+            else:
+                row_indices = indices[:range_row]
+
+            if down<0:
+                col_indices = indices[-range_col:]
+            else:
+                col_indices = indices[:range_col]
+
+            contrast_factor = np.random.uniform(mean_contrast - contrast_range/2, mean_contrast + contrast_range/2)
+
+            stimulus[lower_row:upper_row, lower_col:upper_col] = self.annulus[row_indices, :][:, col_indices] * contrast_factor + 0.5
+        
+        return stimulus
+
+    def _get_grid(self, scaling_factor):
+        """
+        Generate a grid with a specified scaling factor.
+
+        Parameters
+        ----------
+        scaling_factor : float
+            The scaling factor for the grid.
+
+        Returns
+        -------
+        array_like
+            The generated grid.
+        """
+        step_size = int(self.annulus_resolution * scaling_factor) + 1
+        grid_points = np.arange(self.annulus_resolution//2, self.resolution, step_size)
+        row_grid, col_grid = np.meshgrid(grid_points, grid_points)
+        grid = np.vstack((row_grid.flatten(), col_grid.flatten())).T
+
+        randomness = (self.annulus_resolution * scaling_factor - self.annulus_resolution) // 2
+        if randomness > 0:
+            grid += np.random.randint(-randomness, randomness, size=grid.shape)
+
+        return grid
 
         

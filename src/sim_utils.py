@@ -114,3 +114,4 @@ def order_parameter(theta):
     '''
 
     return np.mean(np.exp(1j * theta), axis=1)
+

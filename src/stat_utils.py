@@ -1,3 +1,4 @@
+import numpy as np
 from prettytable import PrettyTable
 
 def print_wald_chi_square(results):
@@ -31,3 +32,16 @@ def print_sample_info(metadata):
     std_age = metadata['Age'].std().__round__(3)
 
     print(f'{num_samples} particpants ({num_females} female, mean age = {mean_age}, standard deviation = {std_age})')
+
+def bootstrap(data, num_repeats, percentile, abs_diff=False):
+    mean_diff = np.zeros(num_repeats)
+    num_items = len(data)
+    for i in range(num_repeats):
+        sample_1 = data.sample(n=num_items, replace=True).values
+        sample_2 = data.sample(n=num_items, replace=True).values
+        mean_diff[i] = (sample_1 - sample_2).mean()
+
+    if abs_diff:
+        mean_diff = np.abs(mean_diff)
+    
+    return np.percentile(mean_diff, percentile)

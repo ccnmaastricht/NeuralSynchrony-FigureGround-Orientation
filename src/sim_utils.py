@@ -131,7 +131,7 @@ def coherence(theta):
     phase_difference = np.angle(np.exp(1j * (theta[:, None] - theta[None, :])))
     return np.cos(phase_difference)
 
-    
+
 def create_annulus(diameter, frequency, resolution):
     """
     Create a Gabor annulus.
@@ -157,28 +157,28 @@ def create_annulus(diameter, frequency, resolution):
     annulus = 0.5 * np.cos(radius * frequency * 2 * np.pi + np.pi) * mask
     return annulus
 
-def psychometric_function(predictors, slope1, slope2, intercept):
+def psychometric_function(predictors, slopes, intercept, chance_level = 0.5):
     """
-    Compute a two-dimensional psychometric function.
+    Compute an n-dimensional psychometric function.
 
     Parameters
     ----------
     predictors : array_like
         The predictors.
-    slope1 : float
-        The slope of the first predictor.
-    slope2 : float
-        The slope of the second predictor.
+    slope : array_like
+        The slopes.
     intercept : float
         The intercept.
+    chance_level : float
+        The chance level.
 
     Returns
     -------
     float
         The probability of a correct response.
     """
-    logit = slope1 * predictors[0] + slope2 * predictors[1] + intercept
-    probability = 0.5 / (1 + np.exp(-logit)) + 0.5
+    logit = slopes * predictors + intercept
+    probability = (1 - chance_level) / (1 + np.exp(-logit)) + chance_level
     return probability
 
 def get_num_blocks(desired, num_cores):

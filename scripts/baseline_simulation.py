@@ -1,3 +1,8 @@
+"""
+This script simulates the first session of the experiment and generate an Arnold Tongue.
+Results are saved in ../data/simulation_results/arnold_tongue.npy and correspond to section X of the paper.
+Figures are saved in ../figures/arnold_tongue.png and correspond to Figures Y and Z of the paper.
+"""
 import os
 import sys
 sys.path.append('../src')

@@ -3,7 +3,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 def plot_arnold_tongue(arnold_tongue, figsize, labels, fontsizes, ticks, show = True, save = False, filename = None, dpi=300, fraction=0.0454):
-    '''
+    """
     Plot the Arnold tongue.
 
     Parameters
@@ -30,7 +30,7 @@ def plot_arnold_tongue(arnold_tongue, figsize, labels, fontsizes, ticks, show = 
     Returns
     -------
     None
-    '''
+    """
 
     figure = plt.figure(figsize=figsize, dpi=dpi)
     sns.set_style('white')

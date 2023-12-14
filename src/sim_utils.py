@@ -128,11 +128,10 @@ def coherence(theta):
     float
         The coherence.
     """
-
-    return np.cos(pairwise_distance(theta, theta))
+    phase_difference = np.angle(np.exp(1j * (theta[:, None] - theta[None, :])))
+    return np.cos(phase_difference)
 
     
-
 def create_annulus(diameter, frequency, resolution):
     """
     Create a Gabor annulus.

@@ -2,7 +2,7 @@ import numpy as np
 
 
 def gaussian(X, Y, x, y, sigma):
-    '''
+    """
     Isotropic 2D Gaussian function.
 
     Parameters
@@ -22,11 +22,11 @@ def gaussian(X, Y, x, y, sigma):
     ------- 
     float
         The value of the Gaussian at the given coordinates.
-    '''
+    """
     return np.exp(-((X - x)**2 + (Y - y)**2) / (2 * sigma**2))
 
 def threshold_linear(x, slope, intercept, offset):
-    '''
+    """
     Threshold linear function.
 
     Parameters
@@ -44,11 +44,11 @@ def threshold_linear(x, slope, intercept, offset):
     ------- 
     float
         The value of the function at the given input.
-    '''
+    """
     return np.maximum(slope * x + intercept, offset)
 
 def inverse_complex_log_transform(X, Y, k=15.0, a=0.7, b=80, alpha=0.9):
-    '''
+    """
     Inverse of the complex-logarithm transformation described in Schwartz
     (1980) - doi:10.1016/0042-6989(80)90090-5.
 
@@ -65,7 +65,7 @@ def inverse_complex_log_transform(X, Y, k=15.0, a=0.7, b=80, alpha=0.9):
         X coordinate in cortical space.
     Y : array_like
         Y coordinate in cortical space.
-    '''
+    """
 
     eccentricity = np.abs(X + Y * 1j)
     polar_angle = np.angle(X + Y * 1j)
@@ -79,8 +79,7 @@ def inverse_complex_log_transform(X, Y, k=15.0, a=0.7, b=80, alpha=0.9):
     return X, Y
 
 def pairwise_distance(X, Y):
-    '''
-    does not yet give the correct result!
+    """
     Compute the pairwise distance between all pairs of points.
 
     Parameters
@@ -94,12 +93,12 @@ def pairwise_distance(X, Y):
     ------- 
     array_like
         The pairwise distance between all pairs of points.
-    '''
+    """
 
     return np.sqrt((X[:, None] - X[None, :])**2 + (Y[:, None] - Y[None, :])**2)
 
 def order_parameter(theta):
-    '''
+    """
     Compute the order parameter of a set of phases.
 
     Parameters
@@ -111,12 +110,31 @@ def order_parameter(theta):
     ------- 
     float (complex)
         The order parameter.
-    '''
+    """
 
     return np.mean(np.exp(1j * theta), axis=1)
 
+def coherence(theta):
+    """
+    Compute the coherence of a set of phases.
+
+    Parameters
+    ----------
+    theta : array_like
+        The phases.
+
+    Returns
+    ------- 
+    float
+        The coherence.
+    """
+
+    return np.cos(pairwise_distance(theta, theta))
+
+    
+
 def create_annulus(diameter, frequency, resolution):
-    '''
+    """
     Create a Gabor annulus.
 
     Parameters
@@ -132,7 +150,7 @@ def create_annulus(diameter, frequency, resolution):
     -------
     array_like
         The annulus.
-    '''
+    """
     r = np.linspace(-diameter/2, diameter/2, resolution)
     X, Y = np.meshgrid(r, -r)
     radius = np.hypot(X, Y)
@@ -141,7 +159,7 @@ def create_annulus(diameter, frequency, resolution):
     return annulus
 
 def psychometric_function(predictors, slope1, slope2, intercept):
-    '''
+    """
     Compute a two-dimensional psychometric function.
 
     Parameters
@@ -159,13 +177,13 @@ def psychometric_function(predictors, slope1, slope2, intercept):
     -------
     float
         The probability of a correct response.
-    '''
+    """
     logit = slope1 * predictors[0] + slope2 * predictors[1] + intercept
     probability = 0.5 / (1 + np.exp(-logit)) + 0.5
     return probability
 
 def get_num_blocks(desired, num_cores):
-    '''
+    """
     Get the number of blocks for parallel processing.
 
     Parameters
@@ -179,7 +197,7 @@ def get_num_blocks(desired, num_cores):
     -------
     int
         The number of blocks.
-    '''
+    """
     bounds = np.array([np.floor(desired / num_cores), np.ceil(desired / num_cores)]) * num_cores
     index = np.argmin(np.abs(bounds - desired))
     return int(bounds[index])

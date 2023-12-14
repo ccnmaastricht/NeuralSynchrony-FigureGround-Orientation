@@ -13,7 +13,7 @@ from plot_utils import plot_arnold_tongue
 from multiprocessing import Pool, Array, cpu_count
 
 def load_configurations():
-    '''
+    """
     Load the model, stimulus, simulation, and experiment parameters.
 
     Returns
@@ -26,7 +26,7 @@ def load_configurations():
         The simulation parameters.
     experiment_parameters : dict
         The experiment parameters.
-    '''
+    """
     with open('../config/model_parameters.json') as f:
         model_parameters = json.load(f)
 
@@ -42,7 +42,7 @@ def load_configurations():
     return model_parameters, stimulus_parameters, simulation_parameters, experiment_parameters
 
 def run_block(block):
-    '''
+    """
     Run a block of the Arnold tongue. This function is used for parallel processing.
 
     Parameters
@@ -53,7 +53,7 @@ def run_block(block):
     Returns
     -------
     None
-    '''
+    """
     global arnold_tongue, num_conditions, sync_index
     global grid_coarseness, contrast_heterogeneity
     global experiment_parameters, simulation_parameters

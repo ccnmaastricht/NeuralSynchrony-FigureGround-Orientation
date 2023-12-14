@@ -53,7 +53,11 @@ def run_block(block):
     -------
     None
     '''
-    global arnold_tongue, num_conditions, grid_coarseness, contrast_heterogeneity, experiment_parameters, model, stimulus_generator, simulation_parameters, sync_index
+    global arnold_tongue, num_conditions, sync_index
+    global grid_coarseness, contrast_heterogeneity
+    global experiment_parameters, simulation_parameters
+    global model, stimulus_generator
+    
     for condition, (scaling_factor, contrast_range) in enumerate(zip(grid_coarseness, contrast_heterogeneity)):
         stimulus = stimulus_generator.generate(scaling_factor, contrast_range, experiment_parameters['mean_contrast'])
         model.compute_omega(stimulus.flatten())

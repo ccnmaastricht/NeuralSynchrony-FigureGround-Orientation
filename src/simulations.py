@@ -9,8 +9,8 @@ class V1Model:
         self.X = None
         self.Y = None
         self.omega = None
-        self.decay_rate = parameters['model']['lambda']
-        self.max_coupling = parameters['model']['gamma']
+        self.decay_rate = parameters['model']['decay_rate']
+        self.max_coupling = parameters['model']['max_coupling']
         self.num_populations = parameters['model']['num_populations']
         self.contrast_slope = parameters['model']['contrast_slope']
         self.contrast_intercept = parameters['model']['contrast_intercept']

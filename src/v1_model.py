@@ -13,6 +13,7 @@ class V1Model:
         self.num_populations = model_parameters['num_populations']
         self.contrast_slope = model_parameters['contrast_slope']
         self.contrast_intercept = model_parameters['contrast_intercept']
+        self.effective_learning_rate = model_parameters['effective_learning_rate']
         
         self._generate_receptive_fields(stimulus_parameters)
         self._generate_coupling()
@@ -31,17 +32,20 @@ class V1Model:
         contrast = np.sqrt( np.matmul(self.receptive_fields, normalized_luminance) ) * 100
         frequency = self.contrast_slope * contrast + self.contrast_intercept
         self.omega = 2 * np.pi * frequency
-        
-    def update_coupling(self, coupling):
+
+
+    def update_coupling(self, weighted_coherence):
         """
-        Update the coupling matrix.
+        Update the coupling matrix through Hebbian learning.
 
         Parameters
         ----------
-        coupling : array_like
-            The new coupling matrix.
+        weighted_coherence : array_like
+            The weighted coherence matrix.
         """
-        self.coupling = coupling
+
+        decay_factor = np.exp(-self.effective_learning_rate)
+        self.coupling = decay_factor * self.coupling + (1 - decay_factor) * weighted_coherence * self.max_coupling
 
     def simulate(self, parameters):
         """

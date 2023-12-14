@@ -5,18 +5,18 @@ from scipy.integrate import odeint
 from sim_utils import gaussian, threshold_linear, inverse_complex_log_transform, pairwise_distance, create_annulus
 
 class V1Model:
-    def __init__(self, parameters):
+    def __init__(self, model_parameters, stimulus_parameters):
         self.X = None
         self.Y = None
         self.omega = None
-        self.decay_rate = parameters['model']['decay_rate']
-        self.max_coupling = parameters['model']['max_coupling']
-        self.num_populations = parameters['model']['num_populations']
-        self.contrast_slope = parameters['model']['contrast_slope']
-        self.contrast_intercept = parameters['model']['contrast_intercept']
+        self.decay_rate = model_parameters['decay_rate']
+        self.max_coupling = model_parameters['max_coupling']
+        self.num_populations = model_parameters['num_populations']
+        self.contrast_slope = model_parameters['contrast_slope']
+        self.contrast_intercept = model_parameters['contrast_intercept']
         
-        self._generate_receptive_fields(parameters['stimulus'])
-        self._generate_coupling()
+        self._generate_receptive_fields(stimulus_parameters)
+        self._generate_couplinggenerate_coupling()
 
     def compute_omega(self, stimulus):
         """
@@ -75,33 +75,33 @@ class V1Model:
         state = odeint(self._dynamics, initial_state, time_vector)
         return state, time_vector
     
-    def _generate_receptive_fields(self, stimulus_parameters):
+    def _generate_receptive_fields(self, parameters):
         """
         Generate receptive fields.
 
         Parameters
         ----------
-        stimulus_parameters : dict
+        parameters : dict
             The parameters of the stimulus.
-            - num_pixels : int
+            - stimulus_num_pixels : int
                 The number of pixels in the stimulus.
-            - radius : float
-                The radius of the stimulus center.
-            - side_length : float
+            - stimulus_eccentricity : float
+                The stimulus_eccentricity of the stimulus center.
+            - stimulus_side_length : float
                 The side length of the stimulus.
         """
-        num_pixels = stimulus_parameters['num_pixels']
-        radius = stimulus_parameters['radius']
-        side_length = stimulus_parameters['side_length']
+        stimulus_num_pixels = parameters['stimulus_num_pixels']
+        stimulus_eccentricity = parameters['stimulus_eccentricity']
+        stimulus_side_length = parameters['stimulus_side_length']
         
-        lower_bound = radius - side_length / 2
-        upper_bound = radius + side_length / 2
+        lower_bound = stimulus_eccentricity - stimulus_side_length / 2
+        upper_bound = stimulus_eccentricity + stimulus_side_length / 2
         r = np.linspace(lower_bound, upper_bound, int(np.sqrt(self.num_populations)))
         X, Y = np.meshgrid(r, r)
         self.X = X.flatten()
         self.Y = Y[::-1].flatten()
  
-        r = np.linspace(lower_bound, upper_bound, int(np.sqrt(num_pixels)))
+        r = np.linspace(lower_bound, upper_bound, int(np.sqrt(stimulus_num_pixels)))
         X, Y = np.meshgrid(r, r)
         X = X.flatten()
         Y = Y[::-1].flatten()
@@ -111,7 +111,7 @@ class V1Model:
         diameter = threshold_linear(eccentricity, slope=0.172, intercept=0.25, offset=1)
         sigma = diameter / 4
 
-        self.receptive_fields = np.zeros((self.num_populations, num_pixels))
+        self.receptive_fields = np.zeros((self.num_populations, stimulus_num_pixels))
         for i in range(self.num_populations):
             rf = gaussian(X, Y, self.X[i], self.Y[i], sigma[i])
             self.receptive_fields[i, :] = rf / np.sum(rf)    

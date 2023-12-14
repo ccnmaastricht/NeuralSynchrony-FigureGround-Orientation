@@ -71,11 +71,9 @@ if __name__ == '__main__':
     # Load the parameters
     model_parameters, stimulus_parameters, simulation_parameters, experiment_parameters = load_configurations()
 
-    model_init_parameters = {'model': model_parameters,
-                'stimulus': stimulus_parameters}
-    
+
     # Initialize the model and stimulus generator
-    model = V1Model(model_init_parameters)
+    model = V1Model(model_parameters, stimulus_parameters)
     stimulus_generator = StimulusGenerator(stimulus_parameters)
 
     # Set up the simulation and parallel processing

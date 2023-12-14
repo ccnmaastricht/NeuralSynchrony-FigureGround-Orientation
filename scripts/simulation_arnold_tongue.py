@@ -5,7 +5,8 @@ sys.path.append('../src')
 import json
 import numpy as np
 
-from simulations import V1Model, StimulusGenerator
+from v1_model import V1Model
+from stimulus_generator import StimulusGenerator
 from sim_utils import order_parameter, get_num_blocks
 from plot_utils import plot_arnold_tongue
 

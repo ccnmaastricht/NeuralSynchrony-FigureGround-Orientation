@@ -60,7 +60,9 @@ def run_block(block):
     global model, stimulus_generator
     
     for condition, (scaling_factor, contrast_range) in enumerate(zip(grid_coarseness, contrast_heterogeneity)):
-        stimulus = stimulus_generator.generate(scaling_factor, contrast_range, experiment_parameters['mean_contrast'])
+        stimulus = stimulus_generator.generate(scaling_factor,
+                                               contrast_range,
+                                               experiment_parameters['mean_contrast'])
         model.compute_omega(stimulus.flatten())
         state_variables, _ = model.simulate(simulation_parameters)
         synchronization = np.abs(order_parameter(state_variables))

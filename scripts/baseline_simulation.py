@@ -1,7 +1,6 @@
 """
 This script simulates the first session of the experiment and generate an Arnold Tongue.
 Results are saved in ../data/simulation_results/arnold_tongue.npy and correspond to section X of the paper.
-Figures are saved in ../figures/arnold_tongue.png and correspond to Figures Y and Z of the paper.
 """
 import os
 import sys
@@ -127,43 +126,6 @@ if __name__ == '__main__':
     file = '../data/simulation_results/arnold_tongue.npy'
     os.makedirs(os.path.dirname(file), exist_ok=True)
     np.save(file, arnold_tongue)
-
-    # Plot the results
-    file = '../figures/arnold_tongue.png'
-    os.makedirs(os.path.dirname(file), exist_ok=True)
-    
-    xticks = np.linspace(0.01, 1, 5)
-    yticks = np.linspace(1, 1.5, 5)
-    xticks = np.round(xticks, 1)
-    yticks = np.round(yticks, 1)
-    ticks = (xticks, yticks)
-
-    title_fontsize = 6
-    label_fontsize = 5
-    tick_fontsize = 5
-    cbar_labelsize = 5
-    labels = ('Arnold Tongue', 'Contrast heterogeneity', 'Grid coarseness', 'Synchronization')
-    
-    fontsizes = (title_fontsize, label_fontsize, tick_fontsize, cbar_labelsize)
-
-    # specify figure size in millimeters
-    heigth, width = 88.9, 88.9
-
-    # convert to inches
-    heigth /= 25.4
-    width /= 25.4
-
-    figsize=(width, heigth)
-
-    plot_arnold_tongue(arnold_tongue.mean(axis=0), 
-                    figsize,
-                    labels,
-                    fontsizes,
-                    ticks,
-                    show=False,
-                    save=True,
-                    filename=file,
-                    fraction=0.0454)
 
 
 

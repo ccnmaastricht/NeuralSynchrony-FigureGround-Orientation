@@ -120,7 +120,7 @@ if __name__ == '__main__':
 
     # Retrieve the results
     arnold_tongue = np.array(arnold_tongue).reshape(num_blocks, num_conditions)
-    arnold_tongue = arnold_tongue.mean(axis=0).reshape(experiment_parameters['num_contrast_heterogeneity'],
+    arnold_tongue = arnold_tongue.reshape(num_blocks,experiment_parameters['num_contrast_heterogeneity'],
                                                        experiment_parameters['num_grid_coarseness'])
     
     # Save the results
@@ -155,7 +155,7 @@ if __name__ == '__main__':
 
     figsize=(width, heigth)
 
-    plot_arnold_tongue(arnold_tongue, 
+    plot_arnold_tongue(arnold_tongue.mean(axis=0), 
                     figsize,
                     labels,
                     fontsizes,

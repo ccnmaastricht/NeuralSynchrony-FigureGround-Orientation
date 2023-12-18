@@ -12,7 +12,6 @@ import numpy as np
 from v1_model import V1Model
 from stimulus_generator import StimulusGenerator
 from sim_utils import order_parameter, get_num_blocks
-from plot_utils import plot_arnold_tongue
 
 from multiprocessing import Pool, Array, cpu_count
 

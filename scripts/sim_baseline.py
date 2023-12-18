@@ -118,11 +118,11 @@ if __name__ == '__main__':
 
     # Retrieve the results
     arnold_tongue = np.array(arnold_tongue).reshape(num_blocks, num_conditions)
-    arnold_tongue = arnold_tongue.reshape(num_blocks,experiment_parameters['num_contrast_heterogeneity'],
+    arnold_tongue = arnold_tongue.reshape(num_blocks, experiment_parameters['num_contrast_heterogeneity'],
                                                        experiment_parameters['num_grid_coarseness'])
     
     # Save the results
-    file = '../data/simulation_results/arnold_tongue.npy'
+    file = '../data/simulation_results/baseline_arnold_tongue.npy'
     os.makedirs(os.path.dirname(file), exist_ok=True)
     np.save(file, arnold_tongue)
 

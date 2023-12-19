@@ -73,7 +73,7 @@ def run_block(block):
 
 if __name__ == '__main__':
     # Load empirical (behavioral) Arnold tongue
-    behavioral_arnold_tongue = np.load('data/empirical_results/continuous_bat.npy').flatten()
+    behavioral_arnold_tongue = np.load('data/results/empirical/continuous_bat.npy').flatten()
     behavioral_arnold_tongue = min_max_normalize(behavioral_arnold_tongue)
 
     # Load the parameters

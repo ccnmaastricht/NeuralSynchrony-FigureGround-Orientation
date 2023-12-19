@@ -82,9 +82,6 @@ if __name__ == '__main__':
     # Initialize the stimulus generator
     stimulus_generator = StimulusGenerator(stimulus_parameters)
 
-    # Set up the synchronization index
-    sync_index = slice(simulation_parameters['num_time_steps'] // 2, None)
-
     # Set up the simulation and parallel processing
     simulation_parameters['num_time_steps'] = int(simulation_parameters['simulation_time'] / simulation_parameters['time_step'])
     simulation_parameters['initial_state'] = np.random.rand(model_parameters['num_populations']) * 2 * np.pi
@@ -93,6 +90,9 @@ if __name__ == '__main__':
     num_cores = int(num_available_cores * simulation_parameters['proportion_used_cores'])
 
     print(f'Using {num_cores} of {num_available_cores} available cores.')
+
+    # Set up the synchronization index
+    sync_index = slice(simulation_parameters['num_time_steps'] // 2, None)
     
     # Set up single experiment
     num_conditions = experiment_parameters['num_contrast_heterogeneity'] * experiment_parameters['num_grid_coarseness']

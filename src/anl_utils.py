@@ -81,3 +81,19 @@ def weighted_jaccard(X, Y):
     denominator = np.sum(maximum)
 
     return numerator / denominator
+
+def min_max_normalize(X):
+    """
+    Normalize an array between 0 and 1.
+
+    Parameters
+    ----------
+    X : array_like
+        The array to normalize.
+
+    Returns
+    -------
+    array_like
+        The normalized array.
+    """
+    return (X - np.min(X)) / (np.max(X) - np.min(X))

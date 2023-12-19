@@ -57,3 +57,27 @@ def psychometric_function(predictors, slopes, intercept, chance_level = 0.5):
     logit = slopes * predictors + intercept
     probability = (1 - chance_level) / (1 + np.exp(-logit)) + chance_level
     return probability
+
+def weighted_jaccard(X, Y):
+    """
+    Compute weighted Jaccard similarity between two sets of elements.
+
+    Parameters
+    ----------
+    X : array_like
+        The first set of elements.
+    Y : array_like
+        The second set of elements.
+
+    Returns
+    -------
+    float
+        The weighted Jaccard similarity.
+    """
+    minimum = np.minimum(X.flatten(), Y.flatten())
+    maximum = np.maximum(X.flatten(), Y.flatten())
+
+    numerator = np.sum(minimum)
+    denominator = np.sum(maximum)
+
+    return numerator / denominator

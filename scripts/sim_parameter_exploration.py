@@ -12,7 +12,7 @@ import numpy as np
 from src.v1_model import V1Model
 from src.stimulus_generator import StimulusGenerator
 from src.sim_utils import get_num_blocks
-from src.anl_utils import order_parameter
+from src.anl_utils import order_parameter, weighted_jaccard, min_max_normalize
 
 from multiprocessing import Pool, Array, cpu_count
 
@@ -33,22 +33,14 @@ def load_configurations():
     exploration_parameters : dict
         The parameters for the parameter space exploration.
     """
-    with open('config/model_parameters.json') as f:
-        model_parameters = json.load(f)
+    parameters = {}
+    config_files = ['model_parameters', 'stimulus_parameters', 'simulation_parameters', 'experiment_parameters', 'exploration_parameters']
+    
+    for config_file in config_files:
+        with open(f'config/{config_file}.json') as f:
+            parameters[config_file] = json.load(f)
 
-    with open('config/stimulus_parameters.json') as f:
-        stimulus_parameters = json.load(f)
-
-    with open('config/simulation_parameters.json') as f:
-        simulation_parameters = json.load(f)
-
-    with open('config/experiment_parameters.json') as f:
-        experiment_parameters = json.load(f)
-
-    with open('config/exploration_parameters.json') as f:
-        exploration_parameters = json.load(f)
-
-    return model_parameters, stimulus_parameters, simulation_parameters, experiment_parameters, exploration_parameters
+    return parameters['model_parameters'], parameters['stimulus_parameters'], parameters['simulation_parameters'], parameters['experiment_parameters'], parameters['exploration_parameters']
 
 def run_block(block):
     """
@@ -80,6 +72,9 @@ def run_block(block):
 
 
 if __name__ == '__main__':
+    # Load empirical (behavioral) Arnold tongue
+    behavioral_arnold_tongue = np.load('data/empirical_results/continuous_bat.npy').flatten()
+    behavioral_arnold_tongue = min_max_normalize(behavioral_arnold_tongue)
 
     # Load the parameters
     model_parameters, stimulus_parameters, simulation_parameters, experiment_parameters, exploration_parameters = load_configurations()
@@ -117,30 +112,41 @@ if __name__ == '__main__':
     max_couplings = np.linspace(exploration_parameters['max_coupling_min'],
                                 exploration_parameters['max_coupling_max'],
                                 exploration_parameters['num_coupling'])
-
-
     
-    # Initialize the model
-    model = V1Model(model_parameters, stimulus_parameters)
-    
+    size = (exploration_parameters['num_decay'], exploration_parameters['num_coupling'])
+    correlation_fits = np.zeros(size)
+    jaccard_fits = np.zeros(size)
+
     # Initialize the Arnold tongue
     arnold_tongue = np.zeros((num_blocks, num_conditions))
     arnold_tongue = Array('d', arnold_tongue.reshape(-1))
 
+    # Run the exploration
+    for decay_counter, decay_rate in enumerate(decay_rates):
+        for coupling_counter, max_coupling in enumerate(max_couplings):
+            print(f'Running decay rate {decay_counter + 1} of {len(decay_rates)} and coupling {coupling_counter + 1} of {len(max_couplings)}')
+            
+            # Set the parameters
+            model_parameters['decay_rate'] = decay_rate
+            model_parameters['max_coupling'] = max_coupling
+
+            # Initialize the model
+            model = V1Model(model_parameters, stimulus_parameters)
     
+            # Run the experiment
+            for batch in range(num_batches):
+                with Pool(num_blocks) as p:
+                    p.map(run_block, range(batch * num_cores, (batch + 1) * num_cores))
 
-    # Run the experiment
-    for batch in range(num_batches):
-        print(f' Blocks {batch * num_cores} to {(batch + 1) * num_cores - 1}')
-        with Pool(num_blocks) as p:
-            p.map(run_block, range(batch * num_cores, (batch + 1) * num_cores))
+            # Retrieve the results
+            simulated_arnold_tongue = np.array(arnold_tongue)
 
-    # Retrieve the results
-    arnold_tongue = np.array(arnold_tongue).reshape(num_blocks, num_conditions)
-    arnold_tongue = arnold_tongue.reshape(num_blocks, experiment_parameters['num_contrast_heterogeneity'],
-                                                       experiment_parameters['num_grid_coarseness'])
+            # Compute the fits
+            correlation_fits[decay_counter, coupling_counter] = np.corrcoef(simulated_arnold_tongue, behavioral_arnold_tongue)[0, 1]
+            jaccard_fits[decay_counter, coupling_counter] = weighted_jaccard(simulated_arnold_tongue, behavioral_arnold_tongue)
+        
     
     # Save the results
-    file = '../data/simulation_results/baseline_arnold_tongue.npy'
+    file = 'data/simulation_results/parameter_space_exploration'
     os.makedirs(os.path.dirname(file), exist_ok=True)
-    np.save(file, arnold_tongue)
+    np.savez(file, correlation_fits=correlation_fits, jaccard_fits=jaccard_fits, decay_rates=decay_rates, max_couplings=max_couplings)

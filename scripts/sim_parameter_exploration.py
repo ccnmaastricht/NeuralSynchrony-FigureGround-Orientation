@@ -113,7 +113,7 @@ if __name__ == '__main__':
                                 exploration_parameters['max_coupling_max'],
                                 exploration_parameters['num_max_coupling'])
     
-    size = (exploration_parameters['num_decay'], exploration_parameters['num_coupling'])
+    size = (exploration_parameters['num_decay'], exploration_parameters['num_max_coupling'])
     correlation_fits = np.zeros(size)
     jaccard_fits = np.zeros(size)
 

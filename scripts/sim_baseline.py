@@ -11,7 +11,8 @@ import numpy as np
 
 from v1_model import V1Model
 from stimulus_generator import StimulusGenerator
-from sim_utils import order_parameter, get_num_blocks
+from sim_utils import get_num_blocks
+from anl_utils import order_parameter
 
 from multiprocessing import Pool, Array, cpu_count
 

@@ -2,10 +2,26 @@
 This script computes the behavioral Arnold tongue of each subject as well as the average behavioral Arnold tongue.
 Results are saved in ../data/empirical_results/behavioral_arnold_tongue.npy and correspond to section X of the paper.
 """
+import json
 import numpy as np
 from scipy.optimize import curve_fit
 
 from src.anl_utils import load_data, get_session_data, get_subject_data, psychometric_function
+
+def load_configuration():
+    """
+    Load the experiment parameters.
+
+    Returns
+    -------
+    experiment_parameters : dict
+        The experiment parameters.
+    """
+    with open('config/experiment_parameters.json') as f:
+        experiment_parameters = json.load(f)
+
+    return experiment_parameters
+
 
 def get_bounds(data, variable):
     """
@@ -56,6 +72,9 @@ def create_predictors(bounds_grid_coarseness, num_grid_coarseness, bounds_contra
 
 
 if __name__ == '__main__':
+    # Load in silico experiment parameters
+    in_silico_experiment_parameters = load_configuration()
+
     # Load data
     data_path = 'data/empirical/main.csv'
     try:
@@ -101,12 +120,15 @@ if __name__ == '__main__':
     popt, _ = curve_fit(psychometric_function, predictors, average_arnold_tongue.flatten(), p0=initial_params)
 
     # Create predictors for continuous Arnold tongue
-    predictors = create_predictors(bounds_grid_coarseness, 30,
-                                   bounds_contrast_heterogeneity, 30)
+    predictors = create_predictors(bounds_grid_coarseness, in_silico_experiment_parameters['num_grid_coarseness'],
+                                   bounds_contrast_heterogeneity, in_silico_experiment_parameters['num_contrast_heterogeneity'])
 
     # Compute continuous Arnold tongue
+    size = (in_silico_experiment_parameters['num_grid_coarseness'],
+            in_silico_experiment_parameters['num_contrast_heterogeneity'])
     continuous_arnold_tongue = psychometric_function(predictors, *popt)
-    continuous_arnold_tongue = continuous_arnold_tongue.reshape((30, 30))
+
+    continuous_arnold_tongue = continuous_arnold_tongue.reshape(size)
 
     # Save results
     np.save('data/results/empirical/optimal_psychometric_parameters.npy', popt)

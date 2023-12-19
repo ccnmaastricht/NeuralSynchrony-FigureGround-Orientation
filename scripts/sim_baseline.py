@@ -3,16 +3,14 @@ This script simulates the first session of the experiment and generate an Arnold
 Results are saved in ../data/simulation_results/arnold_tongue.npy and correspond to section X of the paper.
 """
 import os
-import sys
-sys.path.append('../src')
 
 import json
 import numpy as np
 
-from v1_model import V1Model
-from stimulus_generator import StimulusGenerator
-from sim_utils import get_num_blocks
-from anl_utils import order_parameter
+from src.v1_model import V1Model
+from src.stimulus_generator import StimulusGenerator
+from src.sim_utils import get_num_blocks
+from src.anl_utils import order_parameter
 
 from multiprocessing import Pool, Array, cpu_count
 
@@ -31,16 +29,16 @@ def load_configurations():
     experiment_parameters : dict
         The experiment parameters.
     """
-    with open('../config/model_parameters.json') as f:
+    with open('config/model_parameters.json') as f:
         model_parameters = json.load(f)
 
-    with open('../config/stimulus_parameters.json') as f:
+    with open('config/stimulus_parameters.json') as f:
         stimulus_parameters = json.load(f)
 
-    with open('../config/simulation_parameters.json') as f:
+    with open('config/simulation_parameters.json') as f:
         simulation_parameters = json.load(f)
 
-    with open('../config/experiment_parameters.json') as f:
+    with open('config/experiment_parameters.json') as f:
         experiment_parameters = json.load(f)
 
     return model_parameters, stimulus_parameters, simulation_parameters, experiment_parameters

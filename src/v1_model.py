@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.integrate import odeint
 
-from sim_utils import gaussian, threshold_linear, inverse_complex_log_transform, pairwise_distance
+from src.sim_utils import gaussian, threshold_linear, inverse_complex_log_transform, pairwise_distance
 
 class V1Model:
     def __init__(self, model_parameters, stimulus_parameters):

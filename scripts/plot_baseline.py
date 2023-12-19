@@ -3,11 +3,9 @@ This script creates the Arnold Tongue figure...
 """
 
 import os 
-import sys
-sys.path.append('../src')
 
 import numpy as np
-from plot_utils import plot_arnold_tongue
+from src.plot_utils import plot_arnold_tongue
 
 # Define file paths
 data_file_path = '../data/simulation_results/arnold_tongue.npy'

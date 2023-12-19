@@ -1,4 +1,55 @@
 import numpy as np
+import pandas as pd
+
+def load_data(path):
+    """
+    Load the behavioral data.
+
+    Returns
+    -------
+    data : pandas.DataFrame
+        The behavioral data.
+    """
+    data = pd.read_csv(path)
+    return data
+
+def get_session_data(data, session):
+    """
+    Get the data of a specific session.
+
+    Parameters
+    ----------
+    data : pandas.DataFrame
+        The behavioral data.
+    session : int
+        The session number.
+
+    Returns
+    -------
+    session_data : pandas.DataFrame
+        The data of the session.
+    """
+    session_data = data[data['SessionID'] == session]
+    return session_data
+
+def get_subject_data(data, subject):
+    """
+    Get the data of a specific subject.
+
+    Parameters
+    ----------
+    data : pandas.DataFrame
+        The behavioral data.
+    subject : int
+        The subject number.
+
+    Returns
+    -------
+    subject_data : pandas.DataFrame
+        The data of the subject.
+    """
+    subject_data = data[data['SubjectID'] == subject]
+    return subject_data
 
 def order_parameter(theta):
     """

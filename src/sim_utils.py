@@ -97,40 +97,6 @@ def pairwise_distance(X, Y):
 
     return np.sqrt((X[:, None] - X[None, :])**2 + (Y[:, None] - Y[None, :])**2)
 
-def order_parameter(theta):
-    """
-    Compute the order parameter of a set of phases.
-
-    Parameters
-    ----------
-    theta : array_like
-        The phases.
-
-    Returns
-    ------- 
-    float (complex)
-        The order parameter.
-    """
-
-    return np.mean(np.exp(1j * theta), axis=1)
-
-def coherence(theta):
-    """
-    Compute the coherence of a set of phases.
-
-    Parameters
-    ----------
-    theta : array_like
-        The phases.
-
-    Returns
-    ------- 
-    float
-        The coherence.
-    """
-    phase_difference = np.angle(np.exp(1j * (theta[:, None] - theta[None, :])))
-    return np.cos(phase_difference)
-
 
 def create_annulus(diameter, frequency, resolution):
     """
@@ -157,29 +123,6 @@ def create_annulus(diameter, frequency, resolution):
     annulus = 0.5 * np.cos(radius * frequency * 2 * np.pi + np.pi) * mask
     return annulus
 
-def psychometric_function(predictors, slopes, intercept, chance_level = 0.5):
-    """
-    Compute an n-dimensional psychometric function.
-
-    Parameters
-    ----------
-    predictors : array_like
-        The predictors.
-    slope : array_like
-        The slopes.
-    intercept : float
-        The intercept.
-    chance_level : float
-        The chance level.
-
-    Returns
-    -------
-    float
-        The probability of a correct response.
-    """
-    logit = slopes * predictors + intercept
-    probability = (1 - chance_level) / (1 + np.exp(-logit)) + chance_level
-    return probability
 
 def get_num_blocks(desired, num_cores):
     """

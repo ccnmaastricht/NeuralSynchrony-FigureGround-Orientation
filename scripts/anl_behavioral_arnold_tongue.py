@@ -10,7 +10,7 @@ from src.anl_utils import load_data, get_session_data, get_subject_data, psychom
 
 def load_configuration():
     """
-    Load the experiment parameters.
+    Load parameters for the in silico experiment.
 
     Returns
     -------

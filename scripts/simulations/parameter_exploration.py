@@ -139,7 +139,8 @@ if __name__ == '__main__':
                     p.map(run_block, range(batch * num_cores, (batch + 1) * num_cores))
 
             # Retrieve the results
-            simulated_arnold_tongue = np.array(arnold_tongue)
+            simulated_arnold_tongue = np.array(arnold_tongue).reshape(num_blocks, num_conditions)
+            simulated_arnold_tongue = np.mean(simulated_arnold_tongue, axis=0)
 
             # Compute the fits
             correlation_fits[decay_counter, coupling_counter] = np.corrcoef(simulated_arnold_tongue, behavioral_arnold_tongue)[0, 1]

@@ -10,23 +10,23 @@ from src.anl_utils import load_data, get_session_data
 
 def is_significant(results, variable, cutoff=0.05):
     """
-    Check if at least one interaction between session and a parameter is significant.
+    Check if a variable is significant.
 
     Parameters
     ----------
     results : statsmodels.genmod.generalized_estimating_equations.GEEResultsWrapper
         The results of the GEE analysis.
     variable : str
-        The parameter.
+        The variable of interest.
     cutoff : float, optional
         The cutoff for the p-value. The default is 0.05.
         
     Returns
     -------
     significant : bool
-        True if at least one interaction is significant, False otherwise.
+        True if the variable is significant, False otherwise.
     """
-    # get Wald test p-values
+    # use Wald test p-value
     pvalue = results.wald_test(variable, scalar=True).pvalue
     return pvalue < cutoff
 

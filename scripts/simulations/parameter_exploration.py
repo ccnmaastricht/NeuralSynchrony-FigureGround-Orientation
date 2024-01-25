@@ -73,11 +73,14 @@ def run_block(block):
 
 if __name__ == '__main__':
     # Load empirical (behavioral) Arnold tongue
-    behavioral_arnold_tongue = np.load('data/results/empirical/continuous_bat.npy').flatten()
+    behavioral_arnold_tongue = np.load('data/results/empirical/average_bat.npy').flatten()
     behavioral_arnold_tongue = min_max_normalize(behavioral_arnold_tongue)
 
     # Load the parameters
     model_parameters, stimulus_parameters, simulation_parameters, experiment_parameters, exploration_parameters = load_configurations()
+    experiment_parameters['num_contrast_heterogeneity'] = 5
+    experiment_parameters['num_grid_coarseness'] = 5
+
 
     # Initialize the stimulus generator
     stimulus_generator = StimulusGenerator(stimulus_parameters)

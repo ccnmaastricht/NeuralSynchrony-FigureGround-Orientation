@@ -15,7 +15,9 @@ and experience levels from naïve to highly practised.
 
 ## Psychophysics
 ### Codebooks
+* [Sample Information](https://github.com/ccnmaastricht/NeuralSynchrony-FigureGround/wiki/Codebook-Sample-Info)
 * [Experimental Data](https://github.com/ccnmaastricht/NeuralSynchrony-FigureGround/wiki/Codebook-Experimental-Data)
+
 
 
 

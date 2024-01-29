@@ -1,7 +1,7 @@
 """
 This script explores the decay rate (lambda) and maximum coupling (gamma) parameter space of the model
  and generates an Arnold Tongue for each combination of parameters, and compares the results to behavioral data.
-Results are saved in ../data/simulation_results/parameter_space_exploration.npy and correspond to section X of the paper.
+Results are saved in results/simulation/parameter_space_exploration.npy and correspond to section X of the paper.
 """
 
 import os
@@ -73,7 +73,7 @@ def run_block(block):
 
 if __name__ == '__main__':
     # Load empirical (behavioral) Arnold tongue
-    behavioral_arnold_tongue = np.load('data/results/empirical/average_bat.npy').flatten()
+    behavioral_arnold_tongue = np.load('results/empirical/average_bat.npy').flatten()
     behavioral_arnold_tongue = min_max_normalize(behavioral_arnold_tongue)
 
     # Load the parameters
@@ -151,6 +151,6 @@ if __name__ == '__main__':
         
     
     # Save the results
-    file = 'data/simulation_results/parameter_space_exploration'
+    file = 'results/simulation/parameter_space_exploration'
     os.makedirs(os.path.dirname(file), exist_ok=True)
     np.savez(file, correlation_fits=correlation_fits, jaccard_fits=jaccard_fits, decay_rates=decay_rates, max_couplings=max_couplings)

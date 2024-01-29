@@ -1,6 +1,6 @@
 """
 This script computes the behavioral Arnold tongue of each subject as well as the average behavioral Arnold tongue.
-Results are saved in ../data/results/empirical/ and correspond to section X of the paper.
+Results are saved in results/empirical/ and correspond to section X of the paper.
 """
 import json
 import numpy as np
@@ -76,7 +76,7 @@ if __name__ == '__main__':
     in_silico_experiment_parameters = load_configuration()
 
     # Load data
-    data_path = 'data/empirical/main.csv'
+    data_path = 'empirical/main.csv'
     try:
         data = load_data(data_path)
     except FileNotFoundError:
@@ -131,7 +131,7 @@ if __name__ == '__main__':
     continuous_arnold_tongue = continuous_arnold_tongue.reshape(size)
 
     # Save results
-    np.save('data/results/empirical/optimal_psychometric_parameters.npy', popt)
-    np.save('data/results/empirical/average_bat.npy', average_arnold_tongue)
-    np.save('data/results/empirical/continuous_bat.npy', continuous_arnold_tongue)
-    np.save('data/results/empirical/individual_bats.npy', individual_arnold_tongues)
+    np.save('results/empirical/optimal_psychometric_parameters.npy', popt)
+    np.save('results/empirical/average_bat.npy', average_arnold_tongue)
+    np.save('results/empirical/continuous_bat.npy', continuous_arnold_tongue)
+    np.save('results/empirical/individual_bats.npy', individual_arnold_tongues)

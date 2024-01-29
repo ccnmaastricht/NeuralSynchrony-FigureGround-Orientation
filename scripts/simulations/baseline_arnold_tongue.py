@@ -1,6 +1,6 @@
 """
 This script simulates the first session of the experiment and generate an Arnold Tongue.
-Results are saved in ../data/simulation_results/arnold_tongue.npy and correspond to section X of the paper.
+Results are saved in results/arnold_tongue.npy and correspond to section X of the paper.
 """
 import os
 
@@ -121,7 +121,7 @@ if __name__ == '__main__':
                                                        experiment_parameters['num_grid_coarseness'])
     
     # Save the results
-    file = '../data/simulation_results/baseline_arnold_tongue.npy'
+    file = 'results/baseline_arnold_tongue.npy'
     os.makedirs(os.path.dirname(file), exist_ok=True)
     np.save(file, arnold_tongue)
 

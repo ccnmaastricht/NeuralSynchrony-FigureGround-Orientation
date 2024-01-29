@@ -1,6 +1,6 @@
 """
 This script performs generalized estimating equations (GEE) analysis on the behavioral data.
-Results are saved in ../data/results/empirical/ and correspond to section X of the paper.
+Results are saved in results/empirical/ and correspond to section X of the paper.
 """
 import pandas as pd
 import statsmodels.api as sm
@@ -33,7 +33,7 @@ def is_significant(results, variable, cutoff=0.05):
 
 if __name__ == '__main__':
     # Load data
-    data_path = 'data/empirical/main.csv'
+    data_path = 'data/main.csv'
     try:
         data = load_data(data_path)
     except FileNotFoundError:
@@ -53,7 +53,7 @@ if __name__ == '__main__':
     results_full = model.fit()
 
     # save results of full model
-    results_full.params.to_pickle('data/results/empirical/gee_full.pkl')
+    results_full.params.to_pickle('results/empirical/gee_full.pkl')
 
     if is_significant(results_full, 'SessionID:ContrastHeterogeneity'):
         # simple effects of contrast heterogeneity for each session
@@ -61,7 +61,7 @@ if __name__ == '__main__':
             session_data = get_session_data(data, session)
             model = smf.gee("Correct ~ ContrastHeterogeneity", "SubjectID", session_data, cov_struct=covariance_structure, family=family)
             results = model.fit()
-            results.params.to_pickle(f'data/results/empirical/gee_contrast_heterogeneity_{session}.pkl')
+            results.params.to_pickle(f'results/empirical/gee_contrast_heterogeneity_{session}.pkl')
 
     if is_significant(results_full, 'SessionID:GridCoarseness'):
         # simple effects of grid coarseness for each session
@@ -69,4 +69,4 @@ if __name__ == '__main__':
             session_data = get_session_data(data, session)
             model = smf.gee("Correct ~ GridCoarseness", "SubjectID", session_data, cov_struct=covariance_structure, family=family)
             results = model.fit()
-            results.params.to_pickle(f'data/results/empirical/gee_grid_coarseness_{session}.pkl')
+            results.params.to_pickle(f'results/empirical/gee_grid_coarseness_{session}.pkl')

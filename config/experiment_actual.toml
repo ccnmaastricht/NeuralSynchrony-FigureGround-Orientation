@@ -1,3 +1,4 @@
+# Condition numbers matching the actual experiment
 mean_contrast = 0.5
 num_blocks = 30
 num_contrast_heterogeneity = 5

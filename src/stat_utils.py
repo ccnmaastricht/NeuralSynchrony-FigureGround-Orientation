@@ -33,15 +33,41 @@ def print_sample_info(metadata):
 
     print(f'{num_samples} particpants ({num_females} female, mean age = {mean_age}, standard deviation = {std_age})')
 
-def bootstrap(data, num_repeats, percentile, abs_diff=False):
+def bootstrap(data, num_repeats, percentiles, session_id=9, abs_diff=False):
+    """
+    Bootstrap the data.
+
+    Parameters
+    ----------
+    data : pandas.DataFrame
+        The data.
+    num_repeats : int
+        The number of repeats.
+    num_items : int, optional
+        The number of items in each sample. The default is 25.
+    percentiles : list
+        The percentile.
+    session_id : int, optional
+        The session ID. The default is 9.
+    abs_diff : bool, optional
+        Whether to take the absolute difference. The default is False.
+
+    Returns
+    -------
+    mean_diff : float
+        The mean difference for each percentile.
+    """
+    session_data = data[data['SessionID'] == session_id]
     mean_diff = np.zeros(num_repeats)
-    num_items = len(data)
+    num_items = session_data['BlockID'].nunique()
     for i in range(num_repeats):
-        sample_1 = data.sample(n=num_items, replace=True).values
-        sample_2 = data.sample(n=num_items, replace=True).values
-        mean_diff[i] = (sample_1 - sample_2).mean()
+        sample_1 = session_data.groupby(['SubjectID', 'Condition']).sample(n=num_items, replace=True)
+        sample_1 = sample_1.groupby(['SubjectID', 'Condition']).mean().reset_index()
+        sample_2 = session_data.groupby(['SubjectID', 'Condition']).sample(n=num_items, replace=True)
+        sample_2 = sample_2.groupby(['SubjectID', 'Condition']).mean().reset_index()
+        mean_diff[i] = (sample_1['Correct'] - sample_2['Correct']).mean()
 
     if abs_diff:
         mean_diff = np.abs(mean_diff)
     
-    return np.percentile(mean_diff, percentile)
+    return np.percentile(mean_diff, percentiles)

@@ -33,7 +33,7 @@ def print_sample_info(metadata):
 
     print(f'{num_samples} particpants ({num_females} female, mean age = {mean_age}, standard deviation = {std_age})')
 
-def bootstrap(data, num_repeats, session_id=9):
+def bootstrap(data, num_repeats, session_id):
     """
     Bootstrap the data.
 
@@ -45,8 +45,8 @@ def bootstrap(data, num_repeats, session_id=9):
         The number of repeats.
     num_items : int, optional
         The number of items in each sample. The default is 25.
-    session_id : int, optional
-        The session ID. The default is 9.
+    session_id : int
+        The session ID.
 
     Returns
     -------

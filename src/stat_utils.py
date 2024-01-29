@@ -33,7 +33,7 @@ def print_sample_info(metadata):
 
     print(f'{num_samples} particpants ({num_females} female, mean age = {mean_age}, standard deviation = {std_age})')
 
-def bootstrap(data, num_repeats, percentiles, session_id=9, abs_diff=False):
+def bootstrap(data, num_repeats, session_id=9):
     """
     Bootstrap the data.
 
@@ -45,17 +45,13 @@ def bootstrap(data, num_repeats, percentiles, session_id=9, abs_diff=False):
         The number of repeats.
     num_items : int, optional
         The number of items in each sample. The default is 25.
-    percentiles : list
-        The percentile.
     session_id : int, optional
         The session ID. The default is 9.
-    abs_diff : bool, optional
-        Whether to take the absolute difference. The default is False.
 
     Returns
     -------
-    mean_diff : float
-        The mean difference for each percentile.
+    mean_diff : array_like
+        The distribution of mean differences.
     """
     session_data = data[data['SessionID'] == session_id]
     mean_diff = np.zeros(num_repeats)
@@ -67,7 +63,5 @@ def bootstrap(data, num_repeats, percentiles, session_id=9, abs_diff=False):
         sample_2 = sample_2.groupby(['SubjectID', 'Condition']).mean().reset_index()
         mean_diff[i] = (sample_1['Correct'] - sample_2['Correct']).mean()
 
-    if abs_diff:
-        mean_diff = np.abs(mean_diff)
-    
-    return np.percentile(mean_diff, percentiles)
+
+    return mean_diff

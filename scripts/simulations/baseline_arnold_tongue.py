@@ -4,7 +4,7 @@ Results are saved in results/arnold_tongue.npy and correspond to section X of th
 """
 import os
 
-import json
+import tomllib
 import numpy as np
 
 from src.v1_model import V1Model
@@ -13,6 +13,8 @@ from src.sim_utils import get_num_blocks
 from src.anl_utils import order_parameter
 
 from multiprocessing import Pool, Array, cpu_count
+
+
 
 def load_configurations():
     """
@@ -29,19 +31,15 @@ def load_configurations():
     experiment_parameters : dict
         The experiment parameters.
     """
-    with open('config/model_parameters.json') as f:
-        model_parameters = json.load(f)
+    parameters = {}
+    config_files = ['model', 'stimulus', 'simulation', 'experiment_extended']
+    
+    for config_file in config_files:
+        with open(f'config/{config_file}.toml', 'rb') as f:
+            parameters[config_file] = tomllib.load(f)
 
-    with open('config/stimulus_parameters.json') as f:
-        stimulus_parameters = json.load(f)
+    return parameters['model'], parameters['stimulus'], parameters['simulation'], parameters['experiment_extended']
 
-    with open('config/simulation_parameters.json') as f:
-        simulation_parameters = json.load(f)
-
-    with open('config/experiment_parameters.json') as f:
-        experiment_parameters = json.load(f)
-
-    return model_parameters, stimulus_parameters, simulation_parameters, experiment_parameters
 
 def run_block(block):
     """

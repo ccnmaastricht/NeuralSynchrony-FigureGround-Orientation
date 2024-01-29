@@ -6,7 +6,7 @@ Results are saved in results/simulation/parameter_space_exploration.npy and corr
 
 import os
 
-import json
+import tomllib
 import numpy as np
 
 from src.v1_model import V1Model
@@ -34,13 +34,13 @@ def load_configurations():
         The parameters for the parameter space exploration.
     """
     parameters = {}
-    config_files = ['model_parameters', 'stimulus_parameters', 'simulation_parameters', 'experiment_parameters', 'exploration_parameters']
+    config_files = ['model', 'stimulus', 'simulation', 'experiment_actual', 'exploration']
     
     for config_file in config_files:
-        with open(f'config/{config_file}.json') as f:
-            parameters[config_file] = json.load(f)
+        with open(f'config/{config_file}.toml', 'rb') as f:
+            parameters[config_file] = tomllib.load(f)
 
-    return parameters['model_parameters'], parameters['stimulus_parameters'], parameters['simulation_parameters'], parameters['experiment_parameters'], parameters['exploration_parameters']
+    return parameters['model'], parameters['stimulus'], parameters['simulation'], parameters['experiment_actual'], parameters['exploration']
 
 def run_block(block):
     """

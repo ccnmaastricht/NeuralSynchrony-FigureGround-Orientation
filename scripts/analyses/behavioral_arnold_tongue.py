@@ -2,7 +2,7 @@
 This script computes the behavioral Arnold tongue of each subject as well as the average behavioral Arnold tongue.
 Results are saved in results/empirical/ and correspond to section X of the paper.
 """
-import json
+import tomllib
 import numpy as np
 from scipy.optimize import curve_fit
 
@@ -17,8 +17,8 @@ def load_configuration():
     experiment_parameters : dict
         The experiment parameters.
     """
-    with open('config/experiment_parameters.json') as f:
-        experiment_parameters = json.load(f)
+    with open('config/experiment_extended.toml', 'rb') as f:
+        experiment_parameters = tomllib.load(f)
 
     return experiment_parameters
 

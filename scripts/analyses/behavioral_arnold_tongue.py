@@ -112,6 +112,7 @@ if __name__ == '__main__':
 
     for session in range(1, 10):
 
+        # Get session data
         session_data = get_session_data(data, session)
 
         # Get unique counts
@@ -123,7 +124,7 @@ if __name__ == '__main__':
 
         # Loop over subjects and conditions to fill individual Arnold tongues
         for subject in range(num_subjects):
-            subject_data = get_subject_data(data, subject + 1)
+            subject_data = get_subject_data(session_data, subject + 1)
             accuracy = np.zeros(len(conditions))
             for condition in conditions:
                 condition_data = subject_data[subject_data['Condition'] == condition]
@@ -161,12 +162,12 @@ if __name__ == '__main__':
         directory = f'{BASE_PATH}session_{session}/'
         os.makedirs(directory, exist_ok=True)
         
-        data_to_save = {
+        results_to_save = {
             'optimal_psychometric_parameters': popt,
             'average_bat': average_arnold_tongue,
             'continuous_bat': continuous_arnold_tongue,
             'individual_bats': individual_arnold_tongues
         }
 
-        for filename, data in data_to_save.items():
-            np.save(directory + filename + '.npy', data)
+        for filename, result in results_to_save.items():
+            np.save(directory + filename + '.npy', result)

@@ -37,7 +37,7 @@ def load_configurations():
     config_files = ['model', 'stimulus', 'simulation', 'experiment_actual', 'exploration']
     
     for config_file in config_files:
-        with open(f'config/{config_file}.toml', 'rb') as f:
+        with open(f'config/simulation/{config_file}.toml', 'rb') as f:
             parameters[config_file] = tomllib.load(f)
 
     return parameters['model'], parameters['stimulus'], parameters['simulation'], parameters['experiment_actual'], parameters['exploration']

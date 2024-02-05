@@ -17,7 +17,7 @@ def load_configuration():
     experiment_parameters : dict
         The experiment parameters.
     """
-    with open('config/experiment_extended.toml', 'rb') as f:
+    with open('config/analysis/experiment_extended.toml', 'rb') as f:
         experiment_parameters = tomllib.load(f)
 
     return experiment_parameters

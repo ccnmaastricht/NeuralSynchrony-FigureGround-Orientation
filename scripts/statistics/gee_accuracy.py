@@ -45,7 +45,7 @@ if __name__ == '__main__':
 
     # define distribution and covariance structure for GEE
     family = sm.families.Binomial()
-    covariance_structure = sm.cov_struct.Autoregressive(grid=True)
+    covariance_structure = sm.cov_struct.Exchangeable()
 
 
     # fit full model

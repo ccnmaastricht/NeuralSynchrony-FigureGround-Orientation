@@ -93,7 +93,7 @@ if __name__ == '__main__':
     weights = relative_likelihood / np.sum(relative_likelihood)
 
     # Save the results
-    file = 'results/analysis/transfer_comparison_model_weights.npy'
+    file = 'results/analysis/transfer_model_comparison.npz'
     os.makedirs(os.path.dirname(file), exist_ok=True)
-    np.save(file, weights)
+    np.savez(file, AIC=AIC, delta_AIC=delta_AIC, weights=weights)
 

@@ -22,6 +22,31 @@ def load_configuration():
 
     return model_comparison_parameters
 
+def fit_model_and_calculate_likelihood(train_data, test_data):
+    """
+    Fit a logistic regression model to the training data and calculate the likelihood of the test data given the model.
+
+    Parameters
+    ----------
+    train_data : pd.DataFrame
+        The training data.
+    test_data : pd.DataFrame
+        The test data.
+
+    Returns
+    -------
+    likelihood : float
+        The likelihood of the test data given the model.
+    """
+    model = smf.logit('Correct ~ GridCoarseness + ContrastHeterogeneity', train_data)
+    result = model.fit(disp=False)
+
+    correct_answers = test_data['Correct'].values
+    predicted_probabilities = result.predict(subject_test)
+    likelihood = np.prod(np.power(predicted_probabilities, correct_answers) * np.power(1 - predicted_probabilities, 1 - correct_answers))
+
+    return likelihood
+
 if __name__ == '__main__':
     # Load model comparison parameters
     model_comparison_parameters = load_configuration()
@@ -56,14 +81,7 @@ if __name__ == '__main__':
             subject_train = get_subject_data(train_data, subject)
             subject_test = get_subject_data(transfer_data, subject)
 
-            # fit a logistic regression model
-            model = smf.logit('Correct ~ GridCoarseness + ContrastHeterogeneity', subject_train)
-            result = model.fit(disp=False)
-
-            # calculate the likelihood of the test data given the model
-            correct_answers = subject_test['Correct'].values
-            predicted_probabilities = result.predict(subject_test)
-            likelihoods[session] *= np.prod(np.power(predicted_probabilities, correct_answers) * np.power(1 - predicted_probabilities, 1 - correct_answers))
+            likelihoods[session] *= fit_model_and_calculate_likelihood(subject_train, subject_test)
 
     # calculate the Akaike Information Criterion (AIC)
     AIC = 2 * num_predictors - 2 * np.log(likelihoods)
@@ -74,5 +92,8 @@ if __name__ == '__main__':
     relative_likelihood = np.exp(-0.5 * delta_AIC)
     weights = relative_likelihood / np.sum(relative_likelihood)
 
-    print(f'Weights: {weights}')
+    # Save the results
+    file = 'results/analysis/transfer_comparison_model_weights.npy'
+    os.makedirs(os.path.dirname(file), exist_ok=True)
+    np.save(file, weights)
 

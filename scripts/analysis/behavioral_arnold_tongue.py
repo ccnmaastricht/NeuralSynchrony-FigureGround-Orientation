@@ -96,7 +96,7 @@ def get_unique_counts(data):
     return num_subjects, num_grid_coarseness, num_contrast_heterogeneity
 
 
-BASE_PATH = 'results/empirical/'      
+BASE_PATH = 'results/analysis/'      
 
 if __name__ == '__main__':
     # Load experiment parameters

@@ -119,7 +119,7 @@ if __name__ == '__main__':
                                                        experiment_parameters['num_grid_coarseness'])
     
     # Save the results
-    file = 'results/baseline_arnold_tongue.npy'
+    file = 'results/simulation/baseline_arnold_tongue.npy'
     os.makedirs(os.path.dirname(file), exist_ok=True)
     np.save(file, arnold_tongue)
 

@@ -35,8 +35,8 @@ def load_configurations():
         The simulation parameters.
     experiment_parameters : dict
         The experiment parameters.
-    exploration_parameters : dict
-        The parameters for the parameter space exploration.
+    cross_validation_parameters : dict
+        The cross-validation parameters.
     """
     parameters = {}
     config_files = ['model', 'stimulus', 'simulation', 'experiment_actual', 'cross_validation']
@@ -45,7 +45,7 @@ def load_configurations():
         with open(f'config/simulation/{config_file}.toml', 'rb') as f:
             parameters[config_file] = tomllib.load(f)
 
-    return parameters['model'], parameters['stimulus'], parameters['simulation'], parameters['experiment_actual'], parameters['exploration']
+    return parameters['model'], parameters['stimulus'], parameters['simulation'], parameters['experiment_actual'], parameters['cross_validation']
 
 def run_block(block):
     """

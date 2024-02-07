@@ -18,7 +18,7 @@ def load_configuration():
     experiment_parameters : dict
         The experiment parameters.
     """
-    with open('config/experiment_extended.toml', 'rb') as f:
+    with open('config/analysis/experiment_extended.toml', 'rb') as f:
         experiment_parameters = tomllib.load(f)
 
     return experiment_parameters
@@ -96,11 +96,11 @@ def get_unique_counts(data):
     return num_subjects, num_grid_coarseness, num_contrast_heterogeneity
 
 
-BASE_PATH = 'results/empirical/'      
+BASE_PATH = 'results/analysis/'      
 
 if __name__ == '__main__':
-    # Load in silico experiment parameters
-    in_silico_experiment_parameters = load_configuration()
+    # Load experiment parameters
+    experiment_parameters = load_configuration()
 
     # Load data
     data_path = 'data/main.csv'
@@ -148,12 +148,12 @@ if __name__ == '__main__':
         popt, _ = curve_fit(psychometric_function, predictors, average_arnold_tongue.flatten(), p0=initial_params)
 
         # Create predictors for continuous Arnold tongue
-        predictors = create_predictors(bounds_grid_coarseness, in_silico_experiment_parameters['num_grid_coarseness'],
-                                    bounds_contrast_heterogeneity, in_silico_experiment_parameters['num_contrast_heterogeneity'])
+        predictors = create_predictors(bounds_grid_coarseness, experiment_parameters['num_grid_coarseness'],
+                                    bounds_contrast_heterogeneity, experiment_parameters['num_contrast_heterogeneity'])
 
         # Compute continuous Arnold tongue
-        size = (in_silico_experiment_parameters['num_grid_coarseness'],
-                in_silico_experiment_parameters['num_contrast_heterogeneity'])
+        size = (experiment_parameters['num_grid_coarseness'],
+                experiment_parameters['num_contrast_heterogeneity'])
         continuous_arnold_tongue = psychometric_function(predictors, *popt)
 
         continuous_arnold_tongue = continuous_arnold_tongue.reshape(size)

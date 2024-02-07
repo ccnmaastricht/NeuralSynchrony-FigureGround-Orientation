@@ -35,7 +35,7 @@ def load_configurations():
     config_files = ['model', 'stimulus', 'simulation', 'experiment_extended']
     
     for config_file in config_files:
-        with open(f'config/{config_file}.toml', 'rb') as f:
+        with open(f'config/simulation/{config_file}.toml', 'rb') as f:
             parameters[config_file] = tomllib.load(f)
 
     return parameters['model'], parameters['stimulus'], parameters['simulation'], parameters['experiment_extended']
@@ -119,7 +119,7 @@ if __name__ == '__main__':
                                                        experiment_parameters['num_grid_coarseness'])
     
     # Save the results
-    file = 'results/baseline_arnold_tongue.npy'
+    file = 'results/simulation/baseline_arnold_tongue.npy'
     os.makedirs(os.path.dirname(file), exist_ok=True)
     np.save(file, arnold_tongue)
 

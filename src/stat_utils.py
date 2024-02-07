@@ -32,36 +32,3 @@ def print_sample_info(metadata):
     std_age = metadata['Age'].std().__round__(3)
 
     print(f'{num_samples} particpants ({num_females} female, mean age = {mean_age}, standard deviation = {std_age})')
-
-def bootstrap(data, num_repeats, session_id):
-    """
-    Bootstrap the data.
-
-    Parameters
-    ----------
-    data : pandas.DataFrame
-        The data.
-    num_repeats : int
-        The number of repeats.
-    num_items : int, optional
-        The number of items in each sample. The default is 25.
-    session_id : int
-        The session ID.
-
-    Returns
-    -------
-    mean_diff : array_like
-        The distribution of mean differences.
-    """
-    session_data = data[data['SessionID'] == session_id]
-    mean_diff = np.zeros(num_repeats)
-    num_items = session_data['BlockID'].nunique()
-    for i in range(num_repeats):
-        sample_1 = session_data.groupby(['SubjectID', 'Condition']).sample(n=num_items, replace=True)
-        sample_1 = sample_1.groupby(['SubjectID', 'Condition']).mean().reset_index()
-        sample_2 = session_data.groupby(['SubjectID', 'Condition']).sample(n=num_items, replace=True)
-        sample_2 = sample_2.groupby(['SubjectID', 'Condition']).mean().reset_index()
-        mean_diff[i] = (sample_1['Correct'] - sample_2['Correct']).mean()
-
-
-    return mean_diff

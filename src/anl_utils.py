@@ -85,7 +85,7 @@ def coherence(theta):
     phase_difference = np.angle(np.exp(1j * (theta[:, None] - theta[None, :])))
     return np.cos(phase_difference)
 
-def psychometric_function(predictors, slope1, slope2, intercept, chance_level = 0.5):
+def psychometric_function(predictors, *parameters, chance_level = 0.5):
     """
     Compute an n-dimensional psychometric function.
 
@@ -93,12 +93,8 @@ def psychometric_function(predictors, slope1, slope2, intercept, chance_level = 
     ----------
     predictors : array_like
         The predictors.
-    slope1 : float
-        The first slope.
-    slope2 : float
-        The second slope.
-    intercept : float
-        The intercept.
+    parameters : array_like
+        The parameters.
     chance_level : float
         The chance level.
 
@@ -107,7 +103,7 @@ def psychometric_function(predictors, slope1, slope2, intercept, chance_level = 
     float
         The probability of a correct response.
     """
-    logit = slope1 * predictors[0] + slope2 * predictors[1] + intercept
+    logit = np.dot(parameters, predictors)
     probability = (1 - chance_level) / (1 + np.exp(-logit)) + chance_level
     return probability
 

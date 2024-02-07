@@ -67,6 +67,7 @@ def create_predictors(bounds_grid_coarseness, num_grid_coarseness, bounds_contra
     contrast_heterogeneity = np.linspace(bounds_contrast_heterogeneity[0], bounds_contrast_heterogeneity[1], num_contrast_heterogeneity)
     contrast_heterogeneity, grid_coarseness = np.meshgrid(contrast_heterogeneity, grid_coarseness)
     predictors = np.vstack((grid_coarseness.flatten(), contrast_heterogeneity.flatten()))
+    predictors = np.vstack((predictors, np.ones(len(predictors[0]))))
 
     return predictors
 

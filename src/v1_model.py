@@ -13,7 +13,7 @@ class V1Model:
         self.num_populations = model_parameters['num_populations']
         self.contrast_slope = model_parameters['contrast_slope']
         self.contrast_intercept = model_parameters['contrast_intercept']
-        self.effective_learning_rate = model_parameters['effective_learning_rate']
+        self.effective_learning_rate = None
         
         self._generate_receptive_fields(stimulus_parameters)
         self._generate_coupling()
@@ -43,6 +43,9 @@ class V1Model:
         weighted_coherence : array_like
             The weighted coherence matrix.
         """
+
+        if self.effective_learning_rate is None:
+            raise ValueError("effective_learning_rate cannot be None")
 
         decay_factor = np.exp(-self.effective_learning_rate)
         self.coupling = decay_factor * self.coupling + (1 - decay_factor) * weighted_coherence * self.max_coupling

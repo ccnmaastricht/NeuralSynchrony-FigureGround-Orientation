@@ -14,11 +14,12 @@ import os
 
 import tomllib
 import numpy as np
+from scipy.optimize import curve_fit
 
 from src.v1_model import V1Model
 from src.stimulus_generator import StimulusGenerator
 from src.sim_utils import get_num_blocks
-from src.anl_utils import order_parameter, weighted_jaccard, min_max_normalize
+from src.anl_utils import order_parameter, weighted_jaccard, min_max_normalize, psychometric_function
 
 from multiprocessing import Pool, Array, cpu_count
 def load_configurations():
@@ -75,3 +76,5 @@ def run_block(block):
         index = block * num_conditions + condition
         arnold_tongue[index] = np.mean(synchronization[sync_index])
         arnold_tongue[index] = np.mean(synchronization[sync_index])
+
+

@@ -23,6 +23,28 @@ def load_configuration():
 
     return experiment_parameters
 
+def get_unique_counts(data):
+    """
+    Get the unique counts of the data.
+
+    Parameters
+    ----------
+    data : pandas.DataFrame
+            The data.
+
+    Returns
+    -------
+    num_subjects : int
+        The number of subjects.
+    num_grid_coarseness : int
+        The number of grid coarseness values.
+    num_contrast_heterogeneity : int
+        The number of contrast heterogeneity values.
+    """
+    num_subjects = data['SubjectID'].nunique()
+    num_grid_coarseness = data['GridCoarseness'].nunique()
+    num_contrast_heterogeneity = data['ContrastHeterogeneity'].nunique()
+    return num_subjects, num_grid_coarseness, num_contrast_heterogeneity
 
 def get_bounds(data, variable):
     """
@@ -70,31 +92,6 @@ def create_predictors(bounds_grid_coarseness, num_grid_coarseness, bounds_contra
     predictors = np.vstack((predictors, np.ones(len(predictors[0]))))
 
     return predictors
-
-
-def get_unique_counts(data):
-    """
-    Get the unique counts of the data.
-
-    Parameters
-    ----------
-    data : pandas.DataFrame
-            The data.
-
-    Returns
-    -------
-    num_subjects : int
-        The number of subjects.
-    num_grid_coarseness : int
-        The number of grid coarseness values.
-    num_contrast_heterogeneity : int
-        The number of contrast heterogeneity values.
-    """
-    num_subjects = session_data['SubjectID'].nunique()
-    num_grid_coarseness = session_data['GridCoarseness'].nunique()
-    num_contrast_heterogeneity = session_data['ContrastHeterogeneity'].nunique()
-    return num_subjects, num_grid_coarseness, num_contrast_heterogeneity
-
 
 BASE_PATH = 'results/analysis/'      
 

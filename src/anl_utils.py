@@ -82,6 +82,7 @@ def coherence(theta):
     float
         The coherence.
     """
+    theta = theta.T
     phase_difference = np.angle(np.exp(1j * (theta[:, None] - theta[None, :])))
     return np.cos(phase_difference)
 

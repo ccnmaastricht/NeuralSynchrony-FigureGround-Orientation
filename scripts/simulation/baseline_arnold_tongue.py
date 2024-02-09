@@ -32,11 +32,14 @@ def load_configurations():
         The experiment parameters.
     """
     parameters = {}
-    config_files = ['model', 'stimulus', 'simulation', 'experiment_extended']
+    config_files = ['model', 'stimulus', 'simulation']
     
     for config_file in config_files:
         with open(f'config/simulation/{config_file}.toml', 'rb') as f:
             parameters[config_file] = tomllib.load(f)
+
+    with open('config/analysis/experiment_extended.toml', 'rb') as f:
+        parameters['experiment_extended'] = tomllib.load(f)
 
     return parameters['model'], parameters['stimulus'], parameters['simulation'], parameters['experiment_extended']
 

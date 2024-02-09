@@ -68,7 +68,7 @@ def order_parameter(theta):
 
     return np.mean(np.exp(1j * theta), axis=1)
 
-def coherence(theta):
+def compute_coherence(theta):
     """
     Compute the coherence of a set of phases.
 

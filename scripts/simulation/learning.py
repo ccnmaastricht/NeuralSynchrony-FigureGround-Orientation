@@ -19,7 +19,7 @@ from scipy.optimize import curve_fit
 from src.v1_model import V1Model
 from src.stimulus_generator import StimulusGenerator
 from src.sim_utils import get_num_blocks
-from src.anl_utils import order_parameter, weighted_jaccard, min_max_normalize, psychometric_function
+from src.anl_utils import order_parameter, weighted_jaccard, min_max_normalize, psychometric_function, compute_coherence
 
 from multiprocessing import Pool, Array, cpu_count
 def load_configurations():
@@ -61,7 +61,7 @@ def run_block(block):
     -------
     None
     """
-    global arnold_tongue, num_conditions, sync_index
+    global weightedcoherence, num_pairs, sync_index
     global grid_coarseness, contrast_heterogeneity
     global experiment_parameters, simulation_parameters
     global model, stimulus_generator
@@ -72,9 +72,36 @@ def run_block(block):
                                                experiment_parameters['mean_contrast'])
         model.compute_omega(stimulus.flatten())
         state_variables, _ = model.simulate(simulation_parameters)
-        synchronization = np.abs(order_parameter(state_variables))
-        index = block * num_conditions + condition
-        arnold_tongue[index] = np.mean(synchronization[sync_index])
-        arnold_tongue[index] = np.mean(synchronization[sync_index])
+        state_variables = state_variables[sync_index]
+        coheherence = compute_coherence(state_variables)
+        coheherence = np.mean(coheherence, axis=2)
+        weighted_coherence += coheherence * probability[condition]
 
+def simulation(sync_slice):
+    
+    # Initialize the coherence 
+    coherence = np.zeros((num_blocks, num_pairs))
+    coherence = Array('d', coherence.reshape(-1))
+
+    
+
+    # Run the experiment
+    for batch in range(num_batches):
+        print(f' Blocks {batch * num_cores} to {(batch + 1) * num_cores - 1}')
+        with Pool(num_blocks) as p:
+            p.map(run_block, range(batch * num_cores, (batch + 1) * num_cores))
+
+    # Retrieve the results
+    arnold_tongue = np.array(arnold_tongue).reshape(num_blocks, num_conditions)
+    arnold_tongue = arnold_tongue.reshape(num_blocks, experiment_parameters['num_contrast_heterogeneity'],
+                                                       experiment_parameters['num_grid_coarseness'])
+
+
+if __name__ == '__main__':
+
+
+    # slice_time_steps = num_time_steps - keep_time_steps
+    sync_index = slice(slice_time_steps, None)
+
+    num_pairs = model_parameters['num_populations']**2
 

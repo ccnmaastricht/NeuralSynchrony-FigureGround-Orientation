@@ -74,7 +74,7 @@ class V1Model:
         """
         time_step = parameters['time_step']
         simulation_time = parameters['simulation_time']
-        initial_state = parameters['initial_state']
+        initial_state = np.random.rand(self.num_populations) * 2 * np.pi
         
 
         time_vector = np.arange(0, simulation_time, time_step)

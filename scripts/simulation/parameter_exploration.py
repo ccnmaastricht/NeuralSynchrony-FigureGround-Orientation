@@ -5,7 +5,7 @@ Results are saved in results/simulation/parameter_space_exploration.npy and corr
 """
 
 import os
-
+import time
 import tomllib
 import numpy as np
 
@@ -59,6 +59,8 @@ def run_block(block):
     global grid_coarseness, contrast_heterogeneity
     global experiment_parameters, simulation_parameters
     global model, stimulus_generator
+
+    np.random.seed(int(time.time() + block))
     
     for condition, (scaling_factor, contrast_range) in enumerate(zip(grid_coarseness, contrast_heterogeneity)):
         stimulus = stimulus_generator.generate(scaling_factor,

@@ -1,1 +1,2 @@
 num_folds = 8
+keep_time_steps = 10  # number of time steps to keep for computing coherence

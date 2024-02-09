@@ -42,7 +42,7 @@ def plot_arnold_tongue(arnold_tongue, figsize, labels, fontsizes, ticks, show = 
     title_fontsize, label_fontsize, tick_fontsize, cbar_labelsize = fontsizes
     xticks, yticks = ticks
 
-    im = plt.imshow(arnold_tongue, cmap='jet')
+    im = plt.imshow(arnold_tongue, cmap='jet', vmin=0, vmax=1)
 
     plt.title(title, fontsize=title_fontsize)
     plt.xlabel(xlabel, fontsize=label_fontsize)

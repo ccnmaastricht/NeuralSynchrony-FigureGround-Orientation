@@ -73,9 +73,9 @@ class StimulusGenerator():
         array_like
             The generated grid.
         """
-        step_size = int(self.annulus_resolution * scaling_factor) + 1
+        step_size = int(self.annulus_resolution * scaling_factor)
         annulus_quarter_res = self.annulus_resolution // 4
-        grid_points = np.arange(annulus_quarter_res, self.stimulus_resolution + annulus_quarter_res, step_size)
+        grid_points = np.arange(annulus_quarter_res, self.stimulus_resolution + step_size, step_size)
         row_grid, col_grid = np.meshgrid(grid_points, grid_points)
         grid = np.vstack((row_grid.flatten(), col_grid.flatten())).T
 

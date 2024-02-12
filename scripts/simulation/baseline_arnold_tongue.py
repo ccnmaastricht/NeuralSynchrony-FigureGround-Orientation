@@ -3,7 +3,7 @@ This script simulates the first session of the experiment and generate an Arnold
 Results are saved in results/arnold_tongue.npy and correspond to section X of the paper.
 """
 import os
-
+import time
 import tomllib
 import numpy as np
 
@@ -61,6 +61,8 @@ def run_block(block):
     global grid_coarseness, contrast_heterogeneity
     global experiment_parameters, simulation_parameters
     global model, stimulus_generator
+
+    np.random.seed(int(time.time() + block))
     
     for condition, (scaling_factor, contrast_range) in enumerate(zip(grid_coarseness, contrast_heterogeneity)):
         stimulus = stimulus_generator.generate(scaling_factor,
@@ -71,6 +73,7 @@ def run_block(block):
         synchronization = np.abs(order_parameter(state_variables))
         index = block * num_conditions + condition
         arnold_tongue[index] = np.mean(synchronization[sync_index])
+        
 
 if __name__ == '__main__':
 
@@ -84,7 +87,6 @@ if __name__ == '__main__':
 
     # Set up the simulation and parallel processing
     simulation_parameters['num_time_steps'] = int(simulation_parameters['simulation_time'] / simulation_parameters['time_step'])
-    simulation_parameters['initial_state'] = np.random.rand(model_parameters['num_populations']) * 2 * np.pi
 
     num_available_cores = cpu_count()
     num_cores = int(num_available_cores * simulation_parameters['proportion_used_cores'])

@@ -99,9 +99,9 @@ class V1Model:
         stimulus_num_pixels = parameters['stimulus_num_pixels']
         stimulus_eccentricity = parameters['stimulus_eccentricity']
         stimulus_side_length = parameters['stimulus_side_length']
-        
-        lower_bound = stimulus_eccentricity - stimulus_side_length / 2
-        upper_bound = stimulus_eccentricity + stimulus_side_length / 2
+        xy_offset = np.sqrt(stimulus_eccentricity**2 / 2)
+        lower_bound = xy_offset - stimulus_side_length / 2
+        upper_bound = xy_offset + stimulus_side_length / 2
         r = np.linspace(lower_bound, upper_bound, int(np.sqrt(self.num_populations)))
         X, Y = np.meshgrid(r, r)
         self.X = X.flatten()

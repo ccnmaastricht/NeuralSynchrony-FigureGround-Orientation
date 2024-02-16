@@ -114,7 +114,7 @@ class V1Model:
         
         eccentricity = np.sqrt(self.X**2 + self.Y**2)
 
-        diameter = threshold_linear(eccentricity, slope=0.172, intercept=0.25, offset=1)
+        diameter = threshold_linear(eccentricity, slope=0.172, intercept=-0.25, offset=1)
         sigma = diameter / 4
 
         self.receptive_fields = np.zeros((self.num_populations, stimulus_num_pixels))

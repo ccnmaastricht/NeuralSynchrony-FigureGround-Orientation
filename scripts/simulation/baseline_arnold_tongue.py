@@ -100,8 +100,12 @@ if __name__ == '__main__':
 
     print(f'Running {num_blocks} blocks in {num_batches} batches.')
     
-    contrast_heterogeneity = np.linspace(0.01, 1, experiment_parameters['num_contrast_heterogeneity'])
-    grid_coarseness = np.linspace(1, 1.5, experiment_parameters['num_grid_coarseness'])
+    contrast_heterogeneity = np.linspace(experiment_parameters['min_contrast_heterogeneity'],
+                                        experiment_parameters['max_contrast_heterogeneity'],
+                                        experiment_parameters['num_contrast_heterogeneity'])
+    grid_coarseness = np.linspace(experiment_parameters['min_grid_coarseness'],
+                                    experiment_parameters['max_grid_coarseness'],
+                                    experiment_parameters['num_grid_coarseness'])
 
     contrast_heterogeneity = np.tile(contrast_heterogeneity, experiment_parameters['num_grid_coarseness'])
     grid_coarseness = np.repeat(grid_coarseness, experiment_parameters['num_contrast_heterogeneity'])

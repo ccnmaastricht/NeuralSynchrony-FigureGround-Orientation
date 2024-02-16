@@ -46,25 +46,6 @@ def get_unique_counts(data):
     num_contrast_heterogeneity = data['ContrastHeterogeneity'].nunique()
     return num_subjects, num_grid_coarseness, num_contrast_heterogeneity
 
-def get_bounds(data, variable):
-    """
-    Get the bounds of a variable.
-
-    Parameters
-    ----------
-    data : pandas.DataFrame
-        The behavioral data.
-    variable : str
-        The variable.
-
-    Returns
-    -------
-    bounds : tuple
-        The bounds of the variable.
-    """
-    bounds = (data[variable].min(), data[variable].max())
-    return bounds
-
 def create_predictors(bounds_grid_coarseness, num_grid_coarseness, bounds_contrast_heterogeneity, num_contrast_heterogeneity):
     """
     Create the predictors for the Arnold tongue.
@@ -98,6 +79,8 @@ BASE_PATH = 'results/analysis/'
 if __name__ == '__main__':
     # Load experiment parameters
     experiment_parameters = load_configuration()
+    bounds_grid_coarseness = (experiment_parameters['min_grid_coarseness'], experiment_parameters['max_grid_coarseness'])
+    bounds_contrast_heterogeneity = (experiment_parameters['min_contrast_heterogeneity'], experiment_parameters['max_contrast_heterogeneity'])
 
     # Load data
     data_path = 'data/main.csv'
@@ -133,8 +116,6 @@ if __name__ == '__main__':
         average_arnold_tongue = individual_arnold_tongues.mean(axis=0)
 
         # Get bounds and create predictors
-        bounds_grid_coarseness = get_bounds(session_data, 'GridCoarseness')
-        bounds_contrast_heterogeneity = get_bounds(session_data, 'ContrastHeterogeneity')
         predictors = create_predictors(bounds_grid_coarseness, num_grid_coarseness,
                                     bounds_contrast_heterogeneity, num_contrast_heterogeneity)
 

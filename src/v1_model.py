@@ -13,6 +13,9 @@ class V1Model:
         self.num_populations = model_parameters['num_populations']
         self.contrast_slope = model_parameters['contrast_slope']
         self.contrast_intercept = model_parameters['contrast_intercept']
+        self.receptive_field_slope = model_parameters['receptive_field_slope']
+        self.receptive_field_intercept = model_parameters['receptive_field_intercept']
+        self.receptive_field_minimum_size = model_parameters['receptive_field_minimum_size']
         self.effective_learning_rate = None
         
         self._generate_receptive_fields(stimulus_parameters)
@@ -114,7 +117,9 @@ class V1Model:
         
         eccentricity = np.sqrt(self.X**2 + self.Y**2)
 
-        diameter = threshold_linear(eccentricity, slope=0.172, intercept=-0.25, offset=1)
+        diameter = threshold_linear(eccentricity, slope=self.receptive_field_slope,
+                                    intercept=self.receptive_field_intercept,
+                                    offset=self.receptive_field_minimum_size)
         sigma = diameter / 4
 
         self.receptive_fields = np.zeros((self.num_populations, stimulus_num_pixels))

@@ -3,3 +3,6 @@ decay_rate = 0.2227
 max_coupling = 24.63
 contrast_slope = 0.25
 contrast_intercept = 25
+receptive_field_slope = 0.172
+receptive_field_intercept = -0.25
+receptive_field_minimum_size = 1

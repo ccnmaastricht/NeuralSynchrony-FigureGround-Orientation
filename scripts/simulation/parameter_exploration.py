@@ -34,11 +34,14 @@ def load_configurations():
         The parameters for the parameter space exploration.
     """
     parameters = {}
-    config_files = ['model', 'stimulus', 'simulation', 'experiment_actual', 'exploration']
+    config_files = ['model', 'stimulus', 'simulation', 'exploration']
     
     for config_file in config_files:
         with open(f'config/simulation/{config_file}.toml', 'rb') as f:
             parameters[config_file] = tomllib.load(f)
+
+    with open(f'config/analysis/experiment_actual.toml', 'rb') as f:
+        parameters['experiment_actual'] = tomllib.load(f)
 
     return parameters['model'], parameters['stimulus'], parameters['simulation'], parameters['experiment_actual'], parameters['exploration']
 
@@ -75,7 +78,7 @@ def run_block(block):
 
 if __name__ == '__main__':
     # Load empirical (behavioral) Arnold tongue
-    behavioral_arnold_tongue = np.load('results/empirical/average_bat.npy').flatten()
+    behavioral_arnold_tongue = np.load('results/analysis/session_1/average_bat.npy').flatten()
     behavioral_arnold_tongue = min_max_normalize(behavioral_arnold_tongue)
 
     # Load the parameters

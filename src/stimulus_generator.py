@@ -1,7 +1,5 @@
 import numpy as np
 
-from src.sim_utils import create_annulus
-
 class StimulusGenerator():
     def __init__(self, parameters):
         self.stimulus_resolution = parameters['stimulus_resolution']

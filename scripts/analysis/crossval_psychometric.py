@@ -8,8 +8,6 @@ import tomllib
 import numpy as np
 from scipy.optimize import curve_fit
 
-import matplotlib.pyplot as plt
-
 from src.anl_utils import psychometric_function
 def load_configuration():
     """
@@ -32,8 +30,6 @@ if __name__ == '__main__':
     # load the simulated Arnold tongues of session 1
     simulated_arnold_tongue = np.load('results/simulation/baseline_arnold_tongue.npy').mean(axis=0)
     sat_rows, sat_columns = simulated_arnold_tongue.shape
-    plt.imshow(simulated_arnold_tongue)
-    plt.show()
 
     # load behavioral Arnold tongues of session 1
     individual_arnold_tongues = np.load('results/analysis/session_1/individual_bats.npy')
@@ -61,7 +57,6 @@ if __name__ == '__main__':
         # Fit psychometric function to data
         popt, _ = curve_fit(psychometric_function, simulated_arnold_tongue, average_arnold_tongue.flatten(), p0=initial_params)
         optimal_psychometric_crossval[subject] = popt
-        print(f'Optimal parameters when excluding subject {subject + 1}: {popt}')
         
     np.save('results/analysis/session_1/optimal_psychometric_crossval.npy', optimal_psychometric_crossval)
 

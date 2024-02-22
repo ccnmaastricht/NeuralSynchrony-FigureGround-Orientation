@@ -55,9 +55,6 @@ if __name__ == '__main__':
         # Compute average Arnold tongue
         average_arnold_tongue = fold_arnold_tongues.mean(axis=0)
 
-        plt.imshow(average_arnold_tongue)
-        plt.show()
-
         # Initial guesses for parameters
         initial_params = np.zeros(total_conditions)
 

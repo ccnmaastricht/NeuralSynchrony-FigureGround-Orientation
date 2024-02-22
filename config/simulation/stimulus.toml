@@ -1,7 +1,7 @@
-stimulus_resolution = 224
-stimulus_num_pixels = 50176
+stimulus_resolution = 480
+stimulus_num_pixels = 230400
 stimulus_eccentricity = 7
-stimulus_side_length = 6.7      # 6.7
+stimulus_side_length = 6.7
 annulus_diameter = 0.7
 annulus_frequency = 5.7
-annulus_resolution = 32
+annulus_resolution = 50

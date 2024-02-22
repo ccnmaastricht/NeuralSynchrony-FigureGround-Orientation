@@ -7,7 +7,7 @@ class StimulusGenerator():
         annulus_frequency = parameters['annulus_frequency']
         self.annulus_resolution = parameters['annulus_resolution']
 
-        self.annulus = self.create_annulus(annulus_diameter, annulus_frequency)
+        self.annulus = self._create_annulus(annulus_diameter, annulus_frequency)
 
     def generate(self, scaling_factor, contrast_range, mean_contrast):
         """

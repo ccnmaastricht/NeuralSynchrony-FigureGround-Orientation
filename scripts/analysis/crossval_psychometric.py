@@ -63,7 +63,7 @@ if __name__ == '__main__':
         optimal_psychometric_crossval[subject] = popt
         print(f'Optimal parameters when excluding subject {subject + 1}: {popt}')
         
-    #np.save('results/analysis/session_1/optimal_psychometric_crossval.npy', optimal_psychometric_crossval)
+    np.save('results/analysis/session_1/optimal_psychometric_crossval.npy', optimal_psychometric_crossval)
 
 
 

@@ -1,5 +1,5 @@
 num_populations = 400
-decay_rate = 0.2227
+decay_rate = 0.22
 max_coupling = 24.63
 contrast_slope = 0.25
 contrast_intercept = 25

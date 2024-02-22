@@ -98,32 +98,6 @@ def pairwise_distance(X, Y):
     return np.sqrt((X[:, None] - X[None, :])**2 + (Y[:, None] - Y[None, :])**2)
 
 
-def create_annulus(diameter, frequency, resolution):
-    """
-    Create a Gabor annulus.
-
-    Parameters
-    ----------
-    diameter : float
-        The diameter of the annulus.
-    frequency : float
-        The spatial frequency of the radial modulation.
-    resolution : int
-        The resolution of the annulus.
-
-    Returns
-    -------
-    array_like
-        The annulus.
-    """
-    r = np.linspace(-diameter/2, diameter/2, resolution)
-    X, Y = np.meshgrid(r, -r)
-    radius = np.hypot(X, Y)
-    mask = radius <= diameter/2
-    annulus = 0.5 * np.cos(radius * frequency * 2 * np.pi + np.pi) * mask
-    return annulus
-
-
 def get_num_blocks(desired, num_cores):
     """
     Get the number of blocks for parallel processing.

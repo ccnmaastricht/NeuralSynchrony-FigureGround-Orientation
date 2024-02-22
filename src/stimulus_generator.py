@@ -9,7 +9,7 @@ class StimulusGenerator():
         annulus_frequency = parameters['annulus_frequency']
         self.annulus_resolution = parameters['annulus_resolution']
 
-        self.annulus = create_annulus(annulus_diameter, annulus_frequency, self.annulus_resolution)
+        self.annulus = self.create_annulus(annulus_diameter, annulus_frequency)
 
     def generate(self, scaling_factor, contrast_range, mean_contrast):
         """
@@ -84,3 +84,26 @@ class StimulusGenerator():
             grid += np.random.randint(-randomness, randomness, size=grid.shape)
 
         return grid
+    
+    def _create_annulus(self, diameter, frequency):
+        """
+        Create a Gabor annulus.
+
+        Parameters
+        ----------
+        diameter : float
+            The diameter of the annulus.
+        frequency : float
+            The spatial frequency of the radial modulation.
+
+        Returns
+        -------
+        array_like
+            The annulus.
+        """
+        r = np.linspace(-diameter/2, diameter/2, self.annulus_resolution)
+        X, Y = np.meshgrid(r, -r)
+        radius = np.hypot(X, Y)
+        mask = radius <= diameter/2
+        annulus = 0.5 * np.cos(radius * frequency * 2 * np.pi + np.pi) * mask
+        return annulus

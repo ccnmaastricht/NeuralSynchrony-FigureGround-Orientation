@@ -77,9 +77,8 @@ class V1Model:
         """
         time_step = parameters['time_step']
         simulation_time = parameters['simulation_time']
-        initial_state = np.random.rand(self.num_populations) * 2 * np.pi
+        initial_state = np.random.rand(self.num_populations) * np.pi
         
-
         time_vector = np.arange(0, simulation_time, time_step)
         state = odeint(self._dynamics, initial_state, time_vector)
         return state, time_vector

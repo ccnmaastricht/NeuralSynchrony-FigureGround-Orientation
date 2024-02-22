@@ -89,7 +89,9 @@ if __name__ == '__main__':
     simulation_parameters['num_time_steps'] = int(simulation_parameters['simulation_time'] / simulation_parameters['time_step'])
 
     num_available_cores = cpu_count()
-    num_cores = int(num_available_cores * simulation_parameters['proportion_used_cores'])
+    num_cores = simulation_parameters['num_cores']
+    if num_cores > num_available_cores:
+        num_cores = num_available_cores
 
     print(f'Using {num_cores} of {num_available_cores} available cores.')
     

@@ -41,8 +41,10 @@ if __name__ == '__main__':
     col_ratio = sat_columns // bat_columns
 
     simulated_arnold_tongue = simulated_arnold_tongue[::row_ratio, ::col_ratio].flatten()
+    predictors = np.ones((2, total_conditions))
+    predictors[0] = simulated_arnold_tongue
 
-    optimal_psychometric_crossval = np.zeros((num_subjects, total_conditions))
+    optimal_psychometric_crossval = np.zeros((num_subjects, 2))
 
     for subject in range(num_subjects):
         # remove subject from arnold tongue but do not overwrite
@@ -52,11 +54,12 @@ if __name__ == '__main__':
         average_arnold_tongue = fold_arnold_tongues.mean(axis=0)
 
         # Initial guesses for parameters
-        initial_params = np.zeros(total_conditions)
+        initial_params = np.zeros(2)
 
         # Fit psychometric function to data
-        popt, _ = curve_fit(psychometric_function, simulated_arnold_tongue, average_arnold_tongue.flatten(), p0=initial_params)
+        popt, _ = curve_fit(psychometric_function, predictors, average_arnold_tongue.flatten(), p0=initial_params)
         optimal_psychometric_crossval[subject] = popt
+        print(f'Optimal parameters for subject {subject}: {popt}')
         
     np.save('results/analysis/session_1/optimal_psychometric_crossval.npy', optimal_psychometric_crossval)
 

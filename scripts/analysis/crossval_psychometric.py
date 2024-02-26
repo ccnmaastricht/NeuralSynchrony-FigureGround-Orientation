@@ -59,7 +59,6 @@ if __name__ == '__main__':
         # Fit psychometric function to data
         popt, _ = curve_fit(psychometric_function, predictors, average_arnold_tongue.flatten(), p0=initial_params)
         optimal_psychometric_crossval[subject] = popt
-        print(f'Optimal parameters for subject {subject}: {popt}')
         
     np.save('results/analysis/session_1/optimal_psychometric_crossval.npy', optimal_psychometric_crossval)
 

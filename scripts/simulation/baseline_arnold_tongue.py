@@ -92,15 +92,11 @@ if __name__ == '__main__':
     num_cores = simulation_parameters['num_cores']
     if num_cores > num_available_cores:
         num_cores = num_available_cores
-
-    print(f'Using {num_cores} of {num_available_cores} available cores.')
     
     # Set up the experiment
     num_conditions = experiment_parameters['num_contrast_heterogeneity'] * experiment_parameters['num_grid_coarseness']
     num_blocks = get_num_blocks(experiment_parameters['num_blocks'], num_cores)
     num_batches = num_blocks // num_cores
-
-    print(f'Running {num_blocks} blocks in {num_batches} batches.')
     
     contrast_heterogeneity = np.linspace(experiment_parameters['min_contrast_heterogeneity'],
                                         experiment_parameters['max_contrast_heterogeneity'],
@@ -118,9 +114,8 @@ if __name__ == '__main__':
 
     sync_index = slice(simulation_parameters['num_time_steps'] // 2, None)
 
-    # Run the experiment
+    # Run a batch of blocks in parallel
     for batch in range(num_batches):
-        print(f' Blocks {batch * num_cores} to {(batch + 1) * num_cores - 1}')
         with Pool(num_blocks) as p:
             p.map(run_block, range(batch * num_cores, (batch + 1) * num_cores))
 

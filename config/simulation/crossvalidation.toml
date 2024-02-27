@@ -1,0 +1,4 @@
+num_grids = 5
+effective_learning_rate_min = 0.05
+effective_learning_rate_max = 10.0
+num_effective_learning_rate = 10

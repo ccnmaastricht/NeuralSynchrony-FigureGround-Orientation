@@ -107,8 +107,8 @@ def condense_matrix(matrix):
         The condensed matrix.
     """
 
-    diagonal = np.diag(np.diag(matrix))
-    matrix = matrix - diagonal
+    diagonal = np.diag(matrix)
+    matrix = matrix - np.diag(diagonal)
     return squareform(matrix), diagonal
 
 def expand_matrix(matrix, diagonal):
@@ -127,7 +127,32 @@ def expand_matrix(matrix, diagonal):
     array_like
         The expanded matrix.
     """
-    return squareform(matrix) + diagonal 
+    diagonal = np.diag(diagonal)
+    return squareform(matrix) + diagonal
+
+def welford_update(mean, count, new_value):
+    """
+    Update the mean and count of a set of values.
+
+    Parameters
+    ----------
+    mean : float
+        The current mean.
+    count : int
+        The current count.
+    new_value : float
+        The new value.
+
+    Returns
+    ------- 
+    float
+        The updated mean.
+    int
+        The updated count.
+    """
+    delta = new_value - mean
+    mean += delta / count
+    return mean
 
 def psychometric_function(predictors, *parameters, chance_level = 0.5):
     """

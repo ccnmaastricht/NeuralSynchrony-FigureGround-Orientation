@@ -63,7 +63,7 @@ def run_block(block):
     global experiment_parameters, simulation_parameters
     global model, stimulus_generator
 
-    np.random.seed(int(time.time() + block))
+    np.random.seed(simulation_parameters['random_seed'] + block)
     
     for condition, (scaling_factor, contrast_range) in enumerate(zip(grid_coarseness, contrast_heterogeneity)):
         stimulus = stimulus_generator.generate(scaling_factor,

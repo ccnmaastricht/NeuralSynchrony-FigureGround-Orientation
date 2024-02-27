@@ -275,22 +275,16 @@ if __name__ == '__main__':
 
         weighted_coherence_crossval[subject] = weighted_coherence
 
-
         # remove subject from behavioral Arnold tongues of session 2
         fold_arnold_tongues = np.delete(session2_arnold_tongues, subject, axis=0)
 
         # Compute average behavioral Arnold tongue of session 2
         average_arnold_tongue = fold_arnold_tongues.mean(axis=0)
 
-        
         learning_rate_crossval[subject] = coarse_to_fine(weighted_coherence, average_arnold_tongue, crossval_parameters)
-        print(f'Learning rate for subject {subject + 1} is {learning_rate_crossval[subject]}')
-
             
-
-        
-        
-    #np.save('results/analysis/session_1/optimal_psychometric_crossval.npy', optimal_psychometric_crossval)
+    # Save results
+    np.savez('results/simulation/crossval_estimation.npz', optimal_psychometric_crossval=optimal_psychometric_crossval, weighted_coherence_crossval=weighted_coherence_crossval, learning_rate_crossval=learning_rate_crossval)
 
 
 

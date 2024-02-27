@@ -19,7 +19,7 @@ class V1Model:
         self.effective_learning_rate = None
         
         self._generate_receptive_fields(stimulus_parameters)
-        self._generate_coupling()
+        self.generate_coupling()
 
     def compute_omega(self, stimulus):
         """
@@ -36,6 +36,13 @@ class V1Model:
         frequency = self.contrast_slope * contrast + self.contrast_intercept
         self.omega = 2 * np.pi * frequency
 
+    def generate_coupling(self):
+        """
+        Generate the coupling matrix.
+        """
+        X_cortex, Y_cortex = inverse_complex_log_transform(self.X, self.Y)
+        distances = pairwise_distance(X_cortex, Y_cortex)
+        self.coupling = np.exp(-self.decay_rate * distances) * self.max_coupling
 
     def update_coupling(self, weighted_coherence):
         """
@@ -125,14 +132,6 @@ class V1Model:
         for i in range(self.num_populations):
             rf = gaussian(X, Y, self.X[i], self.Y[i], sigma[i])
             self.receptive_fields[i, :] = rf / np.sum(rf)    
-
-    def _generate_coupling(self):
-        """
-        Generate the coupling matrix.
-        """
-        X_cortex, Y_cortex = inverse_complex_log_transform(self.X, self.Y)
-        distances = pairwise_distance(X_cortex, Y_cortex)
-        self.coupling = np.exp(-self.decay_rate * distances) * self.max_coupling
     
     def _dynamics(self, state, t):
         """

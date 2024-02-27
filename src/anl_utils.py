@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from scipy.spatial.distance import squareform
 
 def load_data(path):
     """
@@ -68,7 +69,7 @@ def order_parameter(theta):
 
     return np.mean(np.exp(1j * theta), axis=1)
 
-def compute_coherence(theta):
+def compute_coherence(theta, condense = True):
     """
     Compute the coherence of a set of phases.
 
@@ -76,6 +77,8 @@ def compute_coherence(theta):
     ----------
     theta : array_like
         The phases.
+    condense : bool
+        Whether to condense the matrix.
 
     Returns
     ------- 
@@ -84,7 +87,47 @@ def compute_coherence(theta):
     """
     theta = theta.T
     phase_difference = np.angle(np.exp(1j * (theta[:, None] - theta[None, :])))
-    return np.cos(phase_difference)
+    coherence = np.cos(phase_difference)
+    if condense:
+        coherence, _ = condense_matrix(coherence)
+    return coherence 
+
+def condense_matrix(matrix):
+    """
+    Condense a symmetric matrix.
+
+    Parameters
+    ----------
+    coherence : array_like
+        The symmetric matrix.
+
+    Returns
+    ------- 
+    array_like
+        The condensed matrix.
+    """
+
+    diagonal = np.diag(np.diag(matrix))
+    matrix = matrix - diagonal
+    return squareform(matrix), diagonal
+
+def expand_matrix(matrix, diagonal):
+    """
+    Expand a condensed matrix.
+
+    Parameters
+    ----------
+    matrix : array_like
+        The condensed matrix.
+    diagonal : array_like
+        The diagonal of the original matrix.
+
+    Returns
+    ------- 
+    array_like
+        The expanded matrix.
+    """
+    return squareform(matrix) + diagonal 
 
 def psychometric_function(predictors, *parameters, chance_level = 0.5):
     """

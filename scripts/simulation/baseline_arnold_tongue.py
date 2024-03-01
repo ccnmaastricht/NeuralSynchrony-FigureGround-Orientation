@@ -121,8 +121,8 @@ if __name__ == '__main__':
 
     # Retrieve the results
     arnold_tongue = np.array(arnold_tongue).reshape(num_blocks, num_conditions)
-    arnold_tongue = arnold_tongue.reshape(num_blocks, experiment_parameters['num_contrast_heterogeneity'],
-                                                       experiment_parameters['num_grid_coarseness'])
+    arnold_tongue = arnold_tongue.reshape(num_blocks, experiment_parameters['num_grid_coarseness'], 
+                                          experiment_parameters['num_contrast_heterogeneity'])
     
     # Save the results
     file = 'results/simulation/baseline_arnold_tongue.npy'

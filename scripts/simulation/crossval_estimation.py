@@ -77,11 +77,8 @@ def run_block(block):
         arnold_tongue[index] = np.mean(synchronization[sync_index])
         lower_index = index * num_entries
         upper_index = lower_index + num_entries
-        #coherence_placeholder = np.zeros(num_entries)
-        #for count, timepoint in enumerate(timepoints, 1):
-        #    coherence_placeholder = welford_update(coherence_placeholder, count, compute_coherence(state_variables[timepoint]))
-        #coherence[lower_index:upper_index] = coherence_placeholder
-        coherence[lower_index:upper_index] = compute_coherence(state_variables[-1])
+        coherence_placeholder = [compute_coherence(state_variables[timepoint]) for timepoint in timepoints]
+        coherence[lower_index:upper_index] = np.mean(coherence_placeholder, axis=0)
     
 def run_simulation():
     """

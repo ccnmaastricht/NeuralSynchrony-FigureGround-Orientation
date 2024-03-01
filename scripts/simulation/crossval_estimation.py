@@ -103,7 +103,6 @@ def run_simulation():
     arnold_tongue = Array('d', arnold_tongue.reshape(-1))
 
     # Initialize the coherence
-    num_entries = model_parameters['num_populations'] * (model_parameters['num_populations'] - 1) // 2
     coherence = np.zeros((num_blocks, num_conditions, num_entries))
     coherence = Array('d', coherence.reshape(-1))
 
@@ -195,6 +194,7 @@ if __name__ == '__main__':
 
     # Load the model, stimulus, simulation, and experiment parameters
     model_parameters, stimulus_parameters, simulation_parameters, crossval_parameters, experiment_parameters = load_configurations()
+    num_entries = model_parameters['num_populations'] * (model_parameters['num_populations'] - 1) // 2
 
     # Initialize the model and stimulus generator
     model = V1Model(model_parameters, stimulus_parameters)
@@ -262,6 +262,7 @@ if __name__ == '__main__':
         optimal_psychometric_crossval[subject] = popt
 
         # Estimate weighted coherence from session 1 data
+        # USE FUNCTION FROM ANL_UTILS.PY!!
         weighted_coherence = np.zeros(num_entries)
         for block in range(num_blocks):
             predictors[0] = arnold_tongue[block]

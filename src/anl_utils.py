@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from scipy.spatial.distance import squareform
+from scipy.integrate import simps
 
 def load_data(path):
     """
@@ -92,6 +93,28 @@ def compute_coherence(theta, condense = True):
         coherence, _ = condense_matrix(coherence)
     return coherence 
 
+def compute_size(arnold_tongue, grid_coarseness, contrast_heterogeneity):
+    """
+    Compute the size of the Arnold tongue as the volume under its surface.
+
+    Parameters
+    ----------
+    arnold_tongue : array_like
+        The Arnold tongue.
+    grid_coarseness : array_like
+        The grid coarseness.
+    contrast_heterogeneity : array_like
+        The contrast heterogeneity.
+
+    Returns
+    -------
+    float
+        The size of the Arnold tongue.
+    """
+
+    return simps(simps(arnold_tongue, contrast_heterogeneity), grid_coarseness)
+
+    
 def condense_matrix(matrix):
     """
     Condense a symmetric matrix.

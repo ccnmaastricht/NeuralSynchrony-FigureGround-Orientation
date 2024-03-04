@@ -13,7 +13,7 @@ from multiprocessing import Pool, Array, cpu_count
 from src.v1_model import V1Model
 from src.stimulus_generator import StimulusGenerator
 from src.sim_utils import get_num_blocks
-from src.anl_utils import order_parameter, compute_coherence, psychometric_function, welford_update, expand_matrix, weighted_jaccard
+from src.anl_utils import order_parameter, compute_coherence, compute_weighted_coherence, psychometric_function, expand_matrix, weighted_jaccard
 
 
 def load_configurations():
@@ -87,7 +87,7 @@ def run_block(block):
                                                      axis=0)
 
 
-def run_simulation():
+def run_simulation(counts_tuple):
     """
     Run the simulation.
 
@@ -99,11 +99,8 @@ def run_simulation():
         The coherence.
     """
     global arnold_tongue, coherence
-    global num_conditions, num_entries
-    global sync_index, timepoints
-    global grid_coarseness, contrast_heterogeneity
-    global experiment_parameters, simulation_parameters
-    global model, stimulus_generator
+
+    num_blocks, num_conditions, num_entries = counts_tuple
 
     # Initialize the Arnold tongue
     arnold_tongue = np.zeros((num_blocks, num_conditions))
@@ -127,7 +124,7 @@ def run_simulation():
 
 
 def coarse_to_fine(weighted_coherence, behavioral_arnold_tongue,
-                   crossval_parameters):
+                   crossval_parameters, counts_tuple):
     """
     Estimate the effective learning rate through coarse-to-fine grid search.
 
@@ -139,6 +136,8 @@ def coarse_to_fine(weighted_coherence, behavioral_arnold_tongue,
         The behavioral Arnold tongue.
     crossval_parameters : dict
         The cross-validation parameters.
+    counts_tuple : tuple
+        The number of blocks, conditions, and entries.
 
     Returns
     -------
@@ -146,7 +145,6 @@ def coarse_to_fine(weighted_coherence, behavioral_arnold_tongue,
         The effective learning rate.
     """
 
-    global arnold_tongue
     global model
 
     diagonal = np.ones(model.num_populations)
@@ -161,7 +159,7 @@ def coarse_to_fine(weighted_coherence, behavioral_arnold_tongue,
         weighted_jaccard_fits = simulation_grid(
             effective_learning_rates, weighted_coherence,
             behavioral_arnold_tongue,
-            crossval_parameters['num_effective_learning_rate'])
+            crossval_parameters['num_effective_learning_rate'], counts_tuple)
         lower_bound = np.argmax(weighted_jaccard_fits)
         upper_bound = lower_bound + 2
         best_index = lower_bound + 1
@@ -174,7 +172,8 @@ def coarse_to_fine(weighted_coherence, behavioral_arnold_tongue,
 
 
 def simulation_grid(effective_learning_rates, weighted_coherence,
-                    behavioral_arnold_tongue, num_effective_learning_rate):
+                    behavioral_arnold_tongue, num_effective_learning_rate,
+                    counts_tuple):
     """
     Run a grid of simulations.
 
@@ -188,6 +187,8 @@ def simulation_grid(effective_learning_rates, weighted_coherence,
         The behavioral Arnold tongue.
     num_effective_learning_rate : int
         The number of effective learning rates.
+    counts_tuple : tuple
+        The number of blocks, conditions, and entries.
 
     Returns
     -------
@@ -204,7 +205,7 @@ def simulation_grid(effective_learning_rates, weighted_coherence,
         model.generate_coupling()
         model.update_coupling(weighted_coherence)
 
-        arnold_tongue, _ = run_simulation()
+        arnold_tongue, _ = run_simulation(counts_tuple)
         weighted_jaccard_fits[i] = weighted_jaccard(arnold_tongue.mean(axis=0),
                                                     behavioral_arnold_tongue)
 
@@ -240,6 +241,9 @@ if __name__ == '__main__':
     num_blocks = get_num_blocks(experiment_parameters['num_blocks'], num_cores)
     num_batches = num_blocks // num_cores
 
+    # Create a tuple of counts_tuple
+    counts_tuple = (num_blocks, num_conditions, num_entries)
+
     contrast_heterogeneity = np.linspace(
         experiment_parameters['min_contrast_heterogeneity'],
         experiment_parameters['max_contrast_heterogeneity'],
@@ -259,7 +263,7 @@ if __name__ == '__main__':
     timepoints = range(start, simulation_parameters['num_time_steps'])
 
     # Run the simulation
-    arnold_tongue, coherence = run_simulation()
+    arnold_tongue, coherence = run_simulation(counts_tuple)
 
     # load behavioral Arnold tongues of session 1
     session1_arnold_tongues = np.load(
@@ -300,17 +304,9 @@ if __name__ == '__main__':
         optimal_psychometric_crossval[subject] = popt
 
         # Estimate weighted coherence from session 1 data
-        # USE FUNCTION FROM ANL_UTILS.PY!!
-        weighted_coherence = np.zeros(num_entries)
-        for block in range(num_blocks):
-            predictors[0] = arnold_tongue[block]
-            probability_correct = psychometric_function(predictors, *popt)
-
-            probability_correct = np.tile(probability_correct,
-                                          (num_entries, 1)).T
-            weighted_coherence = welford_update(
-                weighted_coherence, block + 1,
-                (probability_correct * coherence[block]).mean(axis=0))
+        measurements = (arnold_tongue, coherence)
+        weighted_coherence = compute_weighted_coherence(
+            counts_tuple, measurements, popt)
 
         weighted_coherence_crossval[subject] = weighted_coherence
 

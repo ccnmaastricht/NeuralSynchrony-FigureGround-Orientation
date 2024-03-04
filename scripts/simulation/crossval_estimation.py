@@ -97,6 +97,11 @@ def run_simulation(counts_tuple):
     coherence : array_like
         The coherence.
     """
+
+    # THE TUPLE DOES NOT INCLUDE THE NUMBER OF CORES AND BATCHES!
+    # USING THE TUPLE IS MAYBE NOT THE BEST WAY TO PASS THE ARGUMENTS TO THE FUNCTION.
+    # IT WOULD BE BETTER TO PASS THE ARGUMENTS DIRECTLY TO THE FUNCTION.
+
     global arnold_tongue, coherence
 
     num_blocks, num_conditions, num_entries = counts_tuple

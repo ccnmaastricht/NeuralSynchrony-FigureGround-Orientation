@@ -123,8 +123,48 @@ def run_simulation(counts_tuple):
     return arnold_tongue, coherence
 
 
-def coarse_to_fine(weighted_coherence, behavioral_arnold_tongue,
-                   crossval_parameters, counts_tuple):
+def simulation_grid(counts_tuple, effective_learning_rates,
+                    num_effective_learning_rate, weighted_coherence,
+                    behavioral_arnold_tongue):
+    """
+    Run a grid of simulations.
+
+    Parameters
+    ----------
+    counts_tuple : tuple
+        The number of blocks, conditions, and entries.
+    effective_learning_rates : array_like
+        The effective learning rates.
+    num_effective_learning_rate : int
+        The number of effective learning rates.
+    weighted_coherence : array_like
+        The weighted coherence.
+    behavioral_arnold_tongue : array_like
+        The behavioral Arnold tongue.
+
+    Returns
+    -------
+    array_like
+        The weighted Jaccard fits.
+    """
+    global model
+
+    weighted_jaccard_fits = np.zeros(num_effective_learning_rate - 2)
+    for i, effective_learning_rate in enumerate(
+            effective_learning_rates[1:-1]):
+        model.effective_learning_rate = effective_learning_rate
+        model.generate_coupling()
+        model.update_coupling(weighted_coherence)
+
+        arnold_tongue, _ = run_simulation(counts_tuple)
+        weighted_jaccard_fits[i] = weighted_jaccard(arnold_tongue.mean(axis=0),
+                                                    behavioral_arnold_tongue)
+
+    return weighted_jaccard_fits
+
+
+def coarse_to_fine(weighted_coherence, crossval_parameters, counts_tuple,
+                   behavioral_arnold_tongue):
     """
     Estimate the effective learning rate through coarse-to-fine grid search.
 
@@ -132,12 +172,11 @@ def coarse_to_fine(weighted_coherence, behavioral_arnold_tongue,
     ----------
     weighted_coherence : array_like
         The weighted coherence.
-    behavioral_arnold_tongue : array_like
-        The behavioral Arnold tongue.
     crossval_parameters : dict
         The cross-validation parameters.
     counts_tuple : tuple
         The number of blocks, conditions, and entries.
+    behavioral_arnold_tongue : array_like
 
     Returns
     -------
@@ -157,9 +196,9 @@ def coarse_to_fine(weighted_coherence, behavioral_arnold_tongue,
 
     for _ in tqdm(range(crossval_parameters['num_grids'])):
         weighted_jaccard_fits = simulation_grid(
-            effective_learning_rates, weighted_coherence,
-            behavioral_arnold_tongue,
-            crossval_parameters['num_effective_learning_rate'], counts_tuple)
+            counts_tuple, effective_learning_rates,
+            crossval_parameters['num_effective_learning_rate'],
+            weighted_coherence, behavioral_arnold_tongue)
         lower_bound = np.argmax(weighted_jaccard_fits)
         upper_bound = lower_bound + 2
         best_index = lower_bound + 1
@@ -169,47 +208,6 @@ def coarse_to_fine(weighted_coherence, behavioral_arnold_tongue,
             crossval_parameters['num_effective_learning_rate'])
 
     return best_learning_rate
-
-
-def simulation_grid(effective_learning_rates, weighted_coherence,
-                    behavioral_arnold_tongue, num_effective_learning_rate,
-                    counts_tuple):
-    """
-    Run a grid of simulations.
-
-    Parameters
-    ----------
-    effective_learning_rates : array_like
-        The effective learning rates.
-    weighted_coherence : array_like
-        The weighted coherence.
-    behavioral_arnold_tongue : array_like
-        The behavioral Arnold tongue.
-    num_effective_learning_rate : int
-        The number of effective learning rates.
-    counts_tuple : tuple
-        The number of blocks, conditions, and entries.
-
-    Returns
-    -------
-    array_like
-        The weighted Jaccard fits.
-    """
-    global arnold_tongue
-    global model
-
-    weighted_jaccard_fits = np.zeros(num_effective_learning_rate - 2)
-    for i, effective_learning_rate in enumerate(
-            effective_learning_rates[1:-1]):
-        model.effective_learning_rate = effective_learning_rate
-        model.generate_coupling()
-        model.update_coupling(weighted_coherence)
-
-        arnold_tongue, _ = run_simulation(counts_tuple)
-        weighted_jaccard_fits[i] = weighted_jaccard(arnold_tongue.mean(axis=0),
-                                                    behavioral_arnold_tongue)
-
-    return weighted_jaccard_fits
 
 
 if __name__ == '__main__':
@@ -319,8 +317,8 @@ if __name__ == '__main__':
         average_arnold_tongue = fold_arnold_tongues.mean(axis=0)
 
         learning_rate_crossval[subject] = coarse_to_fine(
-            weighted_coherence, average_arnold_tongue, crossval_parameters,
-            counts_tuple)
+            weighted_coherence, crossval_parameters, counts_tuple,
+            average_arnold_tongue)
 
     # Save results
     np.savez('results/simulation/crossval_estimation.npz',

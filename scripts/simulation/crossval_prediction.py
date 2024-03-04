@@ -97,7 +97,7 @@ def run_block(block):
                                                      axis=0)
 
 
-def run_simulation():
+def run_simulation(counts_tuple):
     """
     Run the simulation.
 
@@ -109,11 +109,8 @@ def run_simulation():
         The coherence.
     """
     global arnold_tongue, coherence
-    global num_conditions, num_entries
-    global sync_index, timepoints
-    global grid_coarseness, contrast_heterogeneity
-    global experiment_parameters, simulation_parameters
-    global model, stimulus_generator
+
+    num_blocks, num_conditions, num_entries = counts_tuple
 
     # Initialize the Arnold tongue
     arnold_tongue = np.zeros((num_blocks, num_conditions))
@@ -137,7 +134,7 @@ def run_simulation():
 
 
 def run_learning(fold, learning_rate, num_sessions, counts_tuple,
-                 condition_space):
+                 condition_space, measurements):
     """
     Run the learning simulation.
 
@@ -153,6 +150,8 @@ def run_learning(fold, learning_rate, num_sessions, counts_tuple,
         The counts tuple.
     condition_space : tuple
         The condition space.
+    measurements : tuple
+        The measurements.
 
     Returns
     -------
@@ -163,8 +162,10 @@ def run_learning(fold, learning_rate, num_sessions, counts_tuple,
     arnold_tongue_size : array_like
         The Arnold tongue size.
     """
-    global arnold_tongue, coherence
     global model
+
+    # Unpack the measurements
+    arnold_tongue, coherence = measurements
 
     # Get the number of sessions by popping the first element from the counts tuple
     num_sessions = counts_tuple[0]
@@ -196,7 +197,7 @@ def run_learning(fold, learning_rate, num_sessions, counts_tuple,
         left_out_arnold_tongue = min_max_normalize(left_out_arnold_tongue)
 
         # Run the simulation
-        arnold_tongue, coherence = run_simulation()
+        arnold_tongue, coherence = run_simulation(counts_tuple)
 
         # Compute the weighted coherence and update the coupling
         measurements = (arnold_tongue, coherence)

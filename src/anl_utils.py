@@ -238,3 +238,37 @@ def min_max_normalize(X):
         The normalized array.
     """
     return (X - np.min(X)) / (np.max(X) - np.min(X))
+
+def compute_weighted_coherence(counts_tuple, measurements, optimal_psychometric_parameters):
+    """
+    Compute the weighted coherence.  
+
+    Parameters
+    ----------
+    counts_tuple : tuple
+        The number of blocks, conditions, and entries.
+    measurements : array_like
+        The Arnold tongue and coherence.
+    optimal_psychometric_parameters : array_like
+        The optimal psychometric parameters.
+
+    Returns
+    -------
+    array_like
+        The weighted coherence.
+    """
+
+    num_blocks, num_conditions, num_entries = counts_tuple
+    arnold_tongue, coherence = measurements
+
+    predictors = np.ones((2, num_conditions))
+    weighted_coherence = np.zeros(num_entries)
+    
+    for block in range(num_blocks):
+        predictors[0] = arnold_tongue[block]
+        probability_correct = psychometric_function(predictors, *optimal_psychometric_parameters)
+             
+        probability_correct = np.tile(probability_correct, (num_entries, 1)).T
+        weighted_coherence = welford_update(weighted_coherence, block + 1, (probability_correct * coherence[block]).mean(axis=0))
+
+    return weighted_coherence

@@ -6,7 +6,6 @@ Results are saved in results/arnold_tongue.npy and correspond to section X of th
 import os
 import tomllib
 import numpy as np
-from tqdm import tqdm
 from scipy.optimize import curve_fit
 from multiprocessing import Pool, Array, cpu_count
 
@@ -194,7 +193,7 @@ def coarse_to_fine(weighted_coherence, crossval_parameters, counts_tuple,
         crossval_parameters['effective_learning_rate_max'],
         crossval_parameters['num_effective_learning_rate'])
 
-    for _ in tqdm(range(crossval_parameters['num_grids'])):
+    for _ in range(crossval_parameters['num_grids']):
         weighted_jaccard_fits = simulation_grid(
             counts_tuple, effective_learning_rates,
             crossval_parameters['num_effective_learning_rate'],

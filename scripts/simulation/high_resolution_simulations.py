@@ -76,11 +76,52 @@ def run_block(block):
         arnold_tongue[index] = np.mean(synchronization[sync_index])
 
 
+def run_simulation(num_blocks, num_conditions, num_cores, num_batches):
+    """
+    Run the simulation.
+
+    Parameters
+    ----------
+    num_blocks : int
+        The number of blocks.
+    num_conditions : int
+        The number of conditions.
+    num_cores : int
+        The number of cores.
+    num_batches : int
+        The number of batches.
+
+    Returns
+    -------
+    arnold_tongue : array_like
+        The Arnold tongue.
+    """
+    global arnold_tongue
+
+    # Initialize the Arnold tongue
+    arnold_tongue = np.zeros((num_blocks, num_conditions))
+    arnold_tongue = Array('d', arnold_tongue.reshape(-1))
+
+    # Run a batch of blocks in parallel
+    for batch in range(num_batches):
+        with Pool(num_blocks) as p:
+            p.map(run_block, range(batch * num_cores, (batch + 1) * num_cores))
+
+    # Collect simulation results
+    arnold_tongue = np.array(arnold_tongue).reshape(num_blocks, num_conditions)
+
+    return arnold_tongue
+
+
 if __name__ == '__main__':
 
     # Load the parameters
     model_parameters, stimulus_parameters, simulation_parameters, experiment_parameters = load_configurations(
     )
+
+    # Load learning rates
+    crossval_results = np.load('results/simulation/crossval_estimation.npz')
+    learning_rates = crossval_results['learning_rate_crossval']
 
     # Initialize the model and stimulus generator
     model = V1Model(model_parameters, stimulus_parameters)

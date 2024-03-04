@@ -247,7 +247,7 @@ if __name__ == '__main__':
     for fold in range(num_folds):
         correlation_fits[fold], jaccard_fits[fold], arnold_tongue_size[
             fold] = run_learning(fold, effective_learning_rates[fold],
-                                 counts_tuple)
+                                 num_sessions, counts_tuple)
 
     # Save the results
     results_file = 'results/simulation/learning_simulation.npz'

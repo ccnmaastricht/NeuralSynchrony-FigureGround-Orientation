@@ -21,7 +21,7 @@ from scipy.optimize import curve_fit
 from src.v1_model import V1Model
 from src.stimulus_generator import StimulusGenerator
 from src.sim_utils import get_num_blocks
-from src.anl_utils import order_parameter, weighted_jaccard, compute_size, compute_coherence, compute_weighted_coherence, expand_matrix
+from src.anl_utils import order_parameter, weighted_jaccard, compute_size, compute_coherence, compute_weighted_coherence, expand_matrix, min_max_normalize
 
 from multiprocessing import Pool, Array, cpu_count
 
@@ -136,51 +136,89 @@ def run_simulation():
     return arnold_tongue, coherence
 
 
-def run_learning(fold, learning_rate, num_sessions, counts_tuple):
+def run_learning(fold, learning_rate, num_sessions, counts_tuple,
+                 condition_space):
+    """
+    Run the learning simulation.
+
+    Parameters
+    ----------
+    fold : int
+        The fold number.
+    learning_rate : float
+        The learning rate.
+    num_sessions : int
+        The number of sessions.
+    counts_tuple : tuple
+        The counts tuple.
+    condition_space : tuple
+        The condition space.
+
+    Returns
+    -------
+    correlation_fits : array_like
+        The correlation fits.
+    jaccard_fits : array_like
+        The Jaccard fits.
+    arnold_tongue_size : array_like
+        The Arnold tongue size.
+    """
     global arnold_tongue, coherence
     global model
 
+    # Get the number of sessions by popping the first element from the counts tuple
     num_sessions = counts_tuple[0]
     counts_tuple = counts_tuple[1:]
 
+    # Set the learning rate and generate the coupling
     model.effective_learning_rate = learning_rate
     model.generate_coupling()
 
+    # Load the optimal psychometric curve
     file = os.path.join(BASE_PATH, f'session_1',
                         'optimal_psychometric_crossval.npy')
     optimal_psychometric_fold = np.load(file)[fold]
 
+    # Initialize the fits
     correlation_fits = np.zeros(num_sessions)
     jaccard_fits = np.zeros(num_sessions)
     arnold_tongue_size = np.zeros(num_sessions)
 
+    # Initialize the diagonal
     diagonal = np.ones(model.num_populations)
 
+    # Run the learning simulation
     for session in range(num_sessions):
+        # Load the left-out Arnold tongue and normalize it
         file = os.path.join(BASE_PATH, f'session_{session + 1}',
                             'individual_bats.npy')
-        left_out_arnold_tongue = np.load(file)[fold]
+        left_out_arnold_tongue = np.load(file)[fold].flatten()
+        left_out_arnold_tongue = min_max_normalize(left_out_arnold_tongue)
 
+        # Run the simulation
         arnold_tongue, coherence = run_simulation()
+
+        # Compute the weighted coherence and update the coupling
         measurements = (arnold_tongue, coherence)
         weighted_coherence = compute_weighted_coherence(
             counts_tuple, measurements, optimal_psychometric_fold)
         weighted_coherence = expand_matrix(weighted_coherence, diagonal)
         model.update_coupling(weighted_coherence)
 
+        # Compute the fits
         simulated_arnold_tongue = arnold_tongue.mean(axis=0)
-
         correlation_fits[session] = np.corrcoef(simulated_arnold_tongue,
                                                 left_out_arnold_tongue)[0, 1]
         jaccard_fits[session] = weighted_jaccard(simulated_arnold_tongue,
                                                  left_out_arnold_tongue)
 
+        # Compute the Arnold tongue size
         simulated_arnold_tongue = simulated_arnold_tongue.reshape(
-            num_blocks, experiment_parameters['num_grid_coarseness'],
+            experiment_parameters['num_grid_coarseness'],
             experiment_parameters['num_contrast_heterogeneity'])
         arnold_tongue_size[session] = compute_size(simulated_arnold_tongue,
-                                                   grid_coarseness,
-                                                   contrast_heterogeneity)
+                                                   condition_space[0],
+                                                   condition_space[1])
 
         return correlation_fits, jaccard_fits, arnold_tongue_size
 
@@ -220,18 +258,23 @@ if __name__ == '__main__':
     counts_tuple = (num_sessions, num_blocks, num_conditions, num_entries)
 
     # Set up the grid coarseness and contrast heterogeneity
-    contrast_heterogeneity = np.linspace(
+    contrast_heterogeneity_orig = np.linspace(
         experiment_parameters['min_contrast_heterogeneity'],
         experiment_parameters['max_contrast_heterogeneity'],
         experiment_parameters['num_contrast_heterogeneity'])
-    grid_coarseness = np.linspace(experiment_parameters['min_grid_coarseness'],
-                                  experiment_parameters['max_grid_coarseness'],
-                                  experiment_parameters['num_grid_coarseness'])
+    grid_coarseness_orig = np.linspace(
+        experiment_parameters['min_grid_coarseness'],
+        experiment_parameters['max_grid_coarseness'],
+        experiment_parameters['num_grid_coarseness'])
+
+    condition_space = (grid_coarseness_orig, contrast_heterogeneity_orig)
 
     contrast_heterogeneity = np.tile(
-        contrast_heterogeneity, experiment_parameters['num_grid_coarseness'])
+        contrast_heterogeneity_orig,
+        experiment_parameters['num_grid_coarseness'])
     grid_coarseness = np.repeat(
-        grid_coarseness, experiment_parameters['num_contrast_heterogeneity'])
+        grid_coarseness_orig,
+        experiment_parameters['num_contrast_heterogeneity'])
 
     # Set up the synchronization index and timepoints
     start = simulation_parameters['num_time_steps'] // 2
@@ -250,7 +293,7 @@ if __name__ == '__main__':
     for fold in range(num_folds):
         correlation_fits[fold], jaccard_fits[fold], arnold_tongue_size[
             fold] = run_learning(fold, effective_learning_rates[fold],
-                                 num_sessions, counts_tuple)
+                                 num_sessions, counts_tuple, condition_space)
 
     # Save the results
     results_file = 'results/simulation/learning_simulation.npz'

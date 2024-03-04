@@ -297,16 +297,16 @@ if __name__ == '__main__':
         initial_params = np.zeros(2)
 
         # Fit psychometric function to session 1 data
-        popt, _ = curve_fit(psychometric_function,
-                            predictors,
-                            average_arnold_tongue.flatten(),
-                            p0=initial_params)
-        optimal_psychometric_crossval[subject] = popt
+        optimized_parameters, _ = curve_fit(psychometric_function,
+                                            predictors,
+                                            average_arnold_tongue.flatten(),
+                                            p0=initial_params)
+        optimal_psychometric_crossval[subject] = optimized_parameters
 
         # Estimate weighted coherence from session 1 data
         measurements = (arnold_tongue, coherence)
         weighted_coherence = compute_weighted_coherence(
-            counts_tuple, measurements, popt)
+            counts_tuple, measurements, optimized_parameters)
 
         weighted_coherence_crossval[subject] = weighted_coherence
 

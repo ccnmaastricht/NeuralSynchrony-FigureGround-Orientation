@@ -319,7 +319,8 @@ if __name__ == '__main__':
         average_arnold_tongue = fold_arnold_tongues.mean(axis=0)
 
         learning_rate_crossval[subject] = coarse_to_fine(
-            weighted_coherence, average_arnold_tongue, crossval_parameters)
+            weighted_coherence, average_arnold_tongue, crossval_parameters,
+            counts_tuple)
 
     # Save results
     np.savez('results/simulation/crossval_estimation.npz',

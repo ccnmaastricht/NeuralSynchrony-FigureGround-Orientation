@@ -3,6 +3,7 @@ import pandas as pd
 from scipy.spatial.distance import squareform
 from scipy.integrate import simps
 
+
 def load_data(path):
     """
     Load the behavioral data.
@@ -14,6 +15,7 @@ def load_data(path):
     """
     data = pd.read_csv(path)
     return data
+
 
 def get_session_data(data, session):
     """
@@ -34,6 +36,7 @@ def get_session_data(data, session):
     session_data = data[data['SessionID'] == session]
     return session_data
 
+
 def get_subject_data(data, subject):
     """
     Get the data of a specific subject.
@@ -53,6 +56,7 @@ def get_subject_data(data, subject):
     subject_data = data[data['SubjectID'] == subject]
     return subject_data
 
+
 def order_parameter(theta):
     """
     Compute the order parameter of a set of phases.
@@ -70,7 +74,8 @@ def order_parameter(theta):
 
     return np.mean(np.exp(1j * theta), axis=1)
 
-def compute_coherence(theta, condense = True):
+
+def compute_coherence(theta, condense=True):
     """
     Compute the coherence of a set of phases.
 
@@ -91,7 +96,8 @@ def compute_coherence(theta, condense = True):
     coherence = np.cos(phase_difference)
     if condense:
         coherence, _ = condense_matrix(coherence)
-    return coherence 
+    return coherence
+
 
 def compute_size(arnold_tongue, grid_coarseness, contrast_heterogeneity):
     """
@@ -114,7 +120,7 @@ def compute_size(arnold_tongue, grid_coarseness, contrast_heterogeneity):
 
     return simps(simps(arnold_tongue, contrast_heterogeneity), grid_coarseness)
 
-    
+
 def condense_matrix(matrix):
     """
     Condense a symmetric matrix.
@@ -134,6 +140,7 @@ def condense_matrix(matrix):
     matrix = matrix - np.diag(diagonal)
     return squareform(matrix), diagonal
 
+
 def expand_matrix(matrix, diagonal):
     """
     Expand a condensed matrix.
@@ -152,6 +159,7 @@ def expand_matrix(matrix, diagonal):
     """
     diagonal = np.diag(diagonal)
     return squareform(matrix) + diagonal
+
 
 def welford_update(mean, count, new_value):
     """
@@ -177,7 +185,8 @@ def welford_update(mean, count, new_value):
     mean += delta / count
     return mean
 
-def psychometric_function(predictors, *parameters, chance_level = 0.5):
+
+def psychometric_function(predictors, *parameters, chance_level=0.5):
     """
     Compute an n-dimensional psychometric function.
 
@@ -198,6 +207,7 @@ def psychometric_function(predictors, *parameters, chance_level = 0.5):
     logit = np.dot(parameters, predictors)
     probability = (1 - chance_level) / (1 + np.exp(-logit)) + chance_level
     return probability
+
 
 def weighted_jaccard(X, Y):
     """
@@ -223,6 +233,7 @@ def weighted_jaccard(X, Y):
 
     return numerator / denominator
 
+
 def min_max_normalize(X):
     """
     Normalize an array between 0 and 1.
@@ -239,7 +250,9 @@ def min_max_normalize(X):
     """
     return (X - np.min(X)) / (np.max(X) - np.min(X))
 
-def compute_weighted_coherence(counts_tuple, measurements, optimal_psychometric_parameters):
+
+def compute_weighted_coherence(counts_tuple, measurements,
+                               optimal_psychometric_parameters):
     """
     Compute the weighted coherence.  
 
@@ -263,12 +276,15 @@ def compute_weighted_coherence(counts_tuple, measurements, optimal_psychometric_
 
     predictors = np.ones((2, num_conditions))
     weighted_coherence = np.zeros(num_entries)
-    
+
     for block in range(num_blocks):
         predictors[0] = arnold_tongue[block]
-        probability_correct = psychometric_function(predictors, *optimal_psychometric_parameters)
-             
+        probability_correct = psychometric_function(
+            predictors, *optimal_psychometric_parameters)
+
         probability_correct = np.tile(probability_correct, (num_entries, 1)).T
-        weighted_coherence = welford_update(weighted_coherence, block + 1, (probability_correct * coherence[block]).mean(axis=0))
+        weighted_coherence = welford_update(weighted_coherence, block + 1,
+                                            (probability_correct *
+                                             coherence[block]).mean(axis=0))
 
     return weighted_coherence

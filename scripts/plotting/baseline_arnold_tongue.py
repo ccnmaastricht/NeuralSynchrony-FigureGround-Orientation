@@ -2,7 +2,7 @@
 This script creates the Arnold Tongue figure...
 """
 
-import os 
+import os
 
 import numpy as np
 from src.plot_utils import plot_arnold_tongue
@@ -22,14 +22,15 @@ xticks = np.round(np.linspace(0.01, 1, 5), 1)
 yticks = np.round(np.linspace(1, 1.5, 5), 1)
 ticks = (xticks, yticks)
 
-labels = ('Arnold Tongue', 'Contrast heterogeneity', 'Grid coarseness', 'Synchronization')
+labels = ('Arnold Tongue', 'Contrast heterogeneity', 'Grid coarseness',
+          'Synchronization')
 fontsizes = (6, 5, 5, 5)  # title, label, tick, cbar label sizes
 
 # Specify figure size in inches
 figsize = (88.9 / 25.4, 88.9 / 25.4)  # convert from millimeters to inches
 
 # Plot the results
-plot_arnold_tongue(arnold_tongue.mean(axis=0), 
+plot_arnold_tongue(arnold_tongue.mean(axis=0),
                    figsize,
                    labels,
                    fontsizes,

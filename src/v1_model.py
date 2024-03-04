@@ -3,7 +3,9 @@ from scipy.integrate import odeint
 
 from src.sim_utils import gaussian, threshold_linear, inverse_complex_log_transform, pairwise_distance
 
+
 class V1Model:
+
     def __init__(self, model_parameters, stimulus_parameters):
         self.X = None
         self.Y = None
@@ -14,10 +16,12 @@ class V1Model:
         self.contrast_slope = model_parameters['contrast_slope']
         self.contrast_intercept = model_parameters['contrast_intercept']
         self.receptive_field_slope = model_parameters['receptive_field_slope']
-        self.receptive_field_intercept = model_parameters['receptive_field_intercept']
-        self.receptive_field_minimum_size = model_parameters['receptive_field_minimum_size']
+        self.receptive_field_intercept = model_parameters[
+            'receptive_field_intercept']
+        self.receptive_field_minimum_size = model_parameters[
+            'receptive_field_minimum_size']
         self.effective_learning_rate = None
-        
+
         self._generate_receptive_fields(stimulus_parameters)
         self.generate_coupling()
 
@@ -31,8 +35,10 @@ class V1Model:
             The stimulus.
         """
         mean_luminance = np.mean(stimulus)
-        normalized_luminance = (stimulus - mean_luminance)**2 / (mean_luminance**2)
-        contrast = np.sqrt( np.matmul(self.receptive_fields, normalized_luminance) ) * 100
+        normalized_luminance = (stimulus - mean_luminance)**2 / (mean_luminance
+                                                                 **2)
+        contrast = np.sqrt(
+            np.matmul(self.receptive_fields, normalized_luminance)) * 100
         frequency = self.contrast_slope * contrast + self.contrast_intercept
         self.omega = 2 * np.pi * frequency
 
@@ -42,7 +48,8 @@ class V1Model:
         """
         X_cortex, Y_cortex = inverse_complex_log_transform(self.X, self.Y)
         distances = pairwise_distance(X_cortex, Y_cortex)
-        self.coupling = np.exp(-self.decay_rate * distances) * self.max_coupling
+        self.coupling = np.exp(
+            -self.decay_rate * distances) * self.max_coupling
 
     def update_coupling(self, weighted_coherence):
         """
@@ -58,7 +65,8 @@ class V1Model:
             raise ValueError("effective_learning_rate cannot be None")
 
         decay_factor = np.exp(-self.effective_learning_rate)
-        self.coupling = decay_factor * self.coupling + (1 - decay_factor) * weighted_coherence * self.max_coupling
+        self.coupling = decay_factor * self.coupling + (
+            1 - decay_factor) * weighted_coherence * self.max_coupling
 
     def simulate(self, parameters):
         """
@@ -84,12 +92,12 @@ class V1Model:
         """
         time_step = parameters['time_step']
         simulation_time = parameters['simulation_time']
-        initial_state = np.random.rand(self.num_populations) * np.pi 
-        
+        initial_state = np.random.rand(self.num_populations) * np.pi
+
         time_vector = np.arange(0, simulation_time, time_step)
         state = odeint(self._dynamics, initial_state, time_vector)
         return state, time_vector
-    
+
     def _generate_receptive_fields(self, parameters):
         """
         Generate receptive fields.
@@ -111,28 +119,32 @@ class V1Model:
         xy_offset = np.sqrt(stimulus_eccentricity**2 / 2)
         lower_bound = xy_offset - stimulus_side_length / 2
         upper_bound = xy_offset + stimulus_side_length / 2
-        r = np.linspace(lower_bound, upper_bound, int(np.sqrt(self.num_populations)))
+        r = np.linspace(lower_bound, upper_bound,
+                        int(np.sqrt(self.num_populations)))
         X, Y = np.meshgrid(r, r)
         self.X = X.flatten()
         self.Y = Y[::-1].flatten()
- 
-        r = np.linspace(lower_bound, upper_bound, int(np.sqrt(stimulus_num_pixels)))
+
+        r = np.linspace(lower_bound, upper_bound,
+                        int(np.sqrt(stimulus_num_pixels)))
         X, Y = np.meshgrid(r, r)
         X = X.flatten()
         Y = Y[::-1].flatten()
-        
+
         eccentricity = np.sqrt(self.X**2 + self.Y**2)
 
-        diameter = threshold_linear(eccentricity, slope=self.receptive_field_slope,
+        diameter = threshold_linear(eccentricity,
+                                    slope=self.receptive_field_slope,
                                     intercept=self.receptive_field_intercept,
                                     offset=self.receptive_field_minimum_size)
         sigma = diameter / 4
 
-        self.receptive_fields = np.zeros((self.num_populations, stimulus_num_pixels))
+        self.receptive_fields = np.zeros(
+            (self.num_populations, stimulus_num_pixels))
         for i in range(self.num_populations):
             rf = gaussian(X, Y, self.X[i], self.Y[i], sigma[i])
-            self.receptive_fields[i, :] = rf / np.sum(rf)    
-    
+            self.receptive_fields[i, :] = rf / np.sum(rf)
+
     def _dynamics(self, state, t):
         """
         The dynamics of the Kuramoto model.
@@ -151,5 +163,6 @@ class V1Model:
         """
         theta = state.reshape((-1, 1))
         phase_difference = theta.T - theta
-        dtheta = self.omega + 1 / self.num_populations * np.sum(self.coupling * np.sin(phase_difference), axis=1)
+        dtheta = self.omega + 1 / self.num_populations * np.sum(
+            self.coupling * np.sin(phase_difference), axis=1)
         return dtheta

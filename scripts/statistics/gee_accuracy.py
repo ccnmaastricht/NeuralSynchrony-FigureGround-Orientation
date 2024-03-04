@@ -8,6 +8,7 @@ import statsmodels.formula.api as smf
 
 from src.anl_utils import load_data, get_session_data
 
+
 def is_significant(results, variable, cutoff=0.05):
     """
     Check if a variable is significant.
@@ -47,9 +48,13 @@ if __name__ == '__main__':
     family = sm.families.Binomial()
     covariance_structure = sm.cov_struct.Exchangeable()
 
-
     # fit full model
-    model = smf.gee("Correct ~ ContrastHeterogeneity + GridCoarseness + SessionID + SessionID*ContrastHeterogeneity + SessionID*GridCoarseness", "SubjectID", data, cov_struct=covariance_structure, family=family)
+    model = smf.gee(
+        "Correct ~ ContrastHeterogeneity + GridCoarseness + SessionID + SessionID*ContrastHeterogeneity + SessionID*GridCoarseness",
+        "SubjectID",
+        data,
+        cov_struct=covariance_structure,
+        family=family)
     results_full = model.fit()
 
     # save results of full model
@@ -59,14 +64,24 @@ if __name__ == '__main__':
         # simple effects of contrast heterogeneity for each session
         for session in range(1, 9):
             session_data = get_session_data(data, session)
-            model = smf.gee("Correct ~ ContrastHeterogeneity", "SubjectID", session_data, cov_struct=covariance_structure, family=family)
+            model = smf.gee("Correct ~ ContrastHeterogeneity",
+                            "SubjectID",
+                            session_data,
+                            cov_struct=covariance_structure,
+                            family=family)
             results = model.fit()
-            results.params.to_pickle(f'results/statistics/gee_contrast_heterogeneity_{session}.pkl')
+            results.params.to_pickle(
+                f'results/statistics/gee_contrast_heterogeneity_{session}.pkl')
 
     if is_significant(results_full, 'SessionID:GridCoarseness'):
         # simple effects of grid coarseness for each session
         for session in range(1, 9):
             session_data = get_session_data(data, session)
-            model = smf.gee("Correct ~ GridCoarseness", "SubjectID", session_data, cov_struct=covariance_structure, family=family)
+            model = smf.gee("Correct ~ GridCoarseness",
+                            "SubjectID",
+                            session_data,
+                            cov_struct=covariance_structure,
+                            family=family)
             results = model.fit()
-            results.params.to_pickle(f'results/statistics/gee_grid_coarseness_{session}.pkl')
+            results.params.to_pickle(
+                f'results/statistics/gee_grid_coarseness_{session}.pkl')

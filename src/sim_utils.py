@@ -25,6 +25,7 @@ def gaussian(X, Y, x, y, sigma):
     """
     return np.exp(-((X - x)**2 + (Y - y)**2) / (2 * sigma**2))
 
+
 def threshold_linear(x, slope, intercept, offset):
     """
     Threshold linear function.
@@ -46,6 +47,7 @@ def threshold_linear(x, slope, intercept, offset):
         The value of the function at the given input.
     """
     return np.maximum(slope * x + intercept, offset)
+
 
 def inverse_complex_log_transform(X, Y, k=15.0, a=0.7, b=80, alpha=0.9):
     """
@@ -77,6 +79,7 @@ def inverse_complex_log_transform(X, Y, k=15.0, a=0.7, b=80, alpha=0.9):
     Y = np.imag(W)
 
     return X, Y
+
 
 def pairwise_distance(X, Y):
     """
@@ -114,7 +117,8 @@ def get_num_blocks(desired, num_cores):
     int
         The number of blocks.
     """
-    bounds = np.array([np.floor(desired / num_cores), np.ceil(desired / num_cores)]) * num_cores
+    bounds = np.array(
+        [np.floor(desired / num_cores),
+         np.ceil(desired / num_cores)]) * num_cores
     index = np.argmin(np.abs(bounds - desired))
     return int(bounds[index])
-

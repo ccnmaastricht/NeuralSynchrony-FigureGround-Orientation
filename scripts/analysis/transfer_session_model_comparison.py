@@ -22,6 +22,7 @@ def load_configuration():
 
     return model_comparison_parameters
 
+
 def fit_model_and_calculate_likelihood(train_data, test_data):
     """
     Fit a logistic regression model to the training data and calculate the likelihood of the test data given the model.
@@ -38,21 +39,26 @@ def fit_model_and_calculate_likelihood(train_data, test_data):
     likelihood : float
         The likelihood of the test data given the model.
     """
-    model = smf.logit('Correct ~ GridCoarseness + ContrastHeterogeneity', train_data)
+    model = smf.logit('Correct ~ GridCoarseness + ContrastHeterogeneity',
+                      train_data)
     result = model.fit(disp=False)
 
     correct_answers = test_data['Correct'].values
     predicted_probabilities = result.predict(subject_test)
-    likelihood = np.prod(np.power(predicted_probabilities, correct_answers) * np.power(1 - predicted_probabilities, 1 - correct_answers))
+    likelihood = np.prod(
+        np.power(predicted_probabilities, correct_answers) *
+        np.power(1 - predicted_probabilities, 1 - correct_answers))
 
     return likelihood
+
 
 if __name__ == '__main__':
     # Load model comparison parameters
     model_comparison_parameters = load_configuration()
 
     transfer_session = model_comparison_parameters['transfer_session']
-    num_training_sessions = model_comparison_parameters['num_training_sessions']
+    num_training_sessions = model_comparison_parameters[
+        'num_training_sessions']
     num_predictors = model_comparison_parameters['num_predictors']
 
     # Load experimental data
@@ -63,8 +69,8 @@ if __name__ == '__main__':
     try:
         experimental_data = pd.read_csv(data_path)
     except FileNotFoundError:
-            print(f"Data file not found: {data_path}")
-            exit(1)
+        print(f"Data file not found: {data_path}")
+        exit(1)
 
     transfer_data = get_session_data(experimental_data, transfer_session)
 
@@ -73,7 +79,7 @@ if __name__ == '__main__':
     # loop through the sessions
     for session in range(num_training_sessions):
         # load the training data
-        train_data = get_session_data(experimental_data, session+1)
+        train_data = get_session_data(experimental_data, session + 1)
 
         # loop through the subjects
         for subject in train_data['SubjectID'].unique():
@@ -81,7 +87,8 @@ if __name__ == '__main__':
             subject_train = get_subject_data(train_data, subject)
             subject_test = get_subject_data(transfer_data, subject)
 
-            likelihoods[session] *= fit_model_and_calculate_likelihood(subject_train, subject_test)
+            likelihoods[session] *= fit_model_and_calculate_likelihood(
+                subject_train, subject_test)
 
     # calculate the Akaike Information Criterion (AIC)
     AIC = 2 * num_predictors - 2 * np.log(likelihoods)
@@ -96,4 +103,3 @@ if __name__ == '__main__':
     file = 'results/analysis/transfer_model_comparison.npz'
     os.makedirs(os.path.dirname(file), exist_ok=True)
     np.savez(file, AIC=AIC, delta_AIC=delta_AIC, weights=weights)
-

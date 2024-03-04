@@ -2,7 +2,17 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-def plot_arnold_tongue(arnold_tongue, figsize, labels, fontsizes, ticks, show = True, save = False, filename = None, dpi=300, fraction=0.0454):
+
+def plot_arnold_tongue(arnold_tongue,
+                       figsize,
+                       labels,
+                       fontsizes,
+                       ticks,
+                       show=True,
+                       save=False,
+                       filename=None,
+                       dpi=300,
+                       fraction=0.0454):
     """
     Plot the Arnold tongue.
 
@@ -37,7 +47,6 @@ def plot_arnold_tongue(arnold_tongue, figsize, labels, fontsizes, ticks, show = 
     sns.set_context('paper')
     sns.set_palette('muted')
 
-    
     title, xlabel, ylabel, cbar_label = labels
     title_fontsize, label_fontsize, tick_fontsize, cbar_labelsize = fontsizes
     xticks, yticks = ticks
@@ -59,9 +68,9 @@ def plot_arnold_tongue(arnold_tongue, figsize, labels, fontsizes, ticks, show = 
 
     plt.xticks(xtick_locations, xticks, fontsize=tick_fontsize)
     plt.yticks(ytick_locations, yticks, fontsize=tick_fontsize)
-    
+
     plt.tight_layout()
-    
+
     if save:
         plt.savefig(filename, dpi=dpi)
 

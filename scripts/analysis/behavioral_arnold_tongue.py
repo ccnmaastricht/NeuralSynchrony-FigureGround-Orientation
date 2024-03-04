@@ -9,6 +9,7 @@ from scipy.optimize import curve_fit
 
 from src.anl_utils import load_data, get_session_data, get_subject_data, psychometric_function
 
+
 def load_configuration():
     """
     Load parameters for the in silico experiment.
@@ -22,6 +23,7 @@ def load_configuration():
         experiment_parameters = tomllib.load(f)
 
     return experiment_parameters
+
 
 def get_unique_counts(data):
     """
@@ -46,7 +48,10 @@ def get_unique_counts(data):
     num_contrast_heterogeneity = data['ContrastHeterogeneity'].nunique()
     return num_subjects, num_grid_coarseness, num_contrast_heterogeneity
 
-def create_predictors(bounds_grid_coarseness, num_grid_coarseness, bounds_contrast_heterogeneity, num_contrast_heterogeneity):
+
+def create_predictors(bounds_grid_coarseness, num_grid_coarseness,
+                      bounds_contrast_heterogeneity,
+                      num_contrast_heterogeneity):
     """
     Create the predictors for the Arnold tongue.
 
@@ -66,21 +71,31 @@ def create_predictors(bounds_grid_coarseness, num_grid_coarseness, bounds_contra
     predictors : array_like
         The predictors for the Arnold tongue.
     """
-    grid_coarseness = np.linspace(bounds_grid_coarseness[0], bounds_grid_coarseness[1], num_grid_coarseness)
-    contrast_heterogeneity = np.linspace(bounds_contrast_heterogeneity[0], bounds_contrast_heterogeneity[1], num_contrast_heterogeneity)
-    contrast_heterogeneity, grid_coarseness = np.meshgrid(contrast_heterogeneity, grid_coarseness)
-    predictors = np.vstack((grid_coarseness.flatten(), contrast_heterogeneity.flatten()))
+    grid_coarseness = np.linspace(bounds_grid_coarseness[0],
+                                  bounds_grid_coarseness[1],
+                                  num_grid_coarseness)
+    contrast_heterogeneity = np.linspace(bounds_contrast_heterogeneity[0],
+                                         bounds_contrast_heterogeneity[1],
+                                         num_contrast_heterogeneity)
+    contrast_heterogeneity, grid_coarseness = np.meshgrid(
+        contrast_heterogeneity, grid_coarseness)
+    predictors = np.vstack(
+        (grid_coarseness.flatten(), contrast_heterogeneity.flatten()))
     predictors = np.vstack((predictors, np.ones(len(predictors[0]))))
 
     return predictors
 
-BASE_PATH = 'results/analysis/'      
+
+BASE_PATH = 'results/analysis/'
 
 if __name__ == '__main__':
     # Load experiment parameters
     experiment_parameters = load_configuration()
-    bounds_grid_coarseness = (experiment_parameters['min_grid_coarseness'], experiment_parameters['max_grid_coarseness'])
-    bounds_contrast_heterogeneity = (experiment_parameters['min_contrast_heterogeneity'], experiment_parameters['max_contrast_heterogeneity'])
+    bounds_grid_coarseness = (experiment_parameters['min_grid_coarseness'],
+                              experiment_parameters['max_grid_coarseness'])
+    bounds_contrast_heterogeneity = (
+        experiment_parameters['min_contrast_heterogeneity'],
+        experiment_parameters['max_contrast_heterogeneity'])
 
     # Load data
     data_path = 'data/main.csv'
@@ -96,10 +111,12 @@ if __name__ == '__main__':
         session_data = get_session_data(data, session)
 
         # Get unique counts
-        num_subjects, num_grid_coarseness, num_contrast_heterogeneity = get_unique_counts(session_data)
+        num_subjects, num_grid_coarseness, num_contrast_heterogeneity = get_unique_counts(
+            session_data)
 
         # Initialize array for individual Arnold tongues
-        individual_arnold_tongues = np.zeros((num_subjects, num_grid_coarseness, num_contrast_heterogeneity))
+        individual_arnold_tongues = np.zeros(
+            (num_subjects, num_grid_coarseness, num_contrast_heterogeneity))
         conditions = session_data['Condition'].unique()
 
         # Loop over subjects and conditions to fill individual Arnold tongues
@@ -107,27 +124,37 @@ if __name__ == '__main__':
             subject_data = get_subject_data(session_data, subject + 1)
             accuracy = np.zeros(len(conditions))
             for condition in conditions:
-                condition_data = subject_data[subject_data['Condition'] == condition]
+                condition_data = subject_data[subject_data['Condition'] ==
+                                              condition]
                 accuracy[condition - 1] = condition_data['Correct'].mean()
 
-            individual_arnold_tongues[subject] = accuracy.reshape((num_grid_coarseness, num_contrast_heterogeneity))
+            individual_arnold_tongues[subject] = accuracy.reshape(
+                (num_grid_coarseness, num_contrast_heterogeneity))
 
         # Compute average Arnold tongue
         average_arnold_tongue = individual_arnold_tongues.mean(axis=0)
 
         # Get bounds and create predictors
-        predictors = create_predictors(bounds_grid_coarseness, num_grid_coarseness,
-                                    bounds_contrast_heterogeneity, num_contrast_heterogeneity)
+        predictors = create_predictors(bounds_grid_coarseness,
+                                       num_grid_coarseness,
+                                       bounds_contrast_heterogeneity,
+                                       num_contrast_heterogeneity)
 
         # Initial guesses for parameters
         initial_params = [0.0, 0.0, 0.0]
 
         # Fit psychometric function to data
-        popt, _ = curve_fit(psychometric_function, predictors, average_arnold_tongue.flatten(), p0=initial_params)
+        popt, _ = curve_fit(psychometric_function,
+                            predictors,
+                            average_arnold_tongue.flatten(),
+                            p0=initial_params)
 
         # Create predictors for continuous Arnold tongue
-        predictors = create_predictors(bounds_grid_coarseness, experiment_parameters['num_grid_coarseness'],
-                                    bounds_contrast_heterogeneity, experiment_parameters['num_contrast_heterogeneity'])
+        predictors = create_predictors(
+            bounds_grid_coarseness,
+            experiment_parameters['num_grid_coarseness'],
+            bounds_contrast_heterogeneity,
+            experiment_parameters['num_contrast_heterogeneity'])
 
         # Compute continuous Arnold tongue
         size = (experiment_parameters['num_grid_coarseness'],
@@ -139,7 +166,7 @@ if __name__ == '__main__':
         # Save results
         directory = f'{BASE_PATH}session_{session}/'
         os.makedirs(directory, exist_ok=True)
-        
+
         results_to_save = {
             'optimal_psychometric_parameters': popt,
             'average_bat': average_arnold_tongue,

@@ -241,7 +241,7 @@ if __name__ == '__main__':
     num_blocks = get_num_blocks(experiment_parameters['num_blocks'], num_cores)
     num_batches = num_blocks // num_cores
 
-    # Create a tuple of counts_tuple
+    # Create a tuple of counts (number of blocks, conditions, and entries)
     counts_tuple = (num_blocks, num_conditions, num_entries)
 
     contrast_heterogeneity = np.linspace(

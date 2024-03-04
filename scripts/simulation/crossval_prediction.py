@@ -21,7 +21,7 @@ from scipy.optimize import curve_fit
 from src.v1_model import V1Model
 from src.stimulus_generator import StimulusGenerator
 from src.sim_utils import get_num_blocks
-from src.anl_utils import order_parameter, weighted_jaccard, compute_size, compute_coherence, compute_weighted_coherence
+from src.anl_utils import order_parameter, weighted_jaccard, compute_size, compute_coherence, compute_weighted_coherence, expand_matrix
 
 from multiprocessing import Pool, Array, cpu_count
 
@@ -154,6 +154,8 @@ def run_learning(fold, learning_rate, num_sessions, counts_tuple):
     jaccard_fits = np.zeros(num_sessions)
     arnold_tongue_size = np.zeros(num_sessions)
 
+    diagonal = np.ones(model.num_populations)
+
     for session in range(num_sessions):
         file = os.path.join(BASE_PATH, f'session_{session + 1}',
                             'individual_bats.npy')
@@ -163,6 +165,7 @@ def run_learning(fold, learning_rate, num_sessions, counts_tuple):
         measurements = (arnold_tongue, coherence)
         weighted_coherence = compute_weighted_coherence(
             counts_tuple, measurements, optimal_psychometric_fold)
+        weighted_coherence = expand_matrix(weighted_coherence, diagonal)
         model.update_coupling(weighted_coherence)
 
         simulated_arnold_tongue = arnold_tongue.mean(axis=0)

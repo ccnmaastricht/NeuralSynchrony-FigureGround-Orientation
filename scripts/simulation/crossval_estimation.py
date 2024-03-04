@@ -185,23 +185,31 @@ def coarse_to_fine(weighted_coherence, crossval_parameters, counts_tuple,
 
     global model
 
+    # Expand the weighted coherence matrix
     diagonal = np.ones(model.num_populations)
     weighted_coherence = expand_matrix(weighted_coherence, diagonal)
 
+    # Set up the grid search (initialize the effective learning rates)
     effective_learning_rates = np.linspace(
         crossval_parameters['effective_learning_rate_min'],
         crossval_parameters['effective_learning_rate_max'],
         crossval_parameters['num_effective_learning_rate'])
 
+    # Coarse-to-fine grid search
     for _ in range(crossval_parameters['num_grids']):
+        # Run a grid of simulations
         weighted_jaccard_fits = simulation_grid(
             counts_tuple, effective_learning_rates,
             crossval_parameters['num_effective_learning_rate'],
             weighted_coherence, behavioral_arnold_tongue)
+
+        # Find the best learning rate
         lower_bound = np.argmax(weighted_jaccard_fits)
         upper_bound = lower_bound + 2
         best_index = lower_bound + 1
         best_learning_rate = effective_learning_rates[best_index]
+
+        # Update the grid
         effective_learning_rates = np.linspace(
             lower_bound, upper_bound,
             crossval_parameters['num_effective_learning_rate'])
@@ -210,7 +218,6 @@ def coarse_to_fine(weighted_coherence, crossval_parameters, counts_tuple,
 
 
 if __name__ == '__main__':
-
     # Load the model, stimulus, simulation, and experiment parameters
     model_parameters, stimulus_parameters, simulation_parameters, crossval_parameters, experiment_parameters = load_configurations(
     )

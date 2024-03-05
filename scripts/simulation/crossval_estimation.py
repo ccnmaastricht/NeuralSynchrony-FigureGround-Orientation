@@ -57,6 +57,9 @@ def run_block(block):
     -------
     None
     """
+
+    # TO DO: COPY AND ADJUST FUNCTION FROM HIGH_RESOLUTION_SIMULATIONS.PY
+
     global arnold_tongue, coherence
     global num_conditions, num_entries
     global sync_index, timepoints
@@ -98,9 +101,7 @@ def run_simulation(counts_tuple):
         The coherence.
     """
 
-    # THE TUPLE DOES NOT INCLUDE THE NUMBER OF CORES AND BATCHES!
-    # USING THE TUPLE IS MAYBE NOT THE BEST WAY TO PASS THE ARGUMENTS TO THE FUNCTION.
-    # IT WOULD BE BETTER TO PASS THE ARGUMENTS DIRECTLY TO THE FUNCTION.
+    # TO DO: COPY AND ADJUST FUNCTION FROM HIGH_RESOLUTION_SIMULATIONS.PY
 
     global arnold_tongue, coherence
 
@@ -151,6 +152,9 @@ def simulation_grid(counts_tuple, effective_learning_rates,
     array_like
         The weighted Jaccard fits.
     """
+
+    # TO DO: REMOVE GLOBAL VARIABLES AND MOVE TO SIM_UTILS.PY
+
     global model
 
     weighted_jaccard_fits = np.zeros(num_effective_learning_rate - 2)
@@ -187,6 +191,8 @@ def coarse_to_fine(weighted_coherence, crossval_parameters, counts_tuple,
     float
         The effective learning rate.
     """
+
+    # TO DO: REMOVE GLOBAL VARIABLES AND MOVE TO SIM_UTILS.PY
 
     global model
 

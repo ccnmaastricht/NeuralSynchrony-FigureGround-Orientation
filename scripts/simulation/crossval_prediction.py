@@ -68,6 +68,9 @@ def run_block(block):
     -------
     None
     """
+
+    # TO DO: COPY AND ADJUST FUNCTION FROM HIGH_RESOLUTION_SIMULATIONS.PY
+
     global arnold_tongue, coherence
     global num_conditions, num_entries
     global sync_index, timepoints
@@ -109,9 +112,7 @@ def run_simulation(counts_tuple):
         The coherence.
     """
 
-    # THE TUPLE DOES NOT INCLUDE THE NUMBER OF CORES AND BATCHES!
-    # USING THE TUPLE IS MAYBE NOT THE BEST WAY TO PASS THE ARGUMENTS TO THE FUNCTION.
-    # IT WOULD BE BETTER TO PASS THE ARGUMENTS DIRECTLY TO THE FUNCTION.
+    # TO DO: COPY AND ADJUST FUNCTION FROM HIGH_RESOLUTION_SIMULATIONS.PY
 
     global arnold_tongue, coherence
 
@@ -167,6 +168,8 @@ def run_learning(fold, learning_rate, num_sessions, counts_tuple,
     arnold_tongue_size : array_like
         The Arnold tongue size.
     """
+    # TO DO: REMOVE GLOBAL VARIABLES AND MOVE TO SIM_UTILS.PY
+
     global model
 
     # Unpack the measurements

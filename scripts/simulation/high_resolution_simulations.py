@@ -12,7 +12,7 @@ from src.stimulus_generator import StimulusGenerator
 from src.sim_utils import get_num_blocks
 from src.anl_utils import order_parameter
 
-from multiprocessing import Pool, Array, cpu_count
+from multiprocessing import Pool, cpu_count, Array, Manager
 
 
 def load_configurations():
@@ -44,7 +44,8 @@ def load_configurations():
         'simulation'], parameters['experiment_extended']
 
 
-def run_block(block):
+def run_block(block, experiment_parameters, simulation_parameters,
+              stimulus_conditions, simulation_classes, indexing):
     """
     Run a block of the Arnold tongue. This function is used for parallel processing.
 
@@ -52,15 +53,22 @@ def run_block(block):
     ----------
     block : int
         The block number.
-
-    Returns
-    -------
-    None
+    experiment_parameters : dict
+        The experiment parameters.
+    simulation_parameters : dict
+        The simulation parameters.
+    stimulus_conditions : tuple
+        The stimulus conditions.
+    simulation_classes : tuple
+        The simulation classes.
+    indexing : tuple
+        The indexing for synchronization.
     """
-    global arnold_tongue, num_conditions, sync_index
-    global grid_coarseness, contrast_heterogeneity
-    global experiment_parameters, simulation_parameters
-    global model, stimulus_generator
+    global arnold_tongue
+
+    grid_coarseness, contrast_heterogeneity = stimulus_conditions
+    model, stimulus_generator = simulation_classes
+    sync_index, _ = indexing
 
     np.random.seed(simulation_parameters['random_seed'] + block)
 
@@ -72,43 +80,57 @@ def run_block(block):
         model.compute_omega(stimulus.flatten())
         state_variables, _ = model.simulate(simulation_parameters)
         synchronization = np.abs(order_parameter(state_variables))
-        index = block * num_conditions + condition
+        index = block * experiment_parameters['num_conditions'] + condition
         arnold_tongue[index] = np.mean(synchronization[sync_index])
 
 
-def run_simulation(num_blocks, num_conditions, num_cores, num_batches):
+def run_simulation(experiment_parameters, simulation_parameters,
+                   stimulus_conditions, simulation_classes, indexing):
     """
     Run the simulation.
 
     Parameters
     ----------
-    num_blocks : int
-        The number of blocks.
-    num_conditions : int
-        The number of conditions.
-    num_cores : int
-        The number of cores.
-    num_batches : int
-        The number of batches.
-
+    experiment_parameters : dict
+        The experiment parameters.
+    simulation_parameters : dict
+        The simulation parameters.
+    stimulus_conditions : tuple
+        The stimulus conditions.
+    simulation_classes : tuple
+        The simulation classes.
+    indexing : tuple
+        The indexing for synchronization.
+        
     Returns
     -------
     arnold_tongue : array_like
         The Arnold tongue.
     """
+
     global arnold_tongue
 
     # Initialize the Arnold tongue
-    arnold_tongue = np.zeros((num_blocks, num_conditions))
+    arnold_tongue = np.zeros((experiment_parameters['num_blocks'],
+                              experiment_parameters['num_conditions']))
     arnold_tongue = Array('d', arnold_tongue.reshape(-1))
 
     # Run a batch of blocks in parallel
-    for batch in range(num_batches):
-        with Pool(num_blocks) as p:
-            p.map(run_block, range(batch * num_cores, (batch + 1) * num_cores))
+    for batch in range(simulation_parameters['num_batches']):
+        with Pool(experiment_parameters['num_blocks']) as p:
+            p.starmap(
+                run_block,
+                [(block, experiment_parameters, simulation_parameters,
+                  stimulus_conditions, simulation_classes, indexing)
+                 for block in range(batch * simulation_parameters['num_cores'],
+                                    (batch + 1) *
+                                    simulation_parameters['num_cores'])])
 
     # Collect simulation results
-    arnold_tongue = np.array(arnold_tongue).reshape(num_blocks, num_conditions)
+    arnold_tongue = np.array(arnold_tongue).reshape(
+        experiment_parameters['num_blocks'],
+        experiment_parameters['num_grid_coarseness'],
+        experiment_parameters['num_contrast_heterogeneity'])
 
     return arnold_tongue
 
@@ -120,30 +142,33 @@ if __name__ == '__main__':
     )
 
     # Load learning rates
-    crossval_results = np.load('results/simulation/crossval_estimation.npz')
-    learning_rates = crossval_results['learning_rate_crossval']
+    #crossval_results = np.load('results/simulation/crossval_estimation.npz')
+    #learning_rates = crossval_results['learning_rate_crossval']
 
     # Initialize the model and stimulus generator
     model = V1Model(model_parameters, stimulus_parameters)
     stimulus_generator = StimulusGenerator(stimulus_parameters)
+
+    simulation_classes = (model, stimulus_generator)
 
     # Set up the simulation and parallel processing
     simulation_parameters['num_time_steps'] = int(
         simulation_parameters['simulation_time'] /
         simulation_parameters['time_step'])
 
-    num_available_cores = cpu_count()
-    num_cores = simulation_parameters['num_cores']
-    if num_cores > num_available_cores:
-        num_cores = num_available_cores
+    num_cores = min(cpu_count(), simulation_parameters['num_cores'])
 
-    # Set up the experiment
-    num_conditions = experiment_parameters[
-        'num_contrast_heterogeneity'] * experiment_parameters[
-            'num_grid_coarseness']
+    # Set up parallel processing
     num_blocks = get_num_blocks(experiment_parameters['num_blocks'], num_cores)
     num_batches = num_blocks // num_cores
 
+    experiment_parameters.update({'num_blocks': num_blocks})
+    simulation_parameters.update({
+        'num_cores': num_cores,
+        'num_batches': num_batches
+    })
+
+    # Set up the stimulus conditions
     contrast_heterogeneity = np.linspace(
         experiment_parameters['min_contrast_heterogeneity'],
         experiment_parameters['max_contrast_heterogeneity'],
@@ -157,24 +182,19 @@ if __name__ == '__main__':
     grid_coarseness = np.repeat(
         grid_coarseness, experiment_parameters['num_contrast_heterogeneity'])
 
-    # Initialize the Arnold tongue
-    arnold_tongue = np.zeros((num_blocks, num_conditions))
-    arnold_tongue = Array('d', arnold_tongue.reshape(-1))
+    stimulus_conditions = (grid_coarseness, contrast_heterogeneity)
 
+    # Set indexing for synchronization
     sync_index = slice(simulation_parameters['num_time_steps'] // 2, None)
+    indexing = (sync_index, None)
 
-    # Run a batch of blocks in parallel
-    for batch in range(num_batches):
-        with Pool(num_blocks) as p:
-            p.map(run_block, range(batch * num_cores, (batch + 1) * num_cores))
+    # Run the simulation
 
-    # Retrieve the results
-    arnold_tongue = np.array(arnold_tongue).reshape(num_blocks, num_conditions)
-    arnold_tongue = arnold_tongue.reshape(
-        num_blocks, experiment_parameters['num_grid_coarseness'],
-        experiment_parameters['num_contrast_heterogeneity'])
+    arnold_tongue = run_simulation(experiment_parameters,
+                                   simulation_parameters, stimulus_conditions,
+                                   simulation_classes, indexing)
 
     # Save the results
-    file = 'results/simulation/baseline_arnold_tongue.npy'
+    file = 'results/simulation/baseline_arnold_tongue_test.npy'
     os.makedirs(os.path.dirname(file), exist_ok=True)
     np.save(file, arnold_tongue)

@@ -7,8 +7,8 @@ import time
 import tomllib
 import numpy as np
 
-from src.sim_utils import initialize_simulation_classes, setup_parallel_processing, generate_stimulus_conditions, generate_time_index
-from src.anl_utils import order_parameter
+from src.sim_utils import initialize_simulation_classes, setup_parallel_processing, generate_stimulus_conditions, generate_condition_space, generate_time_index
+from src.anl_utils import order_parameter, compute_coherence
 
 from multiprocessing import Pool, Array
 
@@ -42,7 +42,7 @@ def load_configurations():
         'simulation'], parameters['experiment_extended']
 
 
-def run_block(block, experiment_parameters, simulation_parameters,
+def run_block(block, experiment_parameters, simulation_parameters, num_entries,
               stimulus_conditions, simulation_classes, indexing):
     """
     Run a block of the Arnold tongue. This function is used for parallel processing.
@@ -62,11 +62,11 @@ def run_block(block, experiment_parameters, simulation_parameters,
     indexing : tuple
         The indexing for synchronization.
     """
-    global arnold_tongue
+    global arnold_tongue, coherence
 
     grid_coarseness, contrast_heterogeneity = stimulus_conditions
     model, stimulus_generator = simulation_classes
-    sync_index, _ = indexing
+    sync_index, timepoints = indexing
 
     np.random.seed(simulation_parameters['random_seed'] + block)
 
@@ -80,9 +80,17 @@ def run_block(block, experiment_parameters, simulation_parameters,
         synchronization = np.abs(order_parameter(state_variables))
         index = block * experiment_parameters['num_conditions'] + condition
         arnold_tongue[index] = np.mean(synchronization[sync_index])
+        lower_index = index * num_entries
+        upper_index = lower_index + num_entries
+        coherence_placeholder = [
+            compute_coherence(state_variables[timepoint])
+            for timepoint in timepoints
+        ]
+        coherence[lower_index:upper_index] = np.mean(coherence_placeholder,
+                                                     axis=0)
 
 
-def run_simulation(experiment_parameters, simulation_parameters,
+def run_simulation(experiment_parameters, simulation_parameters, num_entries,
                    stimulus_conditions, simulation_classes, indexing):
     """
     Run the simulation.
@@ -106,12 +114,18 @@ def run_simulation(experiment_parameters, simulation_parameters,
         The Arnold tongue.
     """
 
-    global arnold_tongue
+    global arnold_tongue, coherence
 
     # Initialize the Arnold tongue
     arnold_tongue = np.zeros((experiment_parameters['num_blocks'],
                               experiment_parameters['num_conditions']))
     arnold_tongue = Array('d', arnold_tongue.reshape(-1))
+
+    # Initialize the coherence
+    coherence = np.zeros(
+        (experiment_parameters['num_blocks'],
+         experiment_parameters['num_conditions'], num_entries))
+    coherence = Array('d', coherence.reshape(-1))
 
     # Run a batch of blocks in parallel
     for batch in range(simulation_parameters['num_batches']):
@@ -119,7 +133,8 @@ def run_simulation(experiment_parameters, simulation_parameters,
             p.starmap(
                 run_block,
                 [(block, experiment_parameters, simulation_parameters,
-                  stimulus_conditions, simulation_classes, indexing)
+                  num_entries, stimulus_conditions, simulation_classes,
+                  indexing)
                  for block in range(batch * simulation_parameters['num_cores'],
                                     (batch + 1) *
                                     simulation_parameters['num_cores'])])
@@ -127,10 +142,13 @@ def run_simulation(experiment_parameters, simulation_parameters,
     # Collect simulation results
     arnold_tongue = np.array(arnold_tongue).reshape(
         experiment_parameters['num_blocks'],
-        experiment_parameters['num_grid_coarseness'],
-        experiment_parameters['num_contrast_heterogeneity'])
+        experiment_parameters['num_conditions'])
 
-    return arnold_tongue
+    coherence = np.array(coherence).reshape(
+        experiment_parameters['num_blocks'],
+        experiment_parameters['num_conditions'], num_entries)
+
+    return arnold_tongue, coherence
 
 
 if __name__ == '__main__':

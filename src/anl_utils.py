@@ -251,7 +251,8 @@ def min_max_normalize(X):
     return (X - np.min(X)) / (np.max(X) - np.min(X))
 
 
-def compute_weighted_coherence(counts_tuple, measurements,
+def compute_weighted_coherence(num_conditions, num_blocks, num_entries,
+                               arnold_tongue, coherence,
                                optimal_psychometric_parameters):
     """
     Compute the weighted coherence.  
@@ -270,9 +271,6 @@ def compute_weighted_coherence(counts_tuple, measurements,
     array_like
         The weighted coherence.
     """
-
-    num_blocks, num_conditions, num_entries = counts_tuple
-    arnold_tongue, coherence = measurements
 
     predictors = np.ones((2, num_conditions))
     weighted_coherence = np.zeros(num_entries)

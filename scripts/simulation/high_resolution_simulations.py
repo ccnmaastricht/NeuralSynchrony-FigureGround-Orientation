@@ -3,12 +3,11 @@ This script simulates the first session of the experiment and generate an Arnold
 Results are saved in results/arnold_tongue.npy and correspond to section X of the paper.
 """
 import os
-import time
 import tomllib
 import numpy as np
 
-from src.sim_utils import initialize_simulation_classes, setup_parallel_processing, generate_stimulus_conditions, generate_condition_space, generate_time_index
-from src.anl_utils import order_parameter, compute_coherence, compute_weighted_coherence, expand_matrix, compute_size
+from src.sim_utils import initialize_simulation_classes, setup_parallel_processing, generate_stimulus_conditions, generate_time_index
+from src.anl_utils import order_parameter, compute_coherence, compute_weighted_coherence, expand_matrix
 
 from multiprocessing import Pool, Array
 
@@ -153,7 +152,7 @@ def run_simulation(experiment_parameters, simulation_parameters, num_entries,
 
 def run_learning(learning_rate, optimal_psychometric, experiment_parameters,
                  simulation_parameters, num_entries, stimulus_conditions,
-                 condition_space, simulation_classes, indexing):
+                 simulation_classes, indexing):
     """
     Run the learning simulation.
 
@@ -171,8 +170,6 @@ def run_learning(learning_rate, optimal_psychometric, experiment_parameters,
         The number of entries.
     stimulus_conditions : tuple
         The stimulus conditions.
-    condition_space : tuple
-        The condition space.
     simulation_classes : tuple
         The simulation classes.
     indexing : tuple
@@ -259,9 +256,6 @@ if __name__ == '__main__':
     # Set up the stimulus conditions
     stimulus_conditions = generate_stimulus_conditions(experiment_parameters)
 
-    # Set up the condition space
-    condition_space = generate_condition_space(experiment_parameters)
-
     # Set up the synchronization index and timepoint
     indexing = generate_time_index(simulation_parameters)
 
@@ -269,8 +263,7 @@ if __name__ == '__main__':
     arnold_tongues = run_learning(learning_rate, optimal_psychometric,
                                   experiment_parameters, simulation_parameters,
                                   num_entries, stimulus_conditions,
-                                  condition_space, simulation_classes,
-                                  indexing)
+                                  simulation_classes, indexing)
 
     # Save the results
     file = 'results/simulation/highres_arnold_tongues.npy'

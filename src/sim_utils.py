@@ -141,6 +141,30 @@ def generate_condition_space(experiment_parameters):
     return grid_coarseness, contrast_heterogeneity
 
 
+def generate_exploration_space(exploration_parameters):
+    """
+    Generate the exploration space based on the experiment parameters.
+
+    Parameters
+    ----------
+    exploration_parameters : dict
+        The parameters for the parameter space exploration.
+        
+    Returns
+    -------
+    tuple
+        A tuple containing the decay rates and maximum couplings.
+    """
+    decay_rates = np.linspace(exploration_parameters['decay_rate_min'],
+                              exploration_parameters['decay_rate_max'],
+                              exploration_parameters['num_decay'])
+    max_couplings = np.linspace(exploration_parameters['max_coupling_min'],
+                                exploration_parameters['max_coupling_max'],
+                                exploration_parameters['num_max_coupling'])
+
+    return decay_rates, max_couplings
+
+
 def generate_time_index(simulation_parameters):
     """
     Generate indices for synchronization and timepoints based on the simulation parameters.

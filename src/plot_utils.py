@@ -3,18 +3,19 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 
-def plot_arnold_tongue(arnold_tongue,
-                       figsize,
-                       labels,
-                       fontsizes,
-                       ticks,
-                       show=True,
-                       save=False,
-                       filename=None,
-                       dpi=300,
-                       fraction=0.0454):
+def colored_heatmap(data,
+                    figsize,
+                    labels,
+                    fontsizes,
+                    ticks,
+                    bounds,
+                    colormap='magma',
+                    filename=None,
+                    dpi=300,
+                    filetype='svg',
+                    fraction=0.0454):
     """
-    Plot the Arnold tongue.
+    Create a heatmap.
 
     Parameters
     ----------
@@ -28,6 +29,10 @@ def plot_arnold_tongue(arnold_tongue,
         The title, label, and tick font sizes.
     ticks : tuple
         The ticks for the x and y axes.
+    bounds : tuple
+        The lower and upper bounds for the colormap.
+    colormap : str, optional
+        The colormap for the plot. The default is 'magma'.
     show : bool, optional
         Whether to show the plot. The default is True.
     save : bool, optional
@@ -36,13 +41,19 @@ def plot_arnold_tongue(arnold_tongue,
         The filename to save the plot. The default is None.
     dpi : int, optional
         The resolution of the plot. The default is 300.
+    filetype : str, optional
+        The file type for the plot. The default is 'svg'.
+    fraction : float, optional
+        The fraction of the original axes to use for the colorbar. The default
+        is 0.0454.
 
     Returns
     -------
     None
     """
 
-    figure = plt.figure(figsize=figsize, dpi=dpi)
+    figure = plt.figure(figsize=figsize,
+                        dpi=dpi if filetype != 'svg' else None)
     sns.set_style('white')
     sns.set_context('paper')
     sns.set_palette('muted')
@@ -51,28 +62,31 @@ def plot_arnold_tongue(arnold_tongue,
     title_fontsize, label_fontsize, tick_fontsize, cbar_labelsize = fontsizes
     xticks, yticks = ticks
 
-    im = plt.imshow(arnold_tongue, cmap='jet', vmin=0, vmax=1)
+    im = plt.imshow(data, cmap=colormap, vmin=bounds[0], vmax=bounds[1])
 
     plt.title(title, fontsize=title_fontsize)
     plt.xlabel(xlabel, fontsize=label_fontsize)
     plt.ylabel(ylabel, fontsize=label_fontsize)
 
-    cbar = plt.colorbar(im, fraction=fraction)
-    cbar.ax.tick_params(labelsize=tick_fontsize)
-    cbar.ax.set_ylabel(cbar_label, rotation=90, fontsize=cbar_labelsize)
+    if cbar_label is not None:
+        cbar = plt.colorbar(im, fraction=fraction)
+        cbar.ax.tick_params(labelsize=tick_fontsize)
+
+        cbar.ax.set_ylabel(cbar_label, rotation=90, fontsize=cbar_labelsize)
 
     num_ticks = len(xticks)
-    xtick_locations = np.linspace(0, arnold_tongue.shape[1] - 1, num_ticks)
+    xtick_locations = np.linspace(0, data.shape[1] - 1, num_ticks)
     num_ticks = len(yticks)
-    ytick_locations = np.linspace(0, arnold_tongue.shape[0] - 1, num_ticks)
+    ytick_locations = np.linspace(0, data.shape[0] - 1, num_ticks)
 
     plt.xticks(xtick_locations, xticks, fontsize=tick_fontsize)
     plt.yticks(ytick_locations, yticks, fontsize=tick_fontsize)
 
     plt.tight_layout()
 
-    if save:
-        plt.savefig(filename, dpi=dpi)
+    if filename is not None:
+        filename = f'{filename}.{filetype}'
+        plt.savefig(filename, dpi=dpi if filetype != 'svg' else None)
 
-    if show:
+    else:
         plt.show()

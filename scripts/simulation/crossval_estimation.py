@@ -192,8 +192,6 @@ def simulation_grid(num_effective_learning_rate, effective_learning_rates,
         model.generate_coupling()
         model.update_coupling(weighted_coherence)
 
-        print('bumm tschakalaka')
-
         simulation_classes = (model, stimulus_generator)
 
         arnold_tongue, _ = run_simulation(experiment_parameters,
@@ -254,7 +252,6 @@ def coarse_to_fine(crossval_parameters, weighted_coherence,
     # Coarse-to-fine grid search
     for _ in range(crossval_parameters['num_grids']):
         # Run a grid of simulations
-        print('Moin!')
         weighted_jaccard_fits = simulation_grid(
             crossval_parameters['num_effective_learning_rate'],
             effective_learning_rates, experiment_parameters,

@@ -17,7 +17,7 @@ import os
 import tomllib
 import numpy as np
 
-from src.sim_utils import initialize_simulation_classes, setup_parallel_processing, generate_stimulus_conditions, generate_time_index
+from src.sim_utils import initialize_simulation_classes, setup_parallel_processing, generate_stimulus_conditions, generate_condition_space, generate_time_index
 from src.anl_utils import order_parameter, weighted_jaccard, compute_size, compute_coherence, compute_weighted_coherence, expand_matrix, min_max_normalize
 
 from multiprocessing import Pool, Array
@@ -50,31 +50,6 @@ def load_configurations():
 
     return parameters['model'], parameters['stimulus'], parameters[
         'simulation'], parameters['crossvalidation'], parameters['experiment']
-
-
-def generate_condition_space(experiment_parameters):
-    """
-    Generate the condition space based on the experiment parameters.
-
-    Parameters
-    ----------
-    experiment_parameters : dict
-        The parameters for the experiment.
-
-    Returns
-    -------
-    tuple
-        A tuple containing the grid coarseness and contrast heterogeneity arrays.
-    """
-    contrast_heterogeneity = np.linspace(
-        experiment_parameters['min_contrast_heterogeneity'],
-        experiment_parameters['max_contrast_heterogeneity'],
-        experiment_parameters['num_contrast_heterogeneity'])
-    grid_coarseness = np.linspace(experiment_parameters['min_grid_coarseness'],
-                                  experiment_parameters['max_grid_coarseness'],
-                                  experiment_parameters['num_grid_coarseness'])
-
-    return grid_coarseness, contrast_heterogeneity
 
 
 def run_block(block, experiment_parameters, simulation_parameters, num_entries,

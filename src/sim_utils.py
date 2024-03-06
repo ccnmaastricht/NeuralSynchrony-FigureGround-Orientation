@@ -116,6 +116,31 @@ def generate_stimulus_conditions(experiment_parameters):
     return grid_coarseness, contrast_heterogeneity
 
 
+def generate_condition_space(experiment_parameters):
+    """
+    Generate the condition space based on the experiment parameters.
+
+    Parameters
+    ----------
+    experiment_parameters : dict
+        The parameters for the experiment.
+
+    Returns
+    -------
+    tuple
+        A tuple containing the grid coarseness and contrast heterogeneity arrays.
+    """
+    contrast_heterogeneity = np.linspace(
+        experiment_parameters['min_contrast_heterogeneity'],
+        experiment_parameters['max_contrast_heterogeneity'],
+        experiment_parameters['num_contrast_heterogeneity'])
+    grid_coarseness = np.linspace(experiment_parameters['min_grid_coarseness'],
+                                  experiment_parameters['max_grid_coarseness'],
+                                  experiment_parameters['num_grid_coarseness'])
+
+    return grid_coarseness, contrast_heterogeneity
+
+
 def generate_time_index(simulation_parameters):
     """
     Generate indices for synchronization and timepoints based on the simulation parameters.

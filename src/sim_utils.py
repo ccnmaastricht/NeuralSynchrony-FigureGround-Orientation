@@ -1,104 +1,9 @@
 import numpy as np
 
+from multiprocessing import cpu_count
 
-def gaussian(X, Y, x, y, sigma):
-    """
-    Isotropic 2D Gaussian function.
-
-    Parameters
-    ----------
-    X : array_like
-        X coordinate space.
-    Y : array_like
-        Y coordinate space.
-    x : float
-        The x-coordinate of the Gaussian.
-    y : float
-        The y-coordinate of the Gaussian.
-    sigma : float
-        The standard deviation of the Gaussian.
-
-    Returns
-    ------- 
-    float
-        The value of the Gaussian at the given coordinates.
-    """
-    return np.exp(-((X - x)**2 + (Y - y)**2) / (2 * sigma**2))
-
-
-def threshold_linear(x, slope, intercept, offset):
-    """
-    Threshold linear function.
-
-    Parameters
-    ----------
-    x : float
-        The input value.
-    slope : float
-        The slope of the linear function.
-    intercept : float
-        The intercept of the linear function.
-    offset : float
-        The offset of the linear function.
-
-    Returns
-    ------- 
-    float
-        The value of the function at the given input.
-    """
-    return np.maximum(slope * x + intercept, offset)
-
-
-def inverse_complex_log_transform(X, Y, k=15.0, a=0.7, b=80, alpha=0.9):
-    """
-    Inverse of the complex-logarithm transformation described in Schwartz
-    (1980) - doi:10.1016/0042-6989(80)90090-5.
-
-    Parameters
-    ----------
-    X : array_like
-        X coordinate in visual field.
-    Y : array_like
-        Y coordinate in visual field.
-
-    Returns
-    ------- 
-    X : array_like
-        X coordinate in cortical space.
-    Y : array_like
-        Y coordinate in cortical space.
-    """
-
-    eccentricity = np.abs(X + Y * 1j)
-    polar_angle = np.angle(X + Y * 1j)
-
-    Z = eccentricity * np.exp(1j * alpha * polar_angle)
-    W = k * np.log((Z + a) / (Z + b)) - k * np.log(a / b)
-
-    X = np.real(W)
-    Y = np.imag(W)
-
-    return X, Y
-
-
-def pairwise_distance(X, Y):
-    """
-    Compute the pairwise distance between all pairs of points.
-
-    Parameters
-    ----------
-    X : array_like (1d array of all x-coordinates)
-        X coordinate space.
-    Y : array_like (1d array of all y-coordinates)
-        Y coordinate space.
-
-    Returns
-    ------- 
-    array_like
-        The pairwise distance between all pairs of points.
-    """
-
-    return np.sqrt((X[:, None] - X[None, :])**2 + (Y[:, None] - Y[None, :])**2)
+from src.v1_model import V1Model
+from src.stimulus_generator import StimulusGenerator
 
 
 def get_num_blocks(desired, num_cores):
@@ -122,3 +27,114 @@ def get_num_blocks(desired, num_cores):
          np.ceil(desired / num_cores)]) * num_cores
     index = np.argmin(np.abs(bounds - desired))
     return int(bounds[index])
+
+
+def initialize_simulation_classes(model_parameters, stimulus_parameters):
+    """
+    Initialize the model and stimulus generator.
+
+    Parameters
+    ----------
+    model_parameters : dict
+        The parameters for the V1Model.
+    stimulus_parameters : dict
+        The parameters for the StimulusGenerator.
+
+    Returns
+    -------
+    tuple
+        A tuple containing the initialized V1Model and StimulusGenerator.
+    """
+    model = V1Model(model_parameters, stimulus_parameters)
+    stimulus_generator = StimulusGenerator(stimulus_parameters)
+    simulation_classes = (model, stimulus_generator)
+
+    return simulation_classes
+
+
+def setup_parallel_processing(simulation_parameters, experiment_parameters):
+    """
+    Set up parameters for parallel processing.
+
+    Parameters
+    ----------
+    simulation_parameters : dict
+        The parameters for the simulation.
+    experiment_parameters : dict
+        The parameters for the experiment.
+
+    Returns
+    -------
+    tuple
+        A tuple containing the updated simulation and experiment parameters.
+    """
+    simulation_parameters['num_time_steps'] = int(
+        simulation_parameters['simulation_time'] /
+        simulation_parameters['time_step'])
+
+    num_cores = min(cpu_count(), simulation_parameters['num_cores'])
+
+    num_blocks = get_num_blocks(experiment_parameters['num_blocks'], num_cores)
+    num_batches = num_blocks // num_cores
+
+    experiment_parameters.update({'num_blocks': num_blocks})
+    simulation_parameters.update({
+        'num_cores': num_cores,
+        'num_batches': num_batches
+    })
+
+    return simulation_parameters, experiment_parameters
+
+
+def generate_stimulus_conditions(experiment_parameters):
+    """
+    Generate stimulus conditions based on the experiment parameters.
+
+    Parameters
+    ----------
+    experiment_parameters : dict
+        The parameters for the experiment.
+
+    Returns
+    -------
+    tuple
+        A tuple containing the grid coarseness and contrast heterogeneity arrays.
+    """
+    contrast_heterogeneity = np.linspace(
+        experiment_parameters['min_contrast_heterogeneity'],
+        experiment_parameters['max_contrast_heterogeneity'],
+        experiment_parameters['num_contrast_heterogeneity'])
+    grid_coarseness = np.linspace(experiment_parameters['min_grid_coarseness'],
+                                  experiment_parameters['max_grid_coarseness'],
+                                  experiment_parameters['num_grid_coarseness'])
+
+    contrast_heterogeneity = np.tile(
+        contrast_heterogeneity, experiment_parameters['num_grid_coarseness'])
+    grid_coarseness = np.repeat(
+        grid_coarseness, experiment_parameters['num_contrast_heterogeneity'])
+
+    return grid_coarseness, contrast_heterogeneity
+
+
+def generate_time_index(simulation_parameters):
+    """
+    Generate indices for synchronization and timepoints based on the simulation parameters.
+
+    Parameters
+    ----------
+    simulation_parameters : dict
+        The parameters for the simulation.
+
+    Returns
+    -------
+    tuple
+        A tuple containing the sync_index and timepoints.
+    """
+    start = simulation_parameters['num_time_steps'] // 2
+    sync_index = slice(start, None)
+
+    start = simulation_parameters['num_time_steps'] - simulation_parameters[
+        'num_timepoints']
+    timepoints = range(start, simulation_parameters['num_time_steps'])
+
+    return sync_index, timepoints

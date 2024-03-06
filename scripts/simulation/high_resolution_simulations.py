@@ -7,12 +7,10 @@ import time
 import tomllib
 import numpy as np
 
-from src.v1_model import V1Model
-from src.stimulus_generator import StimulusGenerator
-from src.sim_utils import get_num_blocks
+from src.sim_utils import initialize_simulation_classes, setup_parallel_processing, generate_stimulus_conditions, generate_time_index
 from src.anl_utils import order_parameter
 
-from multiprocessing import Pool, cpu_count, Array, Manager
+from multiprocessing import Pool, Array
 
 
 def load_configurations():
@@ -146,50 +144,20 @@ if __name__ == '__main__':
     #learning_rates = crossval_results['learning_rate_crossval']
 
     # Initialize the model and stimulus generator
-    model = V1Model(model_parameters, stimulus_parameters)
-    stimulus_generator = StimulusGenerator(stimulus_parameters)
-
-    simulation_classes = (model, stimulus_generator)
-
-    # Set up the simulation and parallel processing
-    simulation_parameters['num_time_steps'] = int(
-        simulation_parameters['simulation_time'] /
-        simulation_parameters['time_step'])
-
-    num_cores = min(cpu_count(), simulation_parameters['num_cores'])
+    simulation_classes = initialize_simulation_classes(model_parameters,
+                                                       stimulus_parameters)
 
     # Set up parallel processing
-    num_blocks = get_num_blocks(experiment_parameters['num_blocks'], num_cores)
-    num_batches = num_blocks // num_cores
-
-    experiment_parameters.update({'num_blocks': num_blocks})
-    simulation_parameters.update({
-        'num_cores': num_cores,
-        'num_batches': num_batches
-    })
+    simulation_parameters, experiment_parameters = setup_parallel_processing(
+        simulation_parameters, experiment_parameters)
 
     # Set up the stimulus conditions
-    contrast_heterogeneity = np.linspace(
-        experiment_parameters['min_contrast_heterogeneity'],
-        experiment_parameters['max_contrast_heterogeneity'],
-        experiment_parameters['num_contrast_heterogeneity'])
-    grid_coarseness = np.linspace(experiment_parameters['min_grid_coarseness'],
-                                  experiment_parameters['max_grid_coarseness'],
-                                  experiment_parameters['num_grid_coarseness'])
+    stimulus_conditions = generate_stimulus_conditions(experiment_parameters)
 
-    contrast_heterogeneity = np.tile(
-        contrast_heterogeneity, experiment_parameters['num_grid_coarseness'])
-    grid_coarseness = np.repeat(
-        grid_coarseness, experiment_parameters['num_contrast_heterogeneity'])
-
-    stimulus_conditions = (grid_coarseness, contrast_heterogeneity)
-
-    # Set indexing for synchronization
-    sync_index = slice(simulation_parameters['num_time_steps'] // 2, None)
-    indexing = (sync_index, None)
+    # Set up the synchronization index and timepoint
+    indexing = generate_time_index(simulation_parameters)
 
     # Run the simulation
-
     arnold_tongue = run_simulation(experiment_parameters,
                                    simulation_parameters, stimulus_conditions,
                                    simulation_classes, indexing)

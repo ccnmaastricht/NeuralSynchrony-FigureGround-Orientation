@@ -142,8 +142,7 @@ def run_simulation(experiment_parameters, simulation_parameters, num_entries,
     # Collect simulation results
     arnold_tongue = np.array(arnold_tongue).reshape(
         experiment_parameters['num_blocks'],
-        experiment_parameters['num_grid_coarseness'],
-        experiment_parameters['num_contrast_heterogeneity'])
+        experiment_parameters['num_conditions'])
 
     coherence = np.array(coherence).reshape(
         experiment_parameters['num_blocks'],
@@ -299,12 +298,10 @@ if __name__ == '__main__':
     indexing = generate_time_index(simulation_parameters)
 
     # Run simulation of session 1
-    print('Running simulation of session 1')
     arnold_tongue, coherence = run_simulation(experiment_parameters,
                                               simulation_parameters,
                                               num_entries, stimulus_conditions,
                                               simulation_classes, indexing)
-    print('Simulation of session 1 done')
 
     # load behavioral Arnold tongues of session 1
     session1_arnold_tongues = np.load(
@@ -334,6 +331,8 @@ if __name__ == '__main__':
         # Compute average behavioral Arnold tongue of session 1
         average_arnold_tongue = fold_arnold_tongues.mean(axis=0)
 
+        print(f'shape of average_arnold_tongue: {average_arnold_tongue.shape}')
+
         # Initial guesses for parameters
         initial_params = np.zeros(2)
 
@@ -343,6 +342,8 @@ if __name__ == '__main__':
                                             average_arnold_tongue.flatten(),
                                             p0=initial_params)
         optimal_psychometric_crossval[subject] = optimized_parameters
+
+        print(f'optimized_parameters: {optimized_parameters}')
 
         # Estimate weighted coherence from session 1 data
         weighted_coherence = compute_weighted_coherence(

@@ -55,7 +55,8 @@ def load_configurations():
         'simulation'], parameters['crossvalidation'], parameters['experiment']
 
 
-def run_block(block):
+def run_block(block, experiment_parameters, simulation_parameters, num_entries,
+              stimulus_conditions, simulation_classes, indexing):
     """
     Run a block of the Arnold tongue. This function is used for parallel processing.
 
@@ -63,20 +64,22 @@ def run_block(block):
     ----------
     block : int
         The block number.
-
-    Returns
-    -------
-    None
+    experiment_parameters : dict
+        The experiment parameters.
+    simulation_parameters : dict
+        The simulation parameters.
+    stimulus_conditions : tuple
+        The stimulus conditions.
+    simulation_classes : tuple
+        The simulation classes.
+    indexing : tuple
+        The indexing for synchronization.
     """
-
-    # TO DO: COPY AND ADJUST FUNCTION FROM HIGH_RESOLUTION_SIMULATIONS.PY
-
     global arnold_tongue, coherence
-    global num_conditions, num_entries
-    global sync_index, timepoints
-    global grid_coarseness, contrast_heterogeneity
-    global experiment_parameters, simulation_parameters
-    global model, stimulus_generator
+
+    grid_coarseness, contrast_heterogeneity = stimulus_conditions
+    model, stimulus_generator = simulation_classes
+    sync_index, timepoints = indexing
 
     np.random.seed(simulation_parameters['random_seed'] + block)
 
@@ -88,7 +91,7 @@ def run_block(block):
         model.compute_omega(stimulus.flatten())
         state_variables, _ = model.simulate(simulation_parameters)
         synchronization = np.abs(order_parameter(state_variables))
-        index = block * num_conditions + condition
+        index = block * experiment_parameters['num_conditions'] + condition
         arnold_tongue[index] = np.mean(synchronization[sync_index])
         lower_index = index * num_entries
         upper_index = lower_index + num_entries
@@ -100,41 +103,63 @@ def run_block(block):
                                                      axis=0)
 
 
-def run_simulation(counts_tuple):
+def run_simulation(experiment_parameters, simulation_parameters, num_entries,
+                   stimulus_conditions, simulation_classes, indexing):
     """
     Run the simulation.
 
+    Parameters
+    ----------
+    experiment_parameters : dict
+        The experiment parameters.
+    simulation_parameters : dict
+        The simulation parameters.
+    stimulus_conditions : tuple
+        The stimulus conditions.
+    simulation_classes : tuple
+        The simulation classes.
+    indexing : tuple
+        The indexing for synchronization.
+        
     Returns
     -------
     arnold_tongue : array_like
         The Arnold tongue.
-    coherence : array_like
-        The coherence.
     """
-
-    # TO DO: COPY AND ADJUST FUNCTION FROM HIGH_RESOLUTION_SIMULATIONS.PY
 
     global arnold_tongue, coherence
 
-    num_blocks, num_conditions, num_entries = counts_tuple
-
     # Initialize the Arnold tongue
-    arnold_tongue = np.zeros((num_blocks, num_conditions))
+    arnold_tongue = np.zeros((experiment_parameters['num_blocks'],
+                              experiment_parameters['num_conditions']))
     arnold_tongue = Array('d', arnold_tongue.reshape(-1))
 
     # Initialize the coherence
-    coherence = np.zeros((num_blocks, num_conditions, num_entries))
+    coherence = np.zeros(
+        (experiment_parameters['num_blocks'],
+         experiment_parameters['num_conditions'], num_entries))
     coherence = Array('d', coherence.reshape(-1))
 
     # Run a batch of blocks in parallel
-    for batch in range(num_batches):
-        with Pool(num_blocks) as p:
-            p.map(run_block, range(batch * num_cores, (batch + 1) * num_cores))
+    for batch in range(simulation_parameters['num_batches']):
+        with Pool(experiment_parameters['num_blocks']) as p:
+            p.starmap(
+                run_block,
+                [(block, experiment_parameters, simulation_parameters,
+                  num_entries, stimulus_conditions, simulation_classes,
+                  indexing)
+                 for block in range(batch * simulation_parameters['num_cores'],
+                                    (batch + 1) *
+                                    simulation_parameters['num_cores'])])
 
     # Collect simulation results
-    arnold_tongue = np.array(arnold_tongue).reshape(num_blocks, num_conditions)
-    coherence = np.array(coherence).reshape(num_blocks, num_conditions,
-                                            num_entries)
+    arnold_tongue = np.array(arnold_tongue).reshape(
+        experiment_parameters['num_blocks'],
+        experiment_parameters['num_conditions'])
+
+    coherence = np.array(coherence).reshape(
+        experiment_parameters['num_blocks'],
+        experiment_parameters['num_conditions'], num_entries)
 
     return arnold_tongue, coherence
 

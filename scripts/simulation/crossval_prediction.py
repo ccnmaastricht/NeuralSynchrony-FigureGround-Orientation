@@ -16,14 +16,11 @@ import os
 
 import tomllib
 import numpy as np
-from scipy.optimize import curve_fit
 
-from src.v1_model import V1Model
-from src.stimulus_generator import StimulusGenerator
-from src.sim_utils import get_num_blocks
+from src.sim_utils import initialize_simulation_classes, setup_parallel_processing, generate_stimulus_conditions, generate_time_index
 from src.anl_utils import order_parameter, weighted_jaccard, compute_size, compute_coherence, compute_weighted_coherence, expand_matrix, min_max_normalize
 
-from multiprocessing import Pool, Array, cpu_count
+from multiprocessing import Pool, Array
 
 
 def load_configurations():
@@ -53,6 +50,31 @@ def load_configurations():
 
     return parameters['model'], parameters['stimulus'], parameters[
         'simulation'], parameters['crossvalidation'], parameters['experiment']
+
+
+def generate_condition_space(experiment_parameters):
+    """
+    Generate the condition space based on the experiment parameters.
+
+    Parameters
+    ----------
+    experiment_parameters : dict
+        The parameters for the experiment.
+
+    Returns
+    -------
+    tuple
+        A tuple containing the grid coarseness and contrast heterogeneity arrays.
+    """
+    contrast_heterogeneity = np.linspace(
+        experiment_parameters['min_contrast_heterogeneity'],
+        experiment_parameters['max_contrast_heterogeneity'],
+        experiment_parameters['num_contrast_heterogeneity'])
+    grid_coarseness = np.linspace(experiment_parameters['min_grid_coarseness'],
+                                  experiment_parameters['max_grid_coarseness'],
+                                  experiment_parameters['num_grid_coarseness'])
+
+    return grid_coarseness, contrast_heterogeneity
 
 
 def run_block(block, experiment_parameters, simulation_parameters, num_entries,
@@ -164,8 +186,9 @@ def run_simulation(experiment_parameters, simulation_parameters, num_entries,
     return arnold_tongue, coherence
 
 
-def run_learning(fold, learning_rate, num_sessions, counts_tuple,
-                 condition_space, measurements):
+def run_learning(fold, learning_rate, num_sessions, experiment_parameters,
+                 simulation_parameters, num_entries, stimulus_conditions,
+                 condition_space, simulation_classes, indexing):
     """
     Run the learning simulation.
 
@@ -177,12 +200,21 @@ def run_learning(fold, learning_rate, num_sessions, counts_tuple,
         The learning rate.
     num_sessions : int
         The number of sessions.
-    counts_tuple : tuple
-        The counts tuple.
+    experiment_parameters : dict
+        The experiment parameters.
+    simulation_parameters : dict
+        The simulation parameters.
+    num_entries : int
+        The number of entries.
+    stimulus_conditions : tuple
+        The stimulus conditions.
     condition_space : tuple
         The condition space.
-    measurements : tuple
-        The measurements.
+    simulation_classes : tuple
+        The simulation classes.
+    indexing : tuple
+        The indexing for synchronization.
+
 
     Returns
     -------
@@ -193,20 +225,10 @@ def run_learning(fold, learning_rate, num_sessions, counts_tuple,
     arnold_tongue_size : array_like
         The Arnold tongue size.
     """
-    # TO DO: REMOVE GLOBAL VARIABLES AND MOVE TO SIM_UTILS.PY
 
-    global model
-
-    # Unpack the measurements
-    arnold_tongue, coherence = measurements
-
-    # Get the number of sessions by popping the first element from the counts tuple
-    num_sessions = counts_tuple[0]
-    counts_tuple = counts_tuple[1:]
-
+    model, stimulus_generator = simulation_classes
     # Set the learning rate and generate the coupling
     model.effective_learning_rate = learning_rate
-    model.generate_coupling()
 
     # Load the optimal psychometric curve
     file = os.path.join(BASE_PATH, f'session_1',
@@ -229,13 +251,20 @@ def run_learning(fold, learning_rate, num_sessions, counts_tuple,
         left_out_arnold_tongue = np.load(file)[fold].flatten()
         left_out_arnold_tongue = min_max_normalize(left_out_arnold_tongue)
 
+        simulation_classes = (model, stimulus_generator)
+
         # Run the simulation
-        arnold_tongue, coherence = run_simulation(counts_tuple)
+        arnold_tongue, coherence = run_simulation(experiment_parameters,
+                                                  simulation_parameters,
+                                                  num_entries,
+                                                  stimulus_conditions,
+                                                  simulation_classes, indexing)
 
         # Compute the weighted coherence and update the coupling
-        measurements = (arnold_tongue, coherence)
         weighted_coherence = compute_weighted_coherence(
-            counts_tuple, measurements, optimal_psychometric_fold)
+            experiment_parameters['num_conditions'],
+            experiment_parameters['num_blocks'], num_entries, arnold_tongue,
+            coherence, optimal_psychometric_fold)
         weighted_coherence = expand_matrix(weighted_coherence, diagonal)
         model.update_coupling(weighted_coherence)
 
@@ -262,58 +291,29 @@ if __name__ == '__main__':
     # Load the model, stimulus, simulation, and experiment parameters
     model_parameters, stimulus_parameters, simulation_parameters, crossval_parameters, experiment_parameters = load_configurations(
     )
+
+    # Derive additional parameters
     num_entries = model_parameters['num_populations'] * (
         model_parameters['num_populations'] - 1) // 2
     num_sessions = experiment_parameters['num_training_sessions']
     num_folds = experiment_parameters['num_subjects']
 
     # Initialize the model and stimulus generator
-    model = V1Model(model_parameters, stimulus_parameters)
-    stimulus_generator = StimulusGenerator(stimulus_parameters)
+    simulation_classes = initialize_simulation_classes(model_parameters,
+                                                       stimulus_parameters)
 
-    # Set up the simulation and parallel processing
-    simulation_parameters['num_time_steps'] = int(
-        simulation_parameters['simulation_time'] /
-        simulation_parameters['time_step'])
+    # Set up parallel processing
+    simulation_parameters, experiment_parameters = setup_parallel_processing(
+        simulation_parameters, experiment_parameters)
 
-    num_available_cores = cpu_count()
-    num_cores = simulation_parameters['num_cores']
-    if num_cores > num_available_cores:
-        num_cores = num_available_cores
+    # Set up the stimulus conditions
+    stimulus_conditions = generate_stimulus_conditions(experiment_parameters)
 
-    # Set up the experiment
-    num_conditions = experiment_parameters[
-        'num_contrast_heterogeneity'] * experiment_parameters[
-            'num_grid_coarseness']
-    num_blocks = get_num_blocks(experiment_parameters['num_blocks'], num_cores)
-    num_batches = num_blocks // num_cores
+    # Set up the condition space
+    condition_space = generate_condition_space(experiment_parameters)
 
-    # Create a tuple of counts_tuple
-    counts_tuple = (num_sessions, num_blocks, num_conditions, num_entries)
-
-    # Set up the grid coarseness and contrast heterogeneity
-    contrast_heterogeneity_orig = np.linspace(
-        experiment_parameters['min_contrast_heterogeneity'],
-        experiment_parameters['max_contrast_heterogeneity'],
-        experiment_parameters['num_contrast_heterogeneity'])
-    grid_coarseness_orig = np.linspace(
-        experiment_parameters['min_grid_coarseness'],
-        experiment_parameters['max_grid_coarseness'],
-        experiment_parameters['num_grid_coarseness'])
-
-    condition_space = (grid_coarseness_orig, contrast_heterogeneity_orig)
-
-    contrast_heterogeneity = np.tile(
-        contrast_heterogeneity_orig,
-        experiment_parameters['num_grid_coarseness'])
-    grid_coarseness = np.repeat(
-        grid_coarseness_orig,
-        experiment_parameters['num_contrast_heterogeneity'])
-
-    # Set up the synchronization index and timepoints
-    start = simulation_parameters['num_time_steps'] // 2
-    sync_index = slice(start, None)
-    timepoints = range(start, simulation_parameters['num_time_steps'])
+    # Set up the synchronization index and timepoint
+    indexing = generate_time_index(simulation_parameters)
 
     # Load fold-specific effective learning rates
     crossval_results = np.load('results/simulation/crossval_estimation.npz')
@@ -327,7 +327,10 @@ if __name__ == '__main__':
     for fold in range(num_folds):
         correlation_fits[fold], jaccard_fits[fold], arnold_tongue_size[
             fold] = run_learning(fold, effective_learning_rates[fold],
-                                 num_sessions, counts_tuple, condition_space)
+                                 num_sessions, experiment_parameters,
+                                 simulation_parameters, num_entries,
+                                 stimulus_conditions, condition_space,
+                                 simulation_classes, indexing)
 
     # Save the results
     results_file = 'results/simulation/learning_simulation.npz'

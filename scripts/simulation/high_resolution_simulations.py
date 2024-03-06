@@ -8,7 +8,7 @@ import tomllib
 import numpy as np
 
 from src.sim_utils import initialize_simulation_classes, setup_parallel_processing, generate_stimulus_conditions, generate_condition_space, generate_time_index
-from src.anl_utils import order_parameter, compute_coherence
+from src.anl_utils import order_parameter, compute_coherence, compute_weighted_coherence, expand_matrix, compute_size
 
 from multiprocessing import Pool, Array
 
@@ -151,15 +151,102 @@ def run_simulation(experiment_parameters, simulation_parameters, num_entries,
     return arnold_tongue, coherence
 
 
+def run_learning(learning_rate, optimal_psychometric, experiment_parameters,
+                 simulation_parameters, num_entries, stimulus_conditions,
+                 condition_space, simulation_classes, indexing):
+    """
+    Run the learning simulation.
+
+    Parameters
+    ----------
+    learning_rate : float
+        The learning rate.
+    num_sessions : int
+        The number of sessions.
+    experiment_parameters : dict
+        The experiment parameters.
+    simulation_parameters : dict
+        The simulation parameters.
+    num_entries : int
+        The number of entries.
+    stimulus_conditions : tuple
+        The stimulus conditions.
+    condition_space : tuple
+        The condition space.
+    simulation_classes : tuple
+        The simulation classes.
+    indexing : tuple
+        The indexing for synchronization.
+
+
+    Returns
+    -------
+    correlation_fits : array_like
+        The correlation fits.
+    jaccard_fits : array_like
+        The Jaccard fits.
+    arnold_tongue_size : array_like
+        The Arnold tongue size.
+    """
+
+    model, stimulus_generator = simulation_classes
+    # Set the learning rate and generate the coupling
+    model.effective_learning_rate = learning_rate
+
+    # Initialize the arnold tongues
+    arnold_tongues = np.zeros((experiment_parameters['num_training_sessions'],
+                               experiment_parameters['num_blocks'],
+                               experiment_parameters['num_conditions']))
+
+    # Initialize the diagonal
+    diagonal = np.ones(model.num_populations)
+
+    # Run the learning simulation
+    for session in range(experiment_parameters['num_training_sessions']):
+        print(
+            f'Running session {session + 1} of {experiment_parameters["num_training_sessions"]}'
+        )
+
+        simulation_classes = (model, stimulus_generator)
+
+        # Run the simulation
+        arnold_tongue, coherence = run_simulation(experiment_parameters,
+                                                  simulation_parameters,
+                                                  num_entries,
+                                                  stimulus_conditions,
+                                                  simulation_classes, indexing)
+
+        # Add the Arnold tongue of the session
+        arnold_tongues[session] = arnold_tongue
+
+        # Compute the weighted coherence and update the coupling
+        weighted_coherence = compute_weighted_coherence(
+            experiment_parameters['num_conditions'],
+            experiment_parameters['num_blocks'], num_entries, arnold_tongue,
+            coherence, optimal_psychometric)
+        weighted_coherence = expand_matrix(weighted_coherence, diagonal)
+        model.update_coupling(weighted_coherence)
+
+        return arnold_tongues
+
+
 if __name__ == '__main__':
 
     # Load the parameters
     model_parameters, stimulus_parameters, simulation_parameters, experiment_parameters = load_configurations(
     )
+    # Derive additional parameters
+    num_entries = model_parameters['num_populations'] * (
+        model_parameters['num_populations'] - 1) // 2
 
     # Load learning rates
-    #crossval_results = np.load('results/simulation/crossval_estimation.npz')
-    #learning_rates = crossval_results['learning_rate_crossval']
+    crossval_results = np.load('results/simulation/crossval_estimation.npz')
+    learning_rates = crossval_results['learning_rate_crossval']
+    learning_rate = learning_rates.mean()
+
+    # Load the optimal psychometric curve
+    file = 'results/analysis/session_1/optimal_psychometric_crossval.npy'
+    optimal_psychometric = np.load(file).mean(axis=0)
 
     # Initialize the model and stimulus generator
     simulation_classes = initialize_simulation_classes(model_parameters,
@@ -172,15 +259,20 @@ if __name__ == '__main__':
     # Set up the stimulus conditions
     stimulus_conditions = generate_stimulus_conditions(experiment_parameters)
 
+    # Set up the condition space
+    condition_space = generate_condition_space(experiment_parameters)
+
     # Set up the synchronization index and timepoint
     indexing = generate_time_index(simulation_parameters)
 
-    # Run the simulation
-    arnold_tongue = run_simulation(experiment_parameters,
-                                   simulation_parameters, stimulus_conditions,
-                                   simulation_classes, indexing)
+    # Run learning simulation
+    arnold_tongues = run_learning(learning_rate, optimal_psychometric,
+                                  experiment_parameters, simulation_parameters,
+                                  num_entries, stimulus_conditions,
+                                  condition_space, simulation_classes,
+                                  indexing)
 
     # Save the results
-    file = 'results/simulation/baseline_arnold_tongue_test.npy'
+    file = 'results/simulation/highres_arnold_tongues.npy'
     os.makedirs(os.path.dirname(file), exist_ok=True)
-    np.save(file, arnold_tongue)
+    np.save(file, arnold_tongues)

@@ -77,19 +77,19 @@ def colored_heatmap(data,
     sns.set_context('paper')
     sns.set_palette('muted')
 
-    xlabel, ylabel, cbar_label = labels
-    label_fontsize, tick_fontsize, cbar_labelsize = fontsizes
+    title, xlabel, ylabel, cbar_label = labels
+    title_fontsize, label_fontsize, tick_fontsize, cbar_labelsize = fontsizes
     xticks, yticks = ticks
 
     im = plt.imshow(data, cmap=colormap, vmin=bounds[0], vmax=bounds[1])
 
+    plt.title(title, fontsize=title_fontsize)
     plt.xlabel(xlabel, fontsize=label_fontsize)
     plt.ylabel(ylabel, fontsize=label_fontsize)
 
     if cbar_label is not None:
         cbar = plt.colorbar(im, fraction=fraction)
         cbar.ax.tick_params(labelsize=tick_fontsize)
-
         cbar.ax.set_ylabel(cbar_label, rotation=90, fontsize=cbar_labelsize)
 
     num_ticks = len(xticks)

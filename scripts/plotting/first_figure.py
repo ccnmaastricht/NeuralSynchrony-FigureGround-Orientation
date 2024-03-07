@@ -1,5 +1,5 @@
 """
-This script creates the Arnold Tongue figure...
+This script creates all panels of the first figure of the paper. 
 """
 
 import os

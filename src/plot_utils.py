@@ -3,6 +3,29 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 
+def convert_size(width, height):
+    """
+    Convert figure size from mm to inches.
+
+    Parameters
+    ----------
+    width : float
+        The width in mm.
+    height : float
+        The height in mm.
+
+    Returns
+    -------
+    tuple
+        The width and height in inches.
+    """
+
+    width = width / 25.4
+    height = height / 25.4
+
+    return (width, height)
+
+
 def colored_heatmap(data,
                     figsize,
                     labels,
@@ -24,19 +47,15 @@ def colored_heatmap(data,
     figsize : tuple
         The figure size in inches.
     labels : tuple
-        The labels for the title, x and y axes, and the colorbar.
+        The labels for the x and y axes, and the colorbar.
     fontsizes : tuple
-        The title, label, and tick font sizes.
+        The label and tick font sizes.
     ticks : tuple
         The ticks for the x and y axes.
     bounds : tuple
         The lower and upper bounds for the colormap.
     colormap : str, optional
         The colormap for the plot. The default is 'magma'.
-    show : bool, optional
-        Whether to show the plot. The default is True.
-    save : bool, optional
-        Whether to save the plot. The default is False.
     filename : str, optional
         The filename to save the plot. The default is None.
     dpi : int, optional
@@ -58,13 +77,12 @@ def colored_heatmap(data,
     sns.set_context('paper')
     sns.set_palette('muted')
 
-    title, xlabel, ylabel, cbar_label = labels
-    title_fontsize, label_fontsize, tick_fontsize, cbar_labelsize = fontsizes
+    xlabel, ylabel, cbar_label = labels
+    label_fontsize, tick_fontsize, cbar_labelsize = fontsizes
     xticks, yticks = ticks
 
     im = plt.imshow(data, cmap=colormap, vmin=bounds[0], vmax=bounds[1])
 
-    plt.title(title, fontsize=title_fontsize)
     plt.xlabel(xlabel, fontsize=label_fontsize)
     plt.ylabel(ylabel, fontsize=label_fontsize)
 
@@ -87,6 +105,5 @@ def colored_heatmap(data,
     if filename is not None:
         filename = f'{filename}.{filetype}'
         plt.savefig(filename, dpi=dpi if filetype != 'svg' else None)
-
     else:
         plt.show()

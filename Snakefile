@@ -12,7 +12,7 @@ rule all:
          "results/simulation/learning_simulation.npz",
          "results/simulation/highres_arnold_tongues.npy",
          "results/figures/figure_one/panel_d.svg",
-         "results/figures/second_figure/bottom_row_transfer.svg"]
+         "results/figures/figure_two/bottom_row_transfer.svg"]
 
 rule run_system_info:
     output:

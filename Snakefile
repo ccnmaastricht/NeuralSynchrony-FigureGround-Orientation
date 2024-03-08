@@ -69,7 +69,7 @@ rule run_high_resolution_simulations:
     output:
         "results/simulation/highres_arnold_tongues.npy"
     shell:
-        "python -m scripts.simulation.highres_arnold_tongues"
+        "python -m scripts.simulation.high_resolution_simulations"
 
 rule run_first_figure:
     input:
@@ -83,7 +83,7 @@ rule run_first_figure:
         "figures/first_figure/panel_c.svg",
         "figures/first_figure/panel_d.svg"]
     shell:
-        "python scripts/plotting/first_figure"
+        "python -m scripts.plotting.first_figure"
 
 rule run_second_figure:
     input:
@@ -92,7 +92,6 @@ rule run_second_figure:
         expand("results/empirical/session_{session}/average_bat.npy", session=session_ids) +
         expand("results/empirical/session_{session}/continuous_bat.npy", session=session_ids)
     output:
-        ["figures/second_figure/top_row_transfer.svg",
-        "figures/second_figure/bottom_row_transfer.svg"]
+        "figures/second_figure/bottom_row_transfer.svg"
     shell:
-        "python scripts/plotting/second_figure"
+        "python -m scripts.plotting.second_figure"

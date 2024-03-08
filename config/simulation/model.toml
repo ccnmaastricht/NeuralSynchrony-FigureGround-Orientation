@@ -1,4 +1,4 @@
-num_populations = 400
+num_populations = 100 # 400
 decay_rate = 0.22
 max_coupling = 24.63
 contrast_slope = 0.25

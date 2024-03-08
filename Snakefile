@@ -4,7 +4,8 @@ session_ids = ["{}".format(i) for i in range(1, 10)]
 
 rule all:
     input:
-        ["results/statistics/gee_full.pkl",
+        ["results/info/system.toml",
+        "results/statistics/gee_full.pkl",
          "results/empirical/transfer_model_comparison.npz",
          "results/simulation/parameter_space_exploration.npz",
          "results/simulation/crossval_estimation.npz",
@@ -12,6 +13,12 @@ rule all:
          "results/simulation/highres_arnold_tongues.npy",
          "figures/first_figure/panel_d.svg",
          "figures/second_figure/bottom_row_transfer.svg"]
+
+rule run_system_info:
+    output:
+        "results/info/system.toml"
+    shell:
+        "python -m scripts.info.system"
 
 rule run_statistics:
     output:

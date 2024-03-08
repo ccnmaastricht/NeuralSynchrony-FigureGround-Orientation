@@ -93,8 +93,10 @@ def compute_phase_difference(theta, condense=True):
     """
     theta = theta.T
     phase_difference = np.exp(1j * (theta[:, None] - theta[None, :]))
+
     if condense:
-        phase_difference, _ = condense_matrix(phase_difference)
+        upper_triangle = np.triu_indices(phase_difference.shape[0], k=1)
+        phase_difference = phase_difference[upper_triangle]
     return phase_difference
 
 
@@ -126,8 +128,8 @@ def condense_matrix(matrix):
 
     Parameters
     ----------
-    coherence : array_like
-        The symmetric matrix.
+    matrix : array_like
+        The matrix.
 
     Returns
     ------- 
@@ -250,29 +252,29 @@ def min_max_normalize(X):
     return (X - np.min(X)) / (np.max(X) - np.min(X))
 
 
-def compute_weighted_coherence(num_conditions, num_blocks, num_entries,
-                               arnold_tongue, coherence,
-                               optimal_psychometric_parameters):
+def compute_weighted_locking(num_conditions, num_blocks, num_entries,
+                             arnold_tongue, locking,
+                             optimal_psychometric_parameters):
     """
-    Compute the weighted coherence.  
+    Compute the weighted locking.  
 
     Parameters
     ----------
     counts_tuple : tuple
         The number of blocks, conditions, and entries.
     measurements : array_like
-        The Arnold tongue and coherence.
+        The Arnold tongue and locking.
     optimal_psychometric_parameters : array_like
         The optimal psychometric parameters.
 
     Returns
     -------
     array_like
-        The weighted coherence.
+        The weighted locking.
     """
 
     predictors = np.ones((2, num_conditions))
-    weighted_coherence = np.zeros(num_entries)
+    weighted_locking = np.zeros(num_entries)
 
     for block in range(num_blocks):
         predictors[0] = arnold_tongue[block]
@@ -280,8 +282,8 @@ def compute_weighted_coherence(num_conditions, num_blocks, num_entries,
             predictors, *optimal_psychometric_parameters)
 
         probability_correct = np.tile(probability_correct, (num_entries, 1)).T
-        weighted_coherence = welford_update(weighted_coherence, block + 1,
-                                            (probability_correct *
-                                             coherence[block]).mean(axis=0))
+        weighted_locking = welford_update(weighted_locking, block + 1,
+                                          (probability_correct *
+                                           locking[block]).mean(axis=0))
 
-    return weighted_coherence
+    return weighted_locking

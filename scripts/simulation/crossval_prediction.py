@@ -202,6 +202,7 @@ def run_learning(fold, learning_rate, num_sessions, experiment_parameters,
 
     model, stimulus_generator = simulation_classes
     # Set the learning rate and generate the coupling
+    model.generate_coupling()
     model.effective_learning_rate = learning_rate
 
     # Load the optimal psychometric curve

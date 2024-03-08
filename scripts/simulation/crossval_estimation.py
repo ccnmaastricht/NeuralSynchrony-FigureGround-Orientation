@@ -10,7 +10,7 @@ from scipy.optimize import curve_fit
 from multiprocessing import Pool, Array
 
 from src.sim_utils import initialize_simulation_classes, setup_parallel_processing, generate_stimulus_conditions, generate_time_index
-from src.anl_utils import order_parameter, compute_coherence, compute_weighted_coherence, psychometric_function, expand_matrix, weighted_jaccard
+from src.anl_utils import order_parameter, compute_phase_difference, compute_weighted_locking, psychometric_function, expand_matrix, weighted_jaccard
 
 
 def load_configurations():
@@ -62,7 +62,7 @@ def run_block(block, experiment_parameters, simulation_parameters, num_entries,
     indexing : tuple
         The indexing for synchronization.
     """
-    global arnold_tongue, coherence
+    global arnold_tongue, locking
 
     grid_coarseness, contrast_heterogeneity = stimulus_conditions
     model, stimulus_generator = simulation_classes
@@ -82,12 +82,12 @@ def run_block(block, experiment_parameters, simulation_parameters, num_entries,
         arnold_tongue[index] = np.mean(synchronization[sync_index])
         lower_index = index * num_entries
         upper_index = lower_index + num_entries
-        coherence_placeholder = [
-            compute_coherence(state_variables[timepoint])
+        phase_differences = [
+            compute_phase_difference(state_variables[timepoint])
             for timepoint in timepoints
         ]
-        coherence[lower_index:upper_index] = np.mean(coherence_placeholder,
-                                                     axis=0)
+        locking[lower_index:upper_index] = np.abs(
+            np.mean(phase_differences, axis=0))
 
 
 def run_simulation(experiment_parameters, simulation_parameters, num_entries,
@@ -114,18 +114,17 @@ def run_simulation(experiment_parameters, simulation_parameters, num_entries,
         The Arnold tongue.
     """
 
-    global arnold_tongue, coherence
+    global arnold_tongue, locking
 
     # Initialize the Arnold tongue
     arnold_tongue = np.zeros((experiment_parameters['num_blocks'],
                               experiment_parameters['num_conditions']))
     arnold_tongue = Array('d', arnold_tongue.reshape(-1))
 
-    # Initialize the coherence
-    coherence = np.zeros(
-        (experiment_parameters['num_blocks'],
-         experiment_parameters['num_conditions'], num_entries))
-    coherence = Array('d', coherence.reshape(-1))
+    # Initialize the locking
+    locking = np.zeros((experiment_parameters['num_blocks'],
+                        experiment_parameters['num_conditions'], num_entries))
+    locking = Array('d', locking.reshape(-1))
 
     # Run a batch of blocks in parallel
     for batch in range(simulation_parameters['num_batches']):
@@ -144,17 +143,17 @@ def run_simulation(experiment_parameters, simulation_parameters, num_entries,
         experiment_parameters['num_blocks'],
         experiment_parameters['num_conditions'])
 
-    coherence = np.array(coherence).reshape(
+    locking = np.array(locking).reshape(
         experiment_parameters['num_blocks'],
         experiment_parameters['num_conditions'], num_entries)
 
-    return arnold_tongue, coherence
+    return arnold_tongue, locking
 
 
 def simulation_grid(num_effective_learning_rate, effective_learning_rates,
                     experiment_parameters, simulation_parameters, num_entries,
                     stimulus_conditions, simulation_classes, indexing,
-                    weighted_coherence, behavioral_arnold_tongue):
+                    weighted_locking, behavioral_arnold_tongue):
     """
     Run a grid of simulations.
 
@@ -190,7 +189,7 @@ def simulation_grid(num_effective_learning_rate, effective_learning_rates,
             effective_learning_rates[1:-1]):
         model.effective_learning_rate = effective_learning_rate
         model.generate_coupling()
-        model.update_coupling(weighted_coherence)
+        model.update_coupling(weighted_locking)
 
         simulation_classes = (model, stimulus_generator)
 
@@ -204,7 +203,7 @@ def simulation_grid(num_effective_learning_rate, effective_learning_rates,
     return weighted_jaccard_fits
 
 
-def coarse_to_fine(crossval_parameters, weighted_coherence,
+def coarse_to_fine(crossval_parameters, weighted_locking,
                    experiment_parameters, simulation_parameters, num_entries,
                    stimulus_conditions, simulation_classes, indexing,
                    behavioral_arnold_tongue):
@@ -215,8 +214,8 @@ def coarse_to_fine(crossval_parameters, weighted_coherence,
     ----------
     crossval_parameters : dict
         The cross-validation parameters.
-    weighted_coherence : array_like
-        The weighted coherence matrix.
+    weighted_locking : array_like
+        The weighted locking matrix.
     experiment_parameters : dict
         The experiment parameters.
     simulation_parameters : dict
@@ -238,10 +237,10 @@ def coarse_to_fine(crossval_parameters, weighted_coherence,
         The effective learning rate.
     """
 
-    # Expand the weighted coherence matrix
+    # Expand the weighted locking matrix
     model = simulation_classes[0]
     diagonal = np.ones(model.num_populations)
-    weighted_coherence = expand_matrix(weighted_coherence, diagonal)
+    weighted_locking = expand_matrix(weighted_locking, diagonal)
 
     # Set up the grid search (initialize the effective learning rates)
     effective_learning_rates = np.linspace(
@@ -256,7 +255,7 @@ def coarse_to_fine(crossval_parameters, weighted_coherence,
             crossval_parameters['num_effective_learning_rate'],
             effective_learning_rates, experiment_parameters,
             simulation_parameters, num_entries, stimulus_conditions,
-            simulation_classes, indexing, weighted_coherence,
+            simulation_classes, indexing, weighted_locking,
             behavioral_arnold_tongue)
 
         # Find the best learning rate
@@ -295,10 +294,10 @@ if __name__ == '__main__':
     indexing = generate_time_index(simulation_parameters)
 
     # Run simulation of session 1
-    arnold_tongue, coherence = run_simulation(experiment_parameters,
-                                              simulation_parameters,
-                                              num_entries, stimulus_conditions,
-                                              simulation_classes, indexing)
+    arnold_tongue, locking = run_simulation(experiment_parameters,
+                                            simulation_parameters, num_entries,
+                                            stimulus_conditions,
+                                            simulation_classes, indexing)
 
     # load behavioral Arnold tongues of session 1
     session1_arnold_tongues = np.load(
@@ -314,7 +313,7 @@ if __name__ == '__main__':
 
     optimal_psychometric_crossval = np.zeros(
         (experiment_parameters['num_subjects'], 2))
-    weighted_coherence_crossval = np.zeros(
+    weighted_locking_crossval = np.zeros(
         (experiment_parameters['num_subjects'], num_entries))
     learning_rate_crossval = np.zeros(experiment_parameters['num_subjects'])
 
@@ -338,13 +337,13 @@ if __name__ == '__main__':
                                             p0=initial_params)
         optimal_psychometric_crossval[subject] = optimized_parameters
 
-        # Estimate weighted coherence from session 1 data
-        weighted_coherence = compute_weighted_coherence(
+        # Estimate weighted locking from session 1 data
+        weighted_locking = compute_weighted_locking(
             experiment_parameters['num_conditions'],
             experiment_parameters['num_blocks'], num_entries, arnold_tongue,
-            coherence, optimized_parameters)
+            locking, optimized_parameters)
 
-        weighted_coherence_crossval[subject] = weighted_coherence
+        weighted_locking_crossval[subject] = weighted_locking
 
         # remove subject from behavioral Arnold tongues of session 2
         fold_arnold_tongues = np.delete(session2_arnold_tongues,
@@ -355,12 +354,12 @@ if __name__ == '__main__':
         average_arnold_tongue = fold_arnold_tongues.mean(axis=0)
 
         learning_rate_crossval[subject] = coarse_to_fine(
-            crossval_parameters, weighted_coherence, experiment_parameters,
+            crossval_parameters, weighted_locking, experiment_parameters,
             simulation_parameters, num_entries, stimulus_conditions,
             simulation_classes, indexing, average_arnold_tongue)
 
     # Save results
     np.savez('results/simulation/crossval_estimation.npz',
              optimal_psychometric_crossval=optimal_psychometric_crossval,
-             weighted_coherence_crossval=weighted_coherence_crossval,
+             weighted_locking_crossval=weighted_locking_crossval,
              learning_rate_crossval=learning_rate_crossval)

@@ -51,14 +51,14 @@ class V1Model:
         self.coupling = np.exp(
             -self.decay_rate * distances) * self.max_coupling
 
-    def update_coupling(self, weighted_coherence):
+    def update_coupling(self, weighted_locking):
         """
         Update the coupling matrix through Hebbian learning.
 
         Parameters
         ----------
-        weighted_coherence : array_like
-            The weighted coherence matrix.
+        weighted_locking : array_like
+            The weighted locking matrix.
         """
 
         if self.effective_learning_rate is None:
@@ -66,7 +66,7 @@ class V1Model:
 
         decay_factor = np.exp(-self.effective_learning_rate)
         self.coupling = decay_factor * self.coupling + (
-            1 - decay_factor) * weighted_coherence * self.max_coupling
+            1 - decay_factor) * weighted_locking * self.max_coupling
 
     def simulate(self, parameters):
         """

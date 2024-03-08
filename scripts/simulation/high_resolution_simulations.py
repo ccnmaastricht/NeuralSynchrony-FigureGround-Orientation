@@ -7,7 +7,7 @@ import tomllib
 import numpy as np
 
 from src.sim_utils import initialize_simulation_classes, setup_parallel_processing, generate_stimulus_conditions, generate_time_index
-from src.anl_utils import order_parameter, compute_coherence, compute_weighted_coherence, expand_matrix
+from src.anl_utils import order_parameter, compute_phase_difference, compute_weighted_locking, expand_matrix
 
 from multiprocessing import Pool, Array
 
@@ -61,7 +61,7 @@ def run_block(block, experiment_parameters, simulation_parameters, num_entries,
     indexing : tuple
         The indexing for synchronization.
     """
-    global arnold_tongue, coherence
+    global arnold_tongue, locking
 
     grid_coarseness, contrast_heterogeneity = stimulus_conditions
     model, stimulus_generator = simulation_classes
@@ -81,12 +81,12 @@ def run_block(block, experiment_parameters, simulation_parameters, num_entries,
         arnold_tongue[index] = np.mean(synchronization[sync_index])
         lower_index = index * num_entries
         upper_index = lower_index + num_entries
-        coherence_placeholder = [
-            compute_coherence(state_variables[timepoint])
+        phase_differences = [
+            compute_phase_difference(state_variables[timepoint])
             for timepoint in timepoints
         ]
-        coherence[lower_index:upper_index] = np.mean(coherence_placeholder,
-                                                     axis=0)
+        locking[lower_index:upper_index] = np.abs(
+            np.mean(phase_differences, axis=0))
 
 
 def run_simulation(experiment_parameters, simulation_parameters, num_entries,
@@ -113,18 +113,17 @@ def run_simulation(experiment_parameters, simulation_parameters, num_entries,
         The Arnold tongue.
     """
 
-    global arnold_tongue, coherence
+    global arnold_tongue, locking
 
     # Initialize the Arnold tongue
     arnold_tongue = np.zeros((experiment_parameters['num_blocks'],
                               experiment_parameters['num_conditions']))
     arnold_tongue = Array('d', arnold_tongue.reshape(-1))
 
-    # Initialize the coherence
-    coherence = np.zeros(
-        (experiment_parameters['num_blocks'],
-         experiment_parameters['num_conditions'], num_entries))
-    coherence = Array('d', coherence.reshape(-1))
+    # Initialize the locking
+    locking = np.zeros((experiment_parameters['num_blocks'],
+                        experiment_parameters['num_conditions'], num_entries))
+    locking = Array('d', locking.reshape(-1))
 
     # Run a batch of blocks in parallel
     for batch in range(simulation_parameters['num_batches']):
@@ -143,11 +142,11 @@ def run_simulation(experiment_parameters, simulation_parameters, num_entries,
         experiment_parameters['num_blocks'],
         experiment_parameters['num_conditions'])
 
-    coherence = np.array(coherence).reshape(
+    locking = np.array(locking).reshape(
         experiment_parameters['num_blocks'],
         experiment_parameters['num_conditions'], num_entries)
 
-    return arnold_tongue, coherence
+    return arnold_tongue, locking
 
 
 def run_learning(learning_rate, optimal_psychometric, experiment_parameters,
@@ -201,27 +200,25 @@ def run_learning(learning_rate, optimal_psychometric, experiment_parameters,
     # Run the learning simulation
     for session in range(experiment_parameters['num_training_sessions']):
 
-        print(f'Session {session + 1}')
-
         simulation_classes = (model, stimulus_generator)
 
         # Run the simulation
-        arnold_tongue, coherence = run_simulation(experiment_parameters,
-                                                  simulation_parameters,
-                                                  num_entries,
-                                                  stimulus_conditions,
-                                                  simulation_classes, indexing)
+        arnold_tongue, locking = run_simulation(experiment_parameters,
+                                                simulation_parameters,
+                                                num_entries,
+                                                stimulus_conditions,
+                                                simulation_classes, indexing)
 
         # Add the Arnold tongue of the session
         arnold_tongues[session] = arnold_tongue
 
-        # Compute the weighted coherence and update the coupling
-        weighted_coherence = compute_weighted_coherence(
+        # Compute the weighted locking and update the coupling
+        weighted_locking = compute_weighted_locking(
             experiment_parameters['num_conditions'],
             experiment_parameters['num_blocks'], num_entries, arnold_tongue,
-            coherence, optimal_psychometric)
-        weighted_coherence = expand_matrix(weighted_coherence, diagonal)
-        model.update_coupling(weighted_coherence)
+            locking, optimal_psychometric)
+        weighted_locking = expand_matrix(weighted_locking, diagonal)
+        model.update_coupling(weighted_locking)
 
     return arnold_tongues
 

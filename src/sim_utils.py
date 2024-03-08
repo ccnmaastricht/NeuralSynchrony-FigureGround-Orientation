@@ -182,8 +182,7 @@ def generate_time_index(simulation_parameters):
     start = simulation_parameters['num_time_steps'] // 2
     sync_index = slice(start, None)
 
-    start = simulation_parameters['num_time_steps'] - simulation_parameters[
-        'num_timepoints']
-    timepoints = range(start, simulation_parameters['num_time_steps'])
+    timepoints = range(start, simulation_parameters['num_time_steps'],
+                       simulation_parameters['num_timepoints'])
 
     return sync_index, timepoints

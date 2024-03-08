@@ -1,9 +1,14 @@
-FROM mambaorg/micromamba:1.5.6
-COPY --chown=$MAMBA_USER:$MAMBA_USER environment.yaml /tmp/environment.yaml
-RUN micromamba install --yes --file /tmp/environment.yaml && \
-    micromamba clean --all --yes
+FROM snakemake/snakemake:latest
 
-# Activate the Conda environment for Dockerfile RUN commands
-ARG MAMBA_DOCKERFILE_ACTIVATE=1
+LABEL author="Mario Senden"
+LABEL email="mario.senden@maastrichtuniversity.nl"
 
+# Set the working directory
+WORKDIR /workflow
 
+# copy everying from the current directory to the working directory
+COPY . /workflow
+RUN pip install -r requirements.txt
+
+# Run the Snakemake workflow when the container starts
+CMD ["snakemake", "--cores", "all"]

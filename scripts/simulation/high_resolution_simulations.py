@@ -201,6 +201,8 @@ def run_learning(learning_rate, optimal_psychometric, experiment_parameters,
     # Run the learning simulation
     for session in range(experiment_parameters['num_training_sessions']):
 
+        print(f'Session {session + 1}')
+
         simulation_classes = (model, stimulus_generator)
 
         # Run the simulation
@@ -221,7 +223,7 @@ def run_learning(learning_rate, optimal_psychometric, experiment_parameters,
         weighted_coherence = expand_matrix(weighted_coherence, diagonal)
         model.update_coupling(weighted_coherence)
 
-        return arnold_tongues
+    return arnold_tongues
 
 
 if __name__ == '__main__':

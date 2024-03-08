@@ -257,7 +257,7 @@ def run_learning(fold, learning_rate, num_sessions, experiment_parameters,
                                                    condition_space[0],
                                                    condition_space[1])
 
-        return correlation_fits, jaccard_fits, arnold_tongue_size
+    return correlation_fits, jaccard_fits, arnold_tongue_size
 
 
 if __name__ == '__main__':

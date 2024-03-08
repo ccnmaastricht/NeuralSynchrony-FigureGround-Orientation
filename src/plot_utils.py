@@ -105,6 +105,8 @@ def colored_heatmap(data,
     if filename is not None:
         filename = f'{filename}.{filetype}'
         plt.savefig(filename, dpi=dpi if filetype != 'svg' else None)
+
+        plt.close()
     else:
         plt.show()
 
@@ -187,5 +189,7 @@ def plot_dAIC(session,
     if filename is not None:
         filename = f'{filename}.{filetype}'
         plt.savefig(filename, dpi=dpi if filetype != 'svg' else None)
+
+        plt.close()
     else:
         plt.show()

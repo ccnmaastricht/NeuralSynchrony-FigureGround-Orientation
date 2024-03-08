@@ -168,8 +168,8 @@ if __name__ == '__main__':
     decay_rates, max_couplings = generate_exploration_space(
         exploration_parameters)
 
-    size = (exploration_parameters['num_decay'],
-            exploration_parameters['num_max_coupling'])
+    size = (exploration_parameters['num_max_coupling'],
+            exploration_parameters['num_decay'])
     correlation_fits = np.zeros(size)
     jaccard_fits = np.zeros(size)
 
@@ -196,9 +196,9 @@ if __name__ == '__main__':
             simulated_arnold_tongue = np.mean(simulated_arnold_tongue, axis=0)
 
             # Compute the fits
-            correlation_fits[decay_counter, coupling_counter] = np.corrcoef(
+            correlation_fits[coupling_counter, decay_counter] = np.corrcoef(
                 simulated_arnold_tongue, behavioral_arnold_tongue)[0, 1]
-            jaccard_fits[decay_counter, coupling_counter] = weighted_jaccard(
+            jaccard_fits[coupling_counter, decay_counter] = weighted_jaccard(
                 simulated_arnold_tongue, behavioral_arnold_tongue)
 
     # Save the results

@@ -51,6 +51,7 @@ filename = os.path.join(BASE_PATH, 'panel_c')
 exploration_data = np.load(
     'results/simulation/parameter_space_exploration.npz')
 jaccard_fits = exploration_data['jaccard_fits']
+jaccard_fits = np.flipud(jaccard_fits)
 
 colored_heatmap(jaccard_fits,
                 figsize=figsize,

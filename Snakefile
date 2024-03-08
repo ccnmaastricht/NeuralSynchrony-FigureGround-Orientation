@@ -11,7 +11,7 @@ rule all:
          "results/simulation/crossval_estimation.npz",
          "results/simulation/learning_simulation.npz",
          "results/simulation/highres_arnold_tongues.npy",
-         "results/figures/first_figure/panel_d.svg",
+         "results/figures/figure_one/panel_d.svg",
          "results/figures/second_figure/bottom_row_transfer.svg"]
 
 rule run_system_info:
@@ -85,20 +85,20 @@ rule create_figure_one:
         ["results/simulation/parameter_space_exploration.npz",
         "results/simulation/highres_arnold_tongues.npy"]
     output:
-        ["results/figures/first_figure/panel_a.svg",
-        "results/figures/first_figure/panel_b.svg",
-        "results/figures/first_figure/panel_c.svg",
-        "results/figures/first_figure/panel_d.svg"]
+        ["results/figures/figure_one/panel_a.svg",
+        "results/figures/figure_one/panel_b.svg",
+        "results/figures/figure_one/panel_c.svg",
+        "results/figures/figure_one/panel_d.svg"]
     shell:
         "python -m scripts.plotting.figure_one"
 
-rule run_second_figure:
+rule run_figure_two:
     input:
         ["results/simulation/highres_arnold_tongues.npy",
         "results/empirical/transfer_model_comparison.npz"] +
         expand("results/empirical/session_{session}/average_bat.npy", session=session_ids) +
         expand("results/empirical/session_{session}/continuous_bat.npy", session=session_ids)
     output:
-        "results/figures/second_figure/bottom_row_transfer.svg"
+        "results/figures/figure_two/bottom_row_transfer.svg"
     shell:
         "python -m scripts.plotting.figure_two"

@@ -8,7 +8,7 @@ import tomllib
 import numpy as np
 from src.plot_utils import colored_heatmap, convert_size
 
-BASE_PATH = 'figures/first_figure'
+BASE_PATH = 'results/figures/figure_one'
 
 os.makedirs(BASE_PATH, exist_ok=True)
 

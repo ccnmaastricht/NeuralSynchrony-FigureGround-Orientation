@@ -328,8 +328,6 @@ if __name__ == '__main__':
         # Compute average behavioral Arnold tongue of session 1
         average_arnold_tongue = fold_arnold_tongues.mean(axis=0)
 
-        print(f'shape of average_arnold_tongue: {average_arnold_tongue.shape}')
-
         # Initial guesses for parameters
         initial_params = np.zeros(2)
 
@@ -339,8 +337,6 @@ if __name__ == '__main__':
                                             average_arnold_tongue.flatten(),
                                             p0=initial_params)
         optimal_psychometric_crossval[subject] = optimized_parameters
-
-        print(f'optimized_parameters: {optimized_parameters}')
 
         # Estimate weighted coherence from session 1 data
         weighted_coherence = compute_weighted_coherence(

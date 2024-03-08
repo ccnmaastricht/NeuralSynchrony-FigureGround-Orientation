@@ -302,11 +302,11 @@ if __name__ == '__main__':
 
     # load behavioral Arnold tongues of session 1
     session1_arnold_tongues = np.load(
-        'results/analysis/session_1/individual_bats.npy')
+        'results/empirical/session_1/individual_bats.npy')
 
     # load behavioral Arnold tongues of session 2
     session2_arnold_tongues = np.load(
-        'results/analysis/session_2/individual_bats.npy')
+        'results/empirical/session_2/individual_bats.npy')
 
     # create predictors for the psychometric function
     predictors = np.ones((2, experiment_parameters['num_conditions']))

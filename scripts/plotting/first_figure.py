@@ -21,7 +21,7 @@ cmap = figure_parameters['general']['colormap']
 # Panel A - behavioural Arnold tongue (raw)
 filename = os.path.join(BASE_PATH, 'panel_a')
 behavioural_arnold_tongue = np.load(
-    'results/analysis/session_1/average_bat.npy')
+    'results/empirical/session_1/average_bat.npy')
 
 colored_heatmap(behavioural_arnold_tongue,
                 figsize=figsize,
@@ -34,7 +34,8 @@ colored_heatmap(behavioural_arnold_tongue,
 
 # Panel B - behavioural Arnold tongue (fitted)
 filename = os.path.join(BASE_PATH, 'panel_b')
-fitted_arnold_tongue = np.load('results/analysis/session_1/continuous_bat.npy')
+fitted_arnold_tongue = np.load(
+    'results/empirical/session_1/continuous_bat.npy')
 
 colored_heatmap(fitted_arnold_tongue,
                 figsize=figsize,

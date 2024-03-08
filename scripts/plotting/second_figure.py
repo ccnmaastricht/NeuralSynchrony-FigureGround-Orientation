@@ -22,7 +22,7 @@ cmap = figure_parameters['general']['colormap']
 for session in range(1, figure_parameters['data']['num_sessions'] + 1):
     filename = os.path.join(BASE_PATH, f'top_row_{session}')
     behavioural_arnold_tongue = np.load(
-        f'results/analysis/session_{session}/average_bat.npy')
+        f'results/empirical/session_{session}/average_bat.npy')
 
     title = f'Session {session}'
     labels = (title, *figure_parameters['data']['labels'])
@@ -39,7 +39,7 @@ for session in range(1, figure_parameters['data']['num_sessions'] + 1):
 for session in range(1, figure_parameters['data']['num_sessions'] + 1):
     filename = os.path.join(BASE_PATH, f'middle_row_{session}')
     fitted_arnold_tongue = np.load(
-        f'results/analysis/session_{session}/continuous_bat.npy')
+        f'results/empirical/session_{session}/continuous_bat.npy')
 
     title = f'Session {session}'
     labels = (title, *figure_parameters['data']['labels'])
@@ -71,7 +71,7 @@ for session in range(figure_parameters['model']['num_sessions']):
                     filename=filename)
 
 # transfer session results
-data = np.load('results/analysis/transfer_model_comparison.npz')
+data = np.load('results/empirical/transfer_model_comparison.npz')
 dAIC = data['delta_AIC']
 session = np.arange(1, figure_parameters['data']['num_sessions'])
 

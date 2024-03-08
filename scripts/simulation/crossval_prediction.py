@@ -10,7 +10,7 @@ NOTES:
 - think about parallelizing the simulations
 """
 
-BASE_PATH = 'results/analysis/'
+BASE_PATH = 'results/empirical/'
 
 import os
 

@@ -141,7 +141,7 @@ def run_simulation(experiment_parameters, simulation_parameters,
 if __name__ == '__main__':
     # Load empirical (behavioral) Arnold tongue
     behavioral_arnold_tongue = np.load(
-        'results/analysis/session_1/average_bat.npy').flatten()
+        'results/empirical/session_1/average_bat.npy').flatten()
     behavioral_arnold_tongue = min_max_normalize(behavioral_arnold_tongue)
 
     # Load the parameters

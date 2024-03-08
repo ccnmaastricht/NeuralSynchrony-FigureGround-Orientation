@@ -176,9 +176,6 @@ if __name__ == '__main__':
     # Run the exploration
     for decay_counter, decay_rate in enumerate(decay_rates):
         for coupling_counter, max_coupling in enumerate(max_couplings):
-            print(
-                f'Running decay rate {decay_counter + 1} of {len(decay_rates)} and coupling {coupling_counter + 1} of {len(max_couplings)}'
-            )
 
             # Set the parameters
             model_parameters['decay_rate'] = decay_rate

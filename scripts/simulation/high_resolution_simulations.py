@@ -200,9 +200,6 @@ def run_learning(learning_rate, optimal_psychometric, experiment_parameters,
 
     # Run the learning simulation
     for session in range(experiment_parameters['num_training_sessions']):
-        print(
-            f'Running session {session + 1} of {experiment_parameters["num_training_sessions"]}'
-        )
 
         simulation_classes = (model, stimulus_generator)
 
@@ -242,8 +239,8 @@ if __name__ == '__main__':
     learning_rate = learning_rates.mean()
 
     # Load the optimal psychometric curve
-    file = 'results/analysis/session_1/optimal_psychometric_crossval.npy'
-    optimal_psychometric = np.load(file).mean(axis=0)
+    data = np.load('results/simulation/crossval_estimation.npz')
+    optimal_psychometric = data['optimal_psychometric_crossval'].mean(axis=0)
 
     # Initialize the model and stimulus generator
     simulation_classes = initialize_simulation_classes(model_parameters,
@@ -266,6 +263,11 @@ if __name__ == '__main__':
                                   simulation_classes, indexing)
 
     # Save the results
+    arnold_tongues = arnold_tongues.reshape(
+        experiment_parameters['num_training_sessions'],
+        experiment_parameters['num_blocks'],
+        experiment_parameters['num_grid_coarseness'],
+        experiment_parameters['num_contrast_heterogeneity'])
     file = 'results/simulation/highres_arnold_tongues.npy'
     os.makedirs(os.path.dirname(file), exist_ok=True)
     np.save(file, arnold_tongues)

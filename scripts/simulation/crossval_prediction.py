@@ -206,9 +206,8 @@ def run_learning(fold, learning_rate, num_sessions, experiment_parameters,
     model.effective_learning_rate = learning_rate
 
     # Load the optimal psychometric curve
-    file = os.path.join(BASE_PATH, f'session_1',
-                        'optimal_psychometric_crossval.npy')
-    optimal_psychometric_fold = np.load(file)[fold]
+    data = np.load('results/simulation/crossval_estimation.npz')
+    optimal_psychometric_fold = data['optimal_psychometric_crossval'][fold]
 
     # Initialize the fits
     correlation_fits = np.zeros(num_sessions)

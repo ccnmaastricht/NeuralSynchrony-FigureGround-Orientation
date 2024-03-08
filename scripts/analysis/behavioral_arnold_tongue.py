@@ -86,7 +86,7 @@ def create_predictors(bounds_grid_coarseness, num_grid_coarseness,
     return predictors
 
 
-BASE_PATH = 'results/analysis/'
+BASE_PATH = 'results/empirical/'
 
 if __name__ == '__main__':
     # Load experiment parameters

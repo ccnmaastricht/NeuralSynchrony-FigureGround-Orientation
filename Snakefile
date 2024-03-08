@@ -11,8 +11,8 @@ rule all:
          "results/simulation/crossval_estimation.npz",
          "results/simulation/learning_simulation.npz",
          "results/simulation/highres_arnold_tongues.npy",
-         "figures/first_figure/panel_d.svg",
-         "figures/second_figure/bottom_row_transfer.svg"]
+         "results/figures/first_figure/panel_d.svg",
+         "results/figures/second_figure/bottom_row_transfer.svg"]
 
 rule run_system_info:
     output:
@@ -78,19 +78,19 @@ rule run_high_resolution_simulations:
     shell:
         "python -m scripts.simulation.high_resolution_simulations"
 
-rule run_first_figure:
+rule create_figure_one:
     input:
         expand("results/empirical/session_{session}/average_bat.npy", session=session_ids) +
         expand("results/empirical/session_{session}/continuous_bat.npy", session=session_ids) +
         ["results/simulation/parameter_space_exploration.npz",
         "results/simulation/highres_arnold_tongues.npy"]
     output:
-        ["figures/first_figure/panel_a.svg",
-        "figures/first_figure/panel_b.svg",
-        "figures/first_figure/panel_c.svg",
-        "figures/first_figure/panel_d.svg"]
+        ["results/figures/first_figure/panel_a.svg",
+        "results/figures/first_figure/panel_b.svg",
+        "results/figures/first_figure/panel_c.svg",
+        "results/figures/first_figure/panel_d.svg"]
     shell:
-        "python -m scripts.plotting.first_figure"
+        "python -m scripts.plotting.figure_one"
 
 rule run_second_figure:
     input:
@@ -99,6 +99,6 @@ rule run_second_figure:
         expand("results/empirical/session_{session}/average_bat.npy", session=session_ids) +
         expand("results/empirical/session_{session}/continuous_bat.npy", session=session_ids)
     output:
-        "figures/second_figure/bottom_row_transfer.svg"
+        "results/figures/second_figure/bottom_row_transfer.svg"
     shell:
-        "python -m scripts.plotting.second_figure"
+        "python -m scripts.plotting.figure_two"

@@ -75,28 +75,27 @@ def order_parameter(theta):
     return np.mean(np.exp(1j * theta), axis=1)
 
 
-def compute_coherence(theta, condense=True):
+def compute_phase_difference(theta, condense=True):
     """
-    Compute the coherence of a set of phases.
+    Compute the phase difference between a set of phases.
 
     Parameters
     ----------
     theta : array_like
         The phases.
-    condense : bool
-        Whether to condense the matrix.
+    condense : bool (optional)
+        Whether to condense the phase difference matrix. The default is True.
 
     Returns
-    ------- 
-    float
-        The coherence.
+    -------
+    array_like
+        The phase difference.
     """
     theta = theta.T
-    phase_difference = np.angle(np.exp(1j * (theta[:, None] - theta[None, :])))
-    coherence = np.cos(phase_difference)
+    phase_difference = np.exp(1j * (theta[:, None] - theta[None, :]))
     if condense:
-        coherence, _ = condense_matrix(coherence)
-    return coherence
+        phase_difference, _ = condense_matrix(phase_difference)
+    return phase_difference
 
 
 def compute_size(arnold_tongue, grid_coarseness, contrast_heterogeneity):

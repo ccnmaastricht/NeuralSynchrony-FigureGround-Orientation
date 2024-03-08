@@ -18,7 +18,7 @@ bounds = [0.5, 1.0]
 [[panels]]
 labels = ['','Coupling decay factor', 'Maximum coupling strength',
           'Jaccard similarity']
-ticks = [[0.0, 0.15, 0.3 , 0.45, 0.6], [0.0, 15.0, 30.0, 45.0, 60.0]]
+ticks = [[0.0, 0.15, 0.3 , 0.45, 0.6], [60.0, 45.0, 30.0, 15.0, 0.0]]
 bounds = [0.0, 1.0]
 
 [[panels]]

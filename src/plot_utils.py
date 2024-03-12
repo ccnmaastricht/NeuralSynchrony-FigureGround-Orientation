@@ -68,20 +68,26 @@ def colored_heatmap(data,
 
     Returns
     -------
-    None
+    None or Figure
+        If `filename` is None, return the figure.
     """
 
     sns.set_style('white')
     sns.set_context('paper')
     sns.set_palette('muted')
 
-    plt.figure(figsize=figsize, dpi=dpi if filetype != 'svg' else None)
+    figure = plt.figure(figsize=figsize,
+                        dpi=dpi if filetype != 'svg' else None)
 
     title, xlabel, ylabel, cbar_label = labels
     title_fontsize, label_fontsize, tick_fontsize, cbar_labelsize = fontsizes
     xticks, yticks = ticks
 
-    im = plt.imshow(data, cmap=colormap, vmin=bounds[0], vmax=bounds[1])
+    im = plt.imshow(data,
+                    cmap=colormap,
+                    vmin=bounds[0],
+                    vmax=bounds[1],
+                    extent=[xticks[0], xticks[-1], yticks[-1], yticks[0]])
 
     plt.title(title, fontsize=title_fontsize)
     plt.xlabel(xlabel, fontsize=label_fontsize)
@@ -97,18 +103,17 @@ def colored_heatmap(data,
     num_ticks = len(yticks)
     ytick_locations = np.linspace(0, data.shape[0] - 1, num_ticks)
 
-    plt.xticks(xtick_locations, xticks, fontsize=tick_fontsize)
-    plt.yticks(ytick_locations, yticks, fontsize=tick_fontsize)
+    plt.xticks(xticks, xticks, fontsize=tick_fontsize)
+    plt.yticks(yticks, yticks, fontsize=tick_fontsize)
 
     plt.tight_layout()
 
     if filename is not None:
         filename = f'{filename}.{filetype}'
         plt.savefig(filename, dpi=dpi if filetype != 'svg' else None)
-
         plt.close()
     else:
-        plt.show()
+        return figure
 
 
 def plot_dAIC(session,
@@ -153,13 +158,15 @@ def plot_dAIC(session,
 
     Returns
     -------
-    None
+    None or Figure
+        If `filename` is None, return the figure.
     """
     sns.set_style('whitegrid')
     sns.set_context('paper')
     sns.set_palette('muted')
 
-    plt.figure(figsize=figsize, dpi=dpi if filetype != 'svg' else None)
+    figure = plt.figure(figsize=figsize,
+                        dpi=dpi if filetype != 'svg' else None)
 
     title, xlabel, ylabel = labels
     title_fontsize, label_fontsize, tick_fontsize = fontsizes
@@ -189,7 +196,7 @@ def plot_dAIC(session,
     if filename is not None:
         filename = f'{filename}.{filetype}'
         plt.savefig(filename, dpi=dpi if filetype != 'svg' else None)
-
         plt.close()
+
     else:
-        plt.show()
+        return figure

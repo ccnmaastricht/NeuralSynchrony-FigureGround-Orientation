@@ -12,7 +12,7 @@ BASE_PATH = 'results/figures/figure_one'
 
 os.makedirs(BASE_PATH, exist_ok=True)
 
-with open('config/plotting/first_figure.toml', 'rb') as f:
+with open('config/plotting/figure_one.toml', 'rb') as f:
     figure_parameters = tomllib.load(f)
 
 figsize = convert_size(*figure_parameters['general']['figure_size'])

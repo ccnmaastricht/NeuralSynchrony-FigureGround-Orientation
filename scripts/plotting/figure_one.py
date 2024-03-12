@@ -36,6 +36,8 @@ colored_heatmap(behavioural_arnold_tongue,
 filename = os.path.join(BASE_PATH, 'panel_b')
 fitted_arnold_tongue = np.load(
     'results/empirical/session_1/continuous_bat.npy')
+psychometric_parameters = np.load(
+    'results/empirical/session_1/optimal_psychometric_parameters.npy')
 
 colored_heatmap(fitted_arnold_tongue,
                 figsize=figsize,

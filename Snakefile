@@ -11,8 +11,8 @@ rule all:
          "results/simulation/crossval_estimation.npz",
          "results/simulation/learning_simulation.npz",
          "results/simulation/highres_arnold_tongues.npy",
-         "results/figures/figure_one/panel_d.svg",
-         "results/figures/figure_two/bottom_row_transfer.svg"]
+         "results/figures/figure_two/panel_d.svg",
+         "results/figures/figure_three/bottom_row_transfer.svg"]
 
 rule run_system_info:
     output:
@@ -78,27 +78,27 @@ rule run_high_resolution_simulations:
     shell:
         "python -m scripts.simulation.high_resolution_simulations"
 
-rule create_figure_one:
+rule create_figure_two:
     input:
         expand("results/empirical/session_{session}/average_bat.npy", session=session_ids) +
         expand("results/empirical/session_{session}/continuous_bat.npy", session=session_ids) +
         ["results/simulation/parameter_space_exploration.npz",
         "results/simulation/highres_arnold_tongues.npy"]
     output:
-        ["results/figures/figure_one/panel_a.svg",
-        "results/figures/figure_one/panel_b.svg",
-        "results/figures/figure_one/panel_c.svg",
-        "results/figures/figure_one/panel_d.svg"]
+        ["results/figures/figure_two/panel_a.svg",
+        "results/figures/figure_two/panel_b.svg",
+        "results/figures/figure_two/panel_c.svg",
+        "results/figures/figure_two/panel_d.svg"]
     shell:
-        "python -m scripts.plotting.figure_one"
+        "python -m scripts.plotting.figure_two"
 
-rule run_figure_two:
+rule run_figure_three:
     input:
         ["results/simulation/highres_arnold_tongues.npy",
         "results/empirical/transfer_model_comparison.npz"] +
         expand("results/empirical/session_{session}/average_bat.npy", session=session_ids) +
         expand("results/empirical/session_{session}/continuous_bat.npy", session=session_ids)
     output:
-        "results/figures/figure_two/bottom_row_transfer.svg"
+        "results/figures/figure_three/bottom_row_transfer.svg"
     shell:
-        "python -m scripts.plotting.figure_two"
+        "python -m scripts.plotting.figure_three"

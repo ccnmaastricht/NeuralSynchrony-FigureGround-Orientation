@@ -86,7 +86,6 @@ def colored_heatmap(data,
     x_range = np.max(xticks) - np.min(xticks)
     y_range = np.max(yticks) - np.min(yticks)
     aspect_ratio = x_range / y_range
-    print(aspect_ratio)
 
     im = plt.imshow(data,
                     cmap=colormap,

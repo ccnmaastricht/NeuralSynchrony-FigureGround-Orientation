@@ -83,11 +83,16 @@ def colored_heatmap(data,
     title_fontsize, label_fontsize, tick_fontsize, cbar_labelsize = fontsizes
     xticks, yticks = ticks
 
+    x_range = xticks[-1] - xticks[0]
+    y_range = yticks[-1] - yticks[0]
+    aspect_ratio = x_range / y_range
+
     im = plt.imshow(data,
                     cmap=colormap,
                     vmin=bounds[0],
                     vmax=bounds[1],
-                    extent=[xticks[0], xticks[-1], yticks[-1], yticks[0]])
+                    extent=[xticks[0], xticks[-1], yticks[-1], yticks[0]],
+                    aspect=aspect_ratio)
 
     plt.title(title, fontsize=title_fontsize)
     plt.xlabel(xlabel, fontsize=label_fontsize)
@@ -98,13 +103,8 @@ def colored_heatmap(data,
         cbar.ax.tick_params(labelsize=tick_fontsize)
         cbar.ax.set_ylabel(cbar_label, rotation=90, fontsize=cbar_labelsize)
 
-    num_ticks = len(xticks)
-    xtick_locations = np.linspace(0, data.shape[1] - 1, num_ticks)
-    num_ticks = len(yticks)
-    ytick_locations = np.linspace(0, data.shape[0] - 1, num_ticks)
-
-    plt.xticks(xticks, xticks, fontsize=tick_fontsize)
-    plt.yticks(yticks, yticks, fontsize=tick_fontsize)
+    plt.xticks(xticks, fontsize=tick_fontsize)
+    plt.yticks(yticks, fontsize=tick_fontsize)
 
     plt.tight_layout()
 

@@ -11,4 +11,4 @@ COPY . /workflow
 RUN pip install -r requirements.txt
 
 # Run the Snakemake workflow when the container starts
-CMD ["snakemake", "--cores", "all"]
+CMD ["snakemake", "--cores", "30"]

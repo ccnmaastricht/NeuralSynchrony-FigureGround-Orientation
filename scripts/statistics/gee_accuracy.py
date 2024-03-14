@@ -34,7 +34,7 @@ def is_significant(results, variable, cutoff=0.05):
 
 if __name__ == '__main__':
     # Load data
-    data_path = 'data/main.csv'
+    data_path = 'data/Experiment.csv'
     try:
         data = load_data(data_path)
     except FileNotFoundError:

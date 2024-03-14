@@ -98,7 +98,7 @@ if __name__ == '__main__':
         experiment_parameters['max_contrast_heterogeneity'])
 
     # Load data
-    data_path = 'data/main.csv'
+    data_path = 'data/Experiment.csv'
     try:
         data = load_data(data_path)
     except FileNotFoundError:

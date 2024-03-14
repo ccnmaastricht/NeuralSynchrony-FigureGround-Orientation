@@ -63,7 +63,7 @@ if __name__ == '__main__':
 
     # Load experimental data
 
-    data_path = 'data/main.csv'
+    data_path = 'data/Experiment.csv'
 
     # Load experimental data
     try:

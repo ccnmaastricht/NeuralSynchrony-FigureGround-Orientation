@@ -4,7 +4,8 @@ session_ids = ["{}".format(i) for i in range(1, 10)]
 
 rule all:
     input:
-        ["results/info/system.toml",
+        ["data/Experiment.csv",
+        "results/info/system.toml",
         "results/statistics/gee_full.pkl",
          "results/empirical/transfer_model_comparison.npz",
          "results/simulation/parameter_space_exploration.npz",
@@ -14,13 +15,21 @@ rule all:
          "results/figures/figure_two/panel_d.svg",
          "results/figures/figure_three/bottom_row_transfer.svg"]
 
+rule download_data:
+    output:
+        "data/Experiment.csv"
+    shell:
+        "bash scripts/data/download.sh"
+
 rule run_system_info:
     output:
         "results/info/system.toml"
     shell:
         "python -m scripts.info.system"
 
-rule run_statistics:
+rule run_gee_accuracy:
+    input:
+        "data/Experiment.csv"
     output:
         "results/statistics/gee_full.pkl"
     shell:
@@ -28,7 +37,7 @@ rule run_statistics:
 
 rule run_behavioral_arnold_tongue:
     input:
-        "results/statistics/gee_full.pkl"
+        "data/Experiment.csv"
     output:
         expand("results/empirical/session_{session}/optimal_psychometric_parameters.npy", session=session_ids) +
         expand("results/empirical/session_{session}/average_bat.npy", session=session_ids) +

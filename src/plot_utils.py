@@ -83,11 +83,16 @@ def colored_heatmap(data,
     title_fontsize, label_fontsize, tick_fontsize, cbar_labelsize = fontsizes
     xticks, yticks = ticks
 
+    x_range = np.max(xticks) - np.min(xticks)
+    y_range = np.max(yticks) - np.min(yticks)
+    aspect_ratio = x_range / y_range
+
     im = plt.imshow(data,
                     cmap=colormap,
                     vmin=bounds[0],
                     vmax=bounds[1],
-                    extent=[xticks[0], xticks[-1], yticks[-1], yticks[0]])
+                    extent=[xticks[0], xticks[-1], yticks[-1], yticks[0]],
+                    aspect=aspect_ratio)
 
     plt.title(title, fontsize=title_fontsize)
     plt.xlabel(xlabel, fontsize=label_fontsize)
@@ -98,15 +103,98 @@ def colored_heatmap(data,
         cbar.ax.tick_params(labelsize=tick_fontsize)
         cbar.ax.set_ylabel(cbar_label, rotation=90, fontsize=cbar_labelsize)
 
-    num_ticks = len(xticks)
-    xtick_locations = np.linspace(0, data.shape[1] - 1, num_ticks)
-    num_ticks = len(yticks)
-    ytick_locations = np.linspace(0, data.shape[0] - 1, num_ticks)
-
-    plt.xticks(xticks, xticks, fontsize=tick_fontsize)
-    plt.yticks(yticks, yticks, fontsize=tick_fontsize)
+    plt.xticks(xticks, fontsize=tick_fontsize)
+    plt.yticks(yticks, fontsize=tick_fontsize)
 
     plt.tight_layout()
+
+    if filename is not None:
+        filename = f'{filename}.{filetype}'
+        plt.savefig(filename, dpi=dpi if filetype != 'svg' else None)
+        plt.close()
+    else:
+        return figure
+
+
+def comparative_lineplot(x,
+                         y,
+                         bounds,
+                         figsize,
+                         labels,
+                         fontsizes,
+                         line_color,
+                         filename=None,
+                         dpi=300,
+                         filetype='svg'):
+    """
+    Plot a line plot with shaded error bounds.
+
+    Parameters
+    ----------
+    x : array_like
+        The x values.
+    y : array_like  
+        The y values.
+    bounds : tuple
+        The lower and upper bounds for the shaded region.
+    figsize : tuple
+        The figure size in inches.
+    labels : tuple
+        The labels for the title, x and y axes.
+    fontsizes : tuple
+        The title, label, and tick font sizes.
+    line_color : str
+        The color for the line plot.
+    filename : str, optional
+        The filename to save the plot. The default is None.
+    dpi : int, optional
+        The resolution of the plot. The default is 300.
+    filetype : str, optional
+        The file type for the plot. The default is 'svg'.
+
+    Returns
+    -------
+    None or Figure
+        If `filename` is None, return the figure.
+    """
+
+    sns.set_style('whitegrid')
+    sns.set_context('paper')
+    sns.set_palette('muted')
+
+    figure = plt.figure(figsize=figsize)
+
+    label, xlabel, ylabel = labels
+    label_fontsize, tick_fontsize = fontsizes
+
+    plt.plot(x,
+             y[0],
+             marker='o',
+             linestyle='-',
+             color=line_color[0],
+             label=label[0])
+    plt.fill_between(x,
+                     bounds[0][0],
+                     bounds[1][0],
+                     color=line_color[0],
+                     alpha=0.2)
+
+    plt.plot(x,
+             y[1],
+             marker='o',
+             linestyle='-',
+             color=line_color[1],
+             label=label[1])
+    plt.fill_between(x,
+                     bounds[0][1],
+                     bounds[1][1],
+                     color=line_color[1],
+                     alpha=0.2)
+
+    plt.xlabel(xlabel, fontsize=label_fontsize)
+    plt.ylabel(ylabel, fontsize=label_fontsize)
+
+    plt.legend(fontsize=label_fontsize)
 
     if filename is not None:
         filename = f'{filename}.{filetype}'

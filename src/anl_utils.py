@@ -122,6 +122,26 @@ def compute_size(arnold_tongue, grid_coarseness, contrast_heterogeneity):
     return simps(simps(arnold_tongue, contrast_heterogeneity), grid_coarseness)
 
 
+def compute_growth_rate(sizes):
+    """
+    Compute the growth rates.
+
+    Parameters
+    ----------
+    sizes : array_like
+        The sizes.
+
+    Returns
+    -------
+    growth_rates : array_like
+        The growth rates.
+    """
+
+    growth_rates = np.diff(sizes, axis=1)
+    nan_array = np.full((growth_rates.shape[0], 1), np.nan)
+    return np.hstack((nan_array, growth_rates))
+
+
 def condense_matrix(matrix):
     """
     Condense a symmetric matrix.

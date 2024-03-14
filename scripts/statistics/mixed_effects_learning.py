@@ -2,13 +2,10 @@ import os
 import tomllib
 import numpy as np
 import pandas as pd
-import statsmodels.api as sm
 import statsmodels.formula.api as smf
 
-from src.anl_utils import compute_size
+from src.anl_utils import compute_size, compute_growth_rate
 from src.sim_utils import generate_condition_space
-
-import matplotlib.pyplot as plt
 
 
 def compute_empirical_sizes(experiment_parameters, condition_space):
@@ -17,8 +14,8 @@ def compute_empirical_sizes(experiment_parameters, condition_space):
 
     Returns
     -------
-    data : pandas.DataFrame
-        The empirical data.
+    bat_sizes : array_like
+        The bat sizes.
     """
 
     base_path = 'results/empirical'
@@ -36,14 +33,13 @@ def compute_empirical_sizes(experiment_parameters, condition_space):
     return bat_sizes
 
 
-if __name__ == '__main__':
-
+def load_data(config_path, simulation_path):
     # load configuration
-    with open('config/analysis/experiment_actual.toml', 'rb') as f:
+    with open(config_path, 'rb') as f:
         experiment_parameters = tomllib.load(f)
 
     # Load model learning data
-    data = np.load('results/simulation/learning_simulation.npz')
+    data = np.load(simulation_path)
     model_sizes = data['arnold_tongue_size']
 
     # Get empirical learning data
@@ -51,9 +47,32 @@ if __name__ == '__main__':
     empirical_sizes = compute_empirical_sizes(experiment_parameters,
                                               condition_space)
 
-    # Stack the arrays
-    data = np.hstack((model_sizes.reshape(-1,
-                                          1), empirical_sizes.reshape(-1, 1)))
+    return model_sizes, empirical_sizes, experiment_parameters
+
+
+def prepare_dataframe(model_sizes, model_growth, empirical_sizes,
+                      empirical_growth, experiment_parameters):
+    """
+    Prepare the DataFrame.
+
+    Parameters
+    ----------
+    model_sizes : array_like
+        The model sizes.
+    model_growth : array_like
+        The model growth rates.
+    empirical_sizes : array_like
+        The empirical sizes.
+    empirical_growth : array_like
+        The empirical growth rates.
+    experiment_parameters : dict
+        The experiment parameters.
+
+    Returns
+    -------
+    df : pandas.DataFrame
+        The DataFrame.
+    """
 
     # Create subject and session indices
     n_subjects = experiment_parameters['num_subjects']
@@ -62,21 +81,62 @@ if __name__ == '__main__':
     session_idx = np.tile(np.arange(n_sessions), n_subjects)
 
     # Create a DataFrame
-    df = pd.DataFrame(data, columns=["model", "empirical"])
-    df["fold"] = subject_idx
-    df["session_id"] = session_idx
+    df = pd.DataFrame(np.hstack((subject_idx[:, None], session_idx[:, None])),
+                      columns=['subject', 'session'])
 
+    # Add sizes
+    df["model_size"] = model_sizes.reshape(-1)
+    df["empirical_size"] = empirical_sizes.reshape(-1)
+
+    # Add growth rates
+    df["model_growth"] = model_growth.reshape(-1)
+    df["empirical_growth"] = empirical_growth.reshape(-1)
+
+    return df
+
+
+def run_mixed_effects_analysis(df, dependent_variable, independent_variable,
+                               group_variable, output_path):
     # Define the model formula with fixed and random effects
-    md = smf.mixedlm("empirical ~ model",
+    md = smf.mixedlm(f"{dependent_variable} ~ {independent_variable}",
                      df,
-                     groups=df["fold"],
-                     re_formula="~0 + model",
-                     vc_formula={"fold": "0 + C(fold)"})
+                     groups=df[group_variable])
 
     # Fit the model
     mdf = md.fit()
 
-    print(mdf.summary())
+    # Save the results of the analysis
+    mdf.save(output_path)
 
-    plt.plot(model_sizes.T, 'o')
-    plt.show()
+
+if __name__ == '__main__':
+
+    config_path = 'config/analysis/experiment_actual.toml'
+    model_path = 'results/simulation/learning_simulation.npz'
+
+    model_sizes, empirical_sizes, experiment_parameters = load_data(
+        config_path, model_path)
+
+    # Compute growth rates
+    model_growth = compute_growth_rate(model_sizes)
+    empirical_growth = compute_growth_rate(empirical_sizes)
+
+    # Prepare the DataFrame
+    df = prepare_dataframe(model_sizes, model_growth, empirical_sizes,
+                           empirical_growth, experiment_parameters)
+
+    # Save the dataframe
+    df.to_csv('results/empirical/learning.csv')
+
+    # Exclude first two sessions
+    df = df[df["session"] > 1]
+
+    # Run the mixed effects analysis for size
+    run_mixed_effects_analysis(
+        df, "empirical_size", "model_size", "subject",
+        'results/statistics/mixed_effects_bat_size.pkl')
+
+    # Run the mixed effects analysis for growth
+    run_mixed_effects_analysis(
+        df, "empirical_growth", "model_growth", "subject",
+        'results/statistics/mixed_effects_bat_growth.pkl')

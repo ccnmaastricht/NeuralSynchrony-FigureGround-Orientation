@@ -1,0 +1,30 @@
+[general]
+figure_size = [89, 89]
+fontsizes = [6, 5, 5, 5]
+colormap="coolwarm"
+
+[data]
+num_sessions = 9
+labels = ['Contrast heterogeneity', 'Grid coarseness', 'Accuracy']
+ticks = [[0.01, 0.25, 0.5, 0.75, 1.0], [1.0, 1.1, 1.2, 1.3, 1.4, 1.5]]
+bounds = [0.5, 1.0]
+
+[model]
+num_sessions = 8
+labels = ['Contrast heterogeneity', 'Grid coarseness', 'Synchronization']
+ticks = [[0.01, 0.25, 0.5, 0.75, 1.0], [1.0, 1.1, 1.2, 1.3, 1.4, 1.5]]
+bounds = [0.5, 1.0]
+
+[transfer]
+labels = ['Model comparison', 'Session', 'Delta AIC']
+line_color = 'black'
+text_color = 'black'
+
+[transfer.fill]
+colors = ['#1f77b4', '#d62728']  # blue and red from coolwarm
+alpha = 0.2  
+bounds_x = [[0.9, 4.5], [4.5, 8.1]] 
+bounds_y = [-1, 400] 
+labels = ['early', 'late']
+label_x = [2, 6] 
+label_y = [350, 350]

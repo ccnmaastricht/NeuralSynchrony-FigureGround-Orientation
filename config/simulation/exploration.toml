@@ -1,6 +1,6 @@
 decay_rate_min = 0.0
 decay_rate_max = 0.6
-num_decay = 5 # 30
+num_decay = 30
 max_coupling_min = 0.0
 max_coupling_max = 60.0
-num_max_coupling = 5 # 30
+num_max_coupling = 30

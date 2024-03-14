@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Read in config file
-config_file="../config/data.toml"
+config_file="../config/data/download.toml"
 eval "$(toml query < "$config_file")"
 
 # Create a directory to store the data files

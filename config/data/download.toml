@@ -1,0 +1,13 @@
+# Data files to download from Zenodo
+
+[data_files]
+
+# First data file
+[[data_files.files]]
+url = "https://zenodo.org/records/10817187/files/Demographics.csv"          # placeholder
+checksum = "md5:17b756d12ff101c4e5476ec3957817e4"
+
+# Second data file
+[[data_files.files]]
+url = "https://zenodo.org/records/10817187/files/Experiment.csv?download=1&preview=1"  # placeholder
+checksum = "md5:6b7488a60ce235e76a8bc869507b8748"

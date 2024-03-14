@@ -19,7 +19,7 @@ rule download_data:
     output:
         "data/Experiment.csv"
     shell:
-        "bash scripts/data/download.sh"
+        "zenodo_get https://doi.org/10.5281/zenodo.10817187 -o data"
 
 rule run_system_info:
     output:

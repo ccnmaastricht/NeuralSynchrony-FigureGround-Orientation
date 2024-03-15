@@ -2,6 +2,7 @@
 This script performs generalized estimating equations (GEE) analysis on the behavioral data.
 Results are saved in results/statistics/ and correspond to section X of the paper.
 """
+import pickle
 import pandas as pd
 import statsmodels.api as sm
 import statsmodels.formula.api as smf
@@ -58,7 +59,8 @@ if __name__ == '__main__':
     results_full = model.fit()
 
     # save results of full model
-    results_full.params.to_pickle('results/statistics/gee_full.pkl')
+    with open('results/statistics/gee_full.pkl', 'wb') as f:
+        pickle.dump(results_full, f)
 
     if is_significant(results_full, 'SessionID:ContrastHeterogeneity'):
         # simple effects of contrast heterogeneity for each session
@@ -70,8 +72,12 @@ if __name__ == '__main__':
                             cov_struct=covariance_structure,
                             family=family)
             results = model.fit()
-            results.params.to_pickle(
-                f'results/statistics/gee_contrast_heterogeneity_{session}.pkl')
+
+            # save results
+            with open(
+                    f'results/statistics/gee_contrast_heterogeneity_{session}.pkl',
+                    'wb') as f:
+                pickle.dump(results, f)
 
     if is_significant(results_full, 'SessionID:GridCoarseness'):
         # simple effects of grid coarseness for each session
@@ -83,5 +89,8 @@ if __name__ == '__main__':
                             cov_struct=covariance_structure,
                             family=family)
             results = model.fit()
-            results.params.to_pickle(
-                f'results/statistics/gee_grid_coarseness_{session}.pkl')
+
+            # save results
+            with open(f'results/statistics/gee_grid_coarseness_{session}.pkl',
+                      'wb') as f:
+                pickle.dump(results, f)

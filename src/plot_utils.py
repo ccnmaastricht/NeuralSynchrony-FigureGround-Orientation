@@ -288,3 +288,61 @@ def plot_dAIC(session,
 
     else:
         return figure
+
+
+def fit_barplot(mean_fit,
+                sem_fit,
+                sessions,
+                noise_ceiling,
+                figsize,
+                labels,
+                fontsizes,
+                capsize,
+                face_color,
+                alpha=0.3,
+                filename=None,
+                dpi=300,
+                filetype='svg'):
+
+    figure = plt.figure(figsize=figsize,
+                        dpi=dpi if filetype != 'svg' else None)
+
+    title, xlabel, ylabel = labels
+    title_fontsize, label_fontsize, tick_fontsize = fontsizes
+
+    # Create a bar plot
+    plt.bar(sessions,
+            mean_fit,
+            yerr=1.96 * sem_fit,
+            capsize=capsize,
+            color=face_color)
+
+    # set the min and max of the y-axis
+    plt.ylim(0, 1)
+
+    plt.tick_params(axis='both', which='major', labelsize=tick_fontsize)
+
+    # Add gray regions above each bar to indicate the noise ceiling
+    for i, session in enumerate(sessions):
+        x_values = np.array([session - 0.4, session + 0.4])
+        y1_values = np.full_like(x_values, noise_ceiling[i][0])
+        y2_values = np.full_like(x_values, noise_ceiling[i][1])
+
+        plt.fill_between(x_values,
+                         y1_values,
+                         y2=y2_values,
+                         color='gray',
+                         alpha=alpha)
+
+    plt.xlabel(xlabel, fontsize=label_fontsize)
+    plt.ylabel(ylabel, fontsize=label_fontsize)
+    plt.title(title, fontsize=title_fontsize)
+    plt.tight_layout()
+
+    # Save the figure
+    if filename is not None:
+        filename = f'{filename}.{filetype}'
+        plt.savefig(filename, dpi=dpi if filetype != 'svg' else None)
+        plt.close()
+    else:
+        return figure

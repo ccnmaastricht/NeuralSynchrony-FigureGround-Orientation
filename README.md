@@ -14,6 +14,10 @@ and experience levels from naïve to highly practised.
 ## Modeling
 
 ## Psychophysics
+
+### Data
+Karimian, M., Mark, R., De Weerd, P., & Senden, M. (2024). Human Psychophysics Dataset on Figure Ground Segregation in Texture Stimuli [Data set]. Zenodo. https://doi.org/10.5281/zenodo.10817187
+
 ### Codebooks
 * [Sample Information](https://github.com/ccnmaastricht/NeuralSynchrony-FigureGround/wiki/Codebook-Sample-Info)
 * [Experimental Data](https://github.com/ccnmaastricht/NeuralSynchrony-FigureGround/wiki/Codebook-Experimental-Data)

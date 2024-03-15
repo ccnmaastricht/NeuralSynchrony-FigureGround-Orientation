@@ -1,5 +1,5 @@
 """
-This script creates all panels of the second figure of the paper. 
+This script creates all panels of the third figure of the paper. 
 """
 
 import os

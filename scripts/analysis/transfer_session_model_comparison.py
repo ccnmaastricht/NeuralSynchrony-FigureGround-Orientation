@@ -62,7 +62,6 @@ if __name__ == '__main__':
     num_predictors = model_comparison_parameters['num_predictors']
 
     # Load experimental data
-
     data_path = 'data/Experiment.csv'
 
     # Load experimental data

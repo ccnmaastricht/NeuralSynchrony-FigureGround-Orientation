@@ -55,9 +55,9 @@ def compute_noise_ceiling(individual_bats):
     return noise_ceiling_corrcoef, noise_ceiling_jaccard
 
 
-def compute_corr_moments(correlation_fits):
+def compute_corr_mean_error(correlation_fits):
     """
-    Compute the mean and standard error on the correlation scale.
+    Compute the mean and error value on the correlation scale for plotting error bars.
 
     Parameters
     ----------
@@ -69,8 +69,9 @@ def compute_corr_moments(correlation_fits):
     array_like
         The mean correlation fit.
     array_like
-        The standard error on the correlation fit.
+        The error value to add and subtract from the mean to create the 95% confidence interval.
     """
+
     # Fisher-z transform the correlation coefficients
     z_corr_fits = np.arctanh(correlation_fits)
 
@@ -79,11 +80,19 @@ def compute_corr_moments(correlation_fits):
     sem_z_corr_fit = np.std(z_corr_fits, axis=0) / np.sqrt(
         z_corr_fits.shape[0])
 
+    # Calculate the 95% confidence interval on the Fisher-z scale
+    bound = 1.96 * sem_z_corr_fit
+
     # Inverse Fisher-z transform the mean and confidence interval to get them back on the correlation scale
     mean_corr_fit = np.tanh(mean_z_corr_fit)
-    sem_corr_fit = np.tanh(sem_z_corr_fit)
+    lower_corr_fit = np.tanh(mean_z_corr_fit - bound)
+    upper_corr_fit = np.tanh(mean_z_corr_fit + bound)
 
-    return mean_corr_fit, sem_corr_fit
+    # Calculate the error value as the difference between the mean and the bounds of the confidence interval
+    error_value = np.array(
+        (upper_corr_fit - mean_corr_fit, mean_corr_fit - lower_corr_fit))
+
+    return mean_corr_fit, error_value
 
 
 if __name__ == '__main__':
@@ -114,11 +123,13 @@ if __name__ == '__main__':
     filename = os.path.join(BASE_PATH, 'panel_a')
 
     # Inverse Fisher-z transform the mean and confidence interval to get them back on the correlation scale
-    mean_corr_fit, sem_corr_fit = compute_corr_moments(correlation_fits)
+    mean_corr_fit, corr_error = compute_corr_mean_error(correlation_fits)
+
+    print(corr_error)
 
     # Create a bar plot
     fit_barplot(mean_corr_fit,
-                sem_corr_fit,
+                corr_error,
                 figure_parameters['general']['sessions'],
                 noise_ceiling_corrcoef,
                 figsize=figsize,

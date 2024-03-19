@@ -3,17 +3,17 @@ This script creates all panels of the fourth figure of the paper.
 """
 
 import os
+import pickle
 import tomllib
 import seaborn as sns
 import matplotlib.pyplot as plt
 
 import numpy as np
+import pandas as pd
 from src.anl_utils import min_max_normalize, weighted_jaccard
 from src.plot_utils import fit_barplot, convert_size
 
 BASE_PATH = 'results/figures/figure_four'
-
-os.makedirs(BASE_PATH, exist_ok=True)
 
 
 def compute_noise_ceiling(individual_bats):
@@ -95,6 +95,98 @@ def compute_corr_mean_error(correlation_fits):
     return mean_corr_fit, error_value
 
 
+def get_intercept_and_slope(picke_file_path):
+    with open(picke_file_path, 'rb') as f:
+        mixed_effects_model = pickle.load(f)
+
+    intercept = mixed_effects_model.params['Intercept']
+    slope = mixed_effects_model.params['model_size']
+    return intercept, slope
+
+
+def mean_and_sem(df, variable):
+    mean = df.groupby('session')[variable].mean()
+    sem = df.groupby('session')[variable].sem()
+    return mean, sem
+
+
+def plot_model_vs_empirical(mean_model_size,
+                            mean_empirical_size,
+                            sem_empirical_size,
+                            intercept,
+                            slope,
+                            labels,
+                            fontsizes,
+                            marker_color,
+                            figsize,
+                            filename=None,
+                            dpi=300,
+                            filetype='svg'):
+    """
+    Plot model vs empirical Arnold tongue size.
+
+    Parameters
+    ----------
+    mean_model_size : pandas.Series
+        The mean model sizes per session.
+    mean_empirical_size : pandas.Series
+        The mean empirical sizes per session.
+    sem_empirical_size : pandas.Series
+        The standard error of the mean for the empirical sizes per session.
+    intercept : float
+        The intercept of the mixed effects model.
+    slope : float
+        The slope of the mixed effects model.
+    fig_params : dict
+        The figure parameters.
+    """
+    figure = plt.figure(figsize=figsize,
+                        dpi=dpi if filetype != 'svg' else None)
+
+    title, xlabel, ylabel = labels
+    title_fontsize, label_fontsize, tick_fontsize = fontsizes
+
+    plt.errorbar(mean_model_size[:2],
+                 mean_empirical_size[:2],
+                 yerr=sem_empirical_size[:2],
+                 fmt='o',
+                 color=marker_color[0],
+                 capsize=5,
+                 capthick=2)
+
+    plt.errorbar(mean_model_size[2:],
+                 mean_empirical_size[2:],
+                 yerr=sem_empirical_size[2:],
+                 fmt='o',
+                 color=marker_color[1],
+                 capsize=5,
+                 capthick=2)
+
+    # plot the mixed effects model
+    min_x = min(mean_model_size) - 0.1 * min(mean_model_size)
+    max_x = max(mean_model_size) + 0.1 * max(mean_model_size)
+    x = np.linspace(min_x, max_x, 100)
+    y = intercept + slope * x
+    plt.plot(x, y, color='black')
+
+    plt.xlabel(xlabel, fontsize=label_fontsize)
+    plt.ylabel(ylabel, fontsize=label_fontsize)
+    plt.title(title, fontsize=title_fontsize)
+
+    plt.xticks(fontsize=tick_fontsize)
+    plt.yticks(fontsize=tick_fontsize)
+
+    plt.tight_layout()
+
+    # Save the figure
+    if filename is not None:
+        filename = f'{filename}.{filetype}'
+        plt.savefig(filename, dpi=dpi if filetype != 'svg' else None)
+        plt.close()
+    else:
+        return figure
+
+
 if __name__ == '__main__':
 
     # Load the figure parameters
@@ -124,8 +216,6 @@ if __name__ == '__main__':
 
     # Inverse Fisher-z transform the mean and confidence interval to get them back on the correlation scale
     mean_corr_fit, corr_error = compute_corr_mean_error(correlation_fits)
-
-    print(corr_error)
 
     # Create a bar plot
     fit_barplot(mean_corr_fit,
@@ -162,3 +252,24 @@ if __name__ == '__main__':
                 filename=filename,
                 dpi=300,
                 filetype='svg')
+
+    # Panel C - model vs empirical Arnold tongue size
+    filename = os.path.join(BASE_PATH, 'panel_c')
+
+    # get slope and intercept of the mixed effects model
+    intercept, slope = get_intercept_and_slope(
+        'results/statistics/mixed_effects_bat_size.pkl')
+
+    # load the empirical data
+    df = pd.read_csv('results/empirical/learning.csv')
+
+    mean_model_size, _ = mean_and_sem(df, 'model_size')
+    mean_empirical_size, sem_empirical_size = mean_and_sem(
+        df, 'empirical_size')
+
+    plot_model_vs_empirical(mean_model_size, mean_empirical_size,
+                            sem_empirical_size, intercept, slope,
+                            figure_parameters['panels'][2]['labels'],
+                            figure_parameters['general']['fontsizes'],
+                            figure_parameters['panels'][2]['marker_color'],
+                            figsize, filename)

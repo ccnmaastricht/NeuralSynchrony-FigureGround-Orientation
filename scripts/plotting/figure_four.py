@@ -96,6 +96,21 @@ def compute_corr_mean_error(correlation_fits):
 
 
 def get_intercept_and_slope(picke_file_path):
+    """
+    Get the intercept and slope of the mixed effects model.
+
+    Parameters
+    ----------
+    picke_file_path : str
+        The path to the pickled mixed effects model.
+
+    Returns
+    -------
+    float
+        The intercept of the mixed effects model.
+    float
+        The slope of the mixed effects model.
+    """
     with open(picke_file_path, 'rb') as f:
         mixed_effects_model = pickle.load(f)
 
@@ -105,6 +120,23 @@ def get_intercept_and_slope(picke_file_path):
 
 
 def mean_and_sem(df, variable):
+    """
+    Compute the mean and standard error of the mean for a variable per session.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        The DataFrame.
+    variable : str
+        The variable of interest.
+
+    Returns
+    -------
+    mean : pandas.Series
+        The mean of the variable per session.
+    sem : pandas.Series
+        The standard error of the mean of the variable per session.
+    """
     mean = df.groupby('session')[variable].mean()
     sem = df.groupby('session')[variable].sem()
     return mean, sem

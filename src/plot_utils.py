@@ -291,7 +291,7 @@ def plot_dAIC(session,
 
 
 def fit_barplot(mean_fit,
-                sem_fit,
+                error,
                 sessions,
                 noise_ceiling,
                 figsize,
@@ -311,11 +311,7 @@ def fit_barplot(mean_fit,
     title_fontsize, label_fontsize, tick_fontsize = fontsizes
 
     # Create a bar plot
-    plt.bar(sessions,
-            mean_fit,
-            yerr=1.96 * sem_fit,
-            capsize=capsize,
-            color=face_color)
+    plt.bar(sessions, mean_fit, yerr=error, capsize=capsize, color=face_color)
 
     # set the min and max of the y-axis
     plt.ylim(0, 1)

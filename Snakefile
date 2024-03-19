@@ -7,13 +7,16 @@ rule all:
         ["data/Experiment.csv",
         "results/info/system.toml",
         "results/statistics/gee_full.pkl",
+        "results/statistics/mixed_effects_bat_size.pkl",
          "results/empirical/transfer_model_comparison.npz",
+         "results/empirical/learning.csv",
          "results/simulation/parameter_space_exploration.npz",
          "results/simulation/crossval_estimation.npz",
          "results/simulation/learning_simulation.npz",
          "results/simulation/highres_arnold_tongues.npy",
          "results/figures/figure_two/panel_d.svg",
-         "results/figures/figure_three/bottom_row_transfer.svg"]
+         "results/figures/figure_three/bottom_row_transfer.svg",
+         "results/figures/figure_four/panel_c.svg",]
 
 rule download_data:
     output:
@@ -87,6 +90,16 @@ rule run_high_resolution_simulations:
     shell:
         "python -m scripts.simulation.high_resolution_simulations"
 
+rule test_model_predictions:
+    input:
+        ["results/simulation/learning_simulation.npz"] + 
+        expand("results/empirical/session_{session}/individual_bats.npy", session=session_ids)
+    output:
+        ["results/statistics/mixed_effects_bat_size.pkl",
+        "results/empirical/learning.csv"]
+    shell:
+        "python -m scripts.statistics.quantify_model_predictions"
+
 rule create_figure_two:
     input:
         expand("results/empirical/session_{session}/average_bat.npy", session=session_ids) +
@@ -111,3 +124,17 @@ rule run_figure_three:
         "results/figures/figure_three/bottom_row_transfer.svg"
     shell:
         "python -m scripts.plotting.figure_three"
+
+rule run_figure_four:
+    input:
+        ["results/simulation/learning_simulation.npz",
+        "results/empirical/learning.csv",
+        "results/statistics/mixed_effects_bat_size.pkl"] +
+        expand("results/empirical/session_{session}/individual_bats.npy", session=session_ids)
+    output:
+        ["results/figures/figure_four/panel_a.svg",
+        "results/figures/figure_four/panel_b.svg",
+        "results/figures/figure_four/panel_c.svg"]
+    shell:
+        "python -m scripts.plotting.figure_four"
+

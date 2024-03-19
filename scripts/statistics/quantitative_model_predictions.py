@@ -34,6 +34,26 @@ def compute_empirical_sizes(experiment_parameters, condition_space):
 
 
 def load_data(config_path, simulation_path):
+    """
+    Load the data.
+
+    Parameters
+    ----------
+    config_path : str
+        The path to the configuration file.
+    simulation_path : str
+        The path to the simulation file.
+
+    Returns
+    -------
+    model_sizes : array_like
+        The model sizes.
+    empirical_sizes : array_like
+        The empirical sizes.
+    experiment_parameters : dict
+        The experiment parameters.
+    """
+
     # load configuration
     with open(config_path, 'rb') as f:
         experiment_parameters = tomllib.load(f)
@@ -68,18 +88,14 @@ def prepare_dataframe(model_sizes, empirical_sizes, experiment_parameters):
     df : pandas.DataFrame
         The DataFrame.
     """
-
-    # Create subject and session indices
     n_subjects = experiment_parameters['num_subjects']
     n_sessions = experiment_parameters['num_training_sessions']
     subject_idx = np.repeat(np.arange(n_subjects), n_sessions)
     session_idx = np.tile(np.arange(n_sessions), n_subjects)
 
-    # Create a DataFrame
     df = pd.DataFrame(np.hstack((subject_idx[:, None], session_idx[:, None])),
                       columns=['subject', 'session'])
 
-    # Add sizes
     df["model_size"] = model_sizes.reshape(-1)
     df["empirical_size"] = empirical_sizes.reshape(-1)
 
@@ -88,16 +104,26 @@ def prepare_dataframe(model_sizes, empirical_sizes, experiment_parameters):
 
 def run_mixed_effects_analysis(df, dependent_variable, independent_variable,
                                group_variable, output_path):
-    # Define the model formula with fixed and random effects
+    """
+    Run a mixed effects analysis.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        The DataFrame.
+    dependent_variable : str
+        The dependent variable.
+    independent_variable : str
+        The independent variable.
+
+    Returns
+    -------
+    None
+    """
     md = smf.mixedlm(f"{dependent_variable} ~ {independent_variable}",
                      df,
                      groups=df[group_variable])
-
-    # Fit the model
     mdf = md.fit()
-
-    # Save the results of the analysis
-    print(mdf.summary())
     mdf.save(output_path)
 
 

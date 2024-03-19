@@ -10,3 +10,7 @@ labels = ['', 'Session', 'Correlation']
 
 [[panels]]
 labels = ['', 'Session', 'Jaccard similarity']
+
+[[panels]]
+marker_color=['#dc267f', '#785ef0']
+labels = ['', 'Empirical', 'Model']

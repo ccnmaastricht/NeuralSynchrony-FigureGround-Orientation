@@ -1,3 +1,8 @@
+"""
+This script generates results required for the Quantitative Model Predictions section of the paper. 
+It performs a mixed effects analysis to investigate the relationship between the sizes of empirical and model 
+Arnold tongues while accounting for subject variability. Results are saved in results/statistics/
+"""
 import os
 import tomllib
 import numpy as np

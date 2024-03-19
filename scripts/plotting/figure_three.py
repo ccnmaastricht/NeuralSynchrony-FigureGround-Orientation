@@ -6,6 +6,7 @@ import os
 import tomllib
 
 import numpy as np
+import matplotlib.pyplot as plt
 from src.plot_utils import colored_heatmap, convert_size, plot_dAIC
 
 BASE_PATH = 'results/figures/figure_three'
@@ -41,16 +42,40 @@ for session in range(1, figure_parameters['data']['num_sessions'] + 1):
     fitted_arnold_tongue = np.load(
         f'results/empirical/session_{session}/continuous_bat.npy')
 
+    psychometric_parameters = np.load(
+        f'results/empirical/session_{session}/optimal_psychometric_parameters.npy'
+    )
+
     title = f'Session {session}'
     labels = (title, *figure_parameters['data']['labels'])
-    colored_heatmap(fitted_arnold_tongue,
-                    figsize=figsize,
-                    labels=labels,
-                    fontsizes=figure_parameters['general']['fontsizes'],
-                    ticks=figure_parameters['data']['ticks'],
-                    bounds=figure_parameters['data']['bounds'],
-                    colormap=cmap,
-                    filename=filename)
+    heatmap = colored_heatmap(
+        fitted_arnold_tongue,
+        figsize=figsize,
+        labels=labels,
+        fontsizes=figure_parameters['general']['fontsizes'],
+        ticks=figure_parameters['data']['ticks'],
+        bounds=figure_parameters['data']['bounds'],
+        colormap=cmap)
+
+    # Add threshold line (75% correct)
+    contrast_heterogeneity = np.linspace(
+        figure_parameters['data']['min_contrast_heterogeneity'],
+        figure_parameters['data']['max_contrast_heterogeneity'],
+        figure_parameters['data']['num_contrast_heterogeneity'])
+    grid_coarseness = -(
+        psychometric_parameters[1] * contrast_heterogeneity +
+        psychometric_parameters[2]) / psychometric_parameters[0]
+
+    ax = heatmap.gca()
+    ax.plot(contrast_heterogeneity, grid_coarseness, 'k--')
+    xticks, yticks = figure_parameters['data']['ticks']
+    ax.set_xlim(xticks[0], xticks[-1])
+    ax.set_ylim(yticks[-1], yticks[0])
+
+    heatmap.tight_layout()
+    filename = f'{filename}.svg'
+    heatmap.savefig(filename)
+    plt.close(heatmap)
 
 # bottom row - simulated Arnold tongue & transfer session results
 simulated_arnold_tongue = np.load(

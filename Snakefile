@@ -16,7 +16,7 @@ rule all:
          "results/simulation/highres_arnold_tongues.npy",
          "results/figures/figure_two/panel_d.svg",
          "results/figures/figure_three/bottom_row_transfer.svg",
-         "results/figures/figure_four/panel_c.svg",]
+         "results/figures/figure_four/panel_c.svg"]
 
 rule download_data:
     output:

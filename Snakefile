@@ -98,7 +98,7 @@ rule test_model_predictions:
         ["results/statistics/mixed_effects_bat_size.pkl",
         "results/empirical/learning.csv"]
     shell:
-        "python -m scripts.statistics.quantify_model_predictions"
+        "python -m scripts.statistics.quantitative_model_predictions"
 
 rule create_figure_two:
     input:

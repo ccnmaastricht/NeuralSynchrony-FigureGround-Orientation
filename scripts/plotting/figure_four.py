@@ -14,6 +14,7 @@ from src.anl_utils import min_max_normalize, weighted_jaccard
 from src.plot_utils import fit_barplot, convert_size
 
 BASE_PATH = 'results/figures/figure_four'
+os.makedirs(BASE_PATH, exist_ok=True)
 
 
 def compute_noise_ceiling(individual_bats):

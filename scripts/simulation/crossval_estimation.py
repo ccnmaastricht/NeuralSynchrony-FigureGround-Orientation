@@ -259,9 +259,11 @@ def coarse_to_fine(crossval_parameters, weighted_locking,
             behavioral_arnold_tongue)
 
         # Find the best learning rate
-        lower_bound = np.argmax(weighted_jaccard_fits)
-        upper_bound = lower_bound + 2
-        best_index = lower_bound + 1
+        lower_bound_idx = np.argmax(weighted_jaccard_fits)
+        upper_bound_idx = lower_bound_idx + 2
+        best_index = lower_bound_idx + 1
+        lower_bound = effective_learning_rates[lower_bound_idx]
+        upper_bound = effective_learning_rates[upper_bound_idx]
         best_learning_rate = effective_learning_rates[best_index]
 
         # Update the grid

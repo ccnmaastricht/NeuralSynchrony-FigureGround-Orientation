@@ -1,4 +1,4 @@
-# Neural Synchrony Provides a Grouping Mechanism for Figure-Ground Segregation in Texture Stimuli
+# Adaptive Synchronization of Neural Gamma Oscillations Mediates Figure-Ground Perception in Texture Stimuli
 
 Neural grouping mechanisms are thought to integrate image elements that define
 a figure and segregate them from the background in texture stimuli.  Neural synchrony is a likely candidate for this grouping mechanism. According to the theory of weakly coupled oscillators (TWCO), the success or failure of synchronization among weakly coupled oscillators is determined by two factors: the dissimilarity of their intrinsic frequencies (detuning) and the strength of their coupling. These factors are directly related to contrast heterogeneity (the extent to which contrasts are dissimilar) among image elements and to the physical distance between elements, respectively. We, therefore, suggest that the grouping mechanisms underlying figure-ground segregation can be explained in terms of the principles of synchronization in a network of weakly coupled oscillators. 

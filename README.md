@@ -55,15 +55,18 @@ The workflow consists of the following steps:
 5. Perform behavioral analysis on the human psychophysics data to estimate the optimal psychometric parameters for each session.
 6. Compare the performance of different models in predicting the human psychophysics data using transfer session model comparison.
 7. Explore the parameter space of the model using parameter exploration.
-8. Estimate the parameters of the model using cross-validation.
-9. Simulate the model using the estimated parameters.
+8. Estimate the learning rate of the model using cross-validation.
+9. Simulate the learning experiment using the estimated learning rate.
 10. Test the model predictions against the human psychophysics data.
 11. Generate figures to visualize the results.
 
 The workflow is designed to be modular and extensible. Each step is defined as a separate rule in the Snakefile, and new rules can be added to extend the workflow as needed.
 
 ### Running the Workflow
-To run the workflow, navigate to the root directory of the project and execute the following command:
+
+There are two ways to run the workflow:
+
+1. **Locally:** To run the workflow locally, navigate to the root directory of the project and execute the following command:
 ```bash
 snakemake --cores [number_of_cores]
 ```
@@ -77,3 +80,16 @@ snakemake --cores 10
 ```
 This will run the workflow using 10 CPU cores and generate the results in the `results` directory.
 
+2. **Docker container:** The workflow can also be run as a Docker container. To do this, build the Docker image using the following command:
+```bash
+docker build -t adaptive-synchronization .
+```
+Then, run the container using the following command:
+```bash
+docker run --rm -it -v $(pwd)/results:/workflow/results adaptive-synchronization snakemake --cores 30
+```
+This will run the workflow using 30 CPU cores and generate the results in the `results` directory.
+
+Note that the `-v` flag maps the results directory from the host machine to the /workflow/results directory inside the container, allowing the workflow to write its results to the host machine.. The `--rm` flag removes the container after it has finished running.
+
+The Dockerfile used to build the image is included in the root directory of the project. It is based on the latest Snakemake image and includes all the necessary dependencies for running the workflow. The `CMD` in the Dockerfile runs the Snakemake workflow with 30 cores by default. However, this can be overridden by specifying a different number of cores when running the container.

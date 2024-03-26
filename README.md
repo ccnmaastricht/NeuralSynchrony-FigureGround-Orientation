@@ -42,3 +42,38 @@ This directory contains scripts for simulations, analysis, statistics, plotting,
 
 ### src
 This directory contains Python source code for the project. The __init__.py file is used to mark the directory as a Python package. The source code includes classes and functions for model simulations, analyzing data, statistics, and generating figures.
+
+## Workflow
+The workflow of the project is defined in the Snakefile. The Snakefile specifies a set of rules that define how to generate the desired results from the input data. The workflow uses the Snakemake workflow management system to automatically execute the rules and generate the results.
+
+The workflow consists of the following steps:
+
+1. Download the data from Zenodo.
+2. Run system information queries to gather information about the system used to run the workflow.
+3. Perform exploratory data analysis on the human psychophysics data.
+4. Fit a generalized estimating equation (GEE) model to the human psychophysics data.
+5. Perform behavioral analysis on the human psychophysics data to estimate the optimal psychometric parameters for each session.
+6. Compare the performance of different models in predicting the human psychophysics data using transfer session model comparison.
+7. Explore the parameter space of the model using parameter exploration.
+8. Estimate the parameters of the model using cross-validation.
+9. Simulate the model using the estimated parameters.
+10. Test the model predictions against the human psychophysics data.
+11. Generate figures to visualize the results.
+
+The workflow is designed to be modular and extensible. Each step is defined as a separate rule in the Snakefile, and new rules can be added to extend the workflow as needed.
+
+### Running the Workflow
+To run the workflow, navigate to the root directory of the project and execute the following command:
+```bash
+snakemake --cores [number_of_cores]
+```
+Replace `[number_of_cores]` with the desired number of CPU cores to be used for the workflow. This command will execute the workflow and generate the results in the `results` directory.
+
+Note that model simulations involve parallel processes implemented with the `multiprocessing` tools. The `config/simulation/simulation.toml` file specifies the number of CPU cores that should be used. If the machine you run this workflow on has fewer cores than specified in the config file, the workflow will still run. However, all of your machine's cores will be used, and the number of blocks of the simulations will be adjusted to be an integer multiple of the number of used cores. It is recommended to adjust the number of cores in the config file and in the `--cores` flag if you would like to use fewer cores.
+
+For example, if you want to run the workflow using 10 cores, execute the following command:
+```bash
+snakemake --cores 10
+```
+This will run the workflow using 10 CPU cores and generate the results in the `results` directory.
+

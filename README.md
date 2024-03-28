@@ -26,6 +26,8 @@ The project is organized into the following directories:
 ### config
 This directory contains TOML configuration files for the analysis, plotting, and simulation scripts. These files specify the parameters used by the scripts and allow for easy configuration of the project.
 
+Note that for reasons of reproducibility, the random seed is fixed in the `simulation.toml` config file. This ensures that the results of the simulations can be reproduced exactly.
+
 ### data
 This directory contains the data used in the project. The Snakemake workflow of the project automatically downloads CSV data files from Zenodo and places them in this directory. The data includes human psychophysics data on figure-ground segregation in texture stimuli.
 

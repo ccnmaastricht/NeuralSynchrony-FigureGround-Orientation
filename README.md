@@ -52,17 +52,14 @@ The workflow consists of the following steps:
 
 1. Download the data from Zenodo.
 2. Run system information queries to gather information about the system used to run the workflow.
-3. Perform exploratory data analysis on the human psychophysics data.
-4. Fit a generalized estimating equation (GEE) model to the human psychophysics data.
-5. Perform behavioral analysis on the human psychophysics data to estimate the optimal psychometric parameters for each session.
-6. Compare the performance of different models in predicting the human psychophysics data using transfer session model comparison.
+3. Fit a generalized estimating equation (GEE) model to the human psychophysics data.
+4. Pre-process human psychophysics data to obtain behavioural Arnold tongues and estimate optimal psychometric parameters for each session.
+5. Evaluate assumption of local learning by analysing transfer session results.
 7. Explore the parameter space of the model using parameter exploration.
 8. Estimate the learning rate of the model using cross-validation.
 9. Simulate the learning experiment using the estimated learning rate.
 10. Test the model predictions against the human psychophysics data.
 11. Generate figures to visualize the results.
-
-The workflow is designed to be modular and extensible. Each step is defined as a separate rule in the Snakefile, and new rules can be added to extend the workflow as needed.
 
 ### Running the Workflow
 

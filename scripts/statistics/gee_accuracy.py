@@ -28,7 +28,7 @@ def is_significant(results, variable, cutoff=0.05):
     significant : bool
         True if the variable is significant, False otherwise.
     """
-    # use Wald test p-value
+    # Use Wald test p-value
     pvalue = results.wald_test(variable, scalar=True).pvalue
     return pvalue < cutoff
 
@@ -42,14 +42,14 @@ if __name__ == '__main__':
         print(f"Data file not found: {data_path}")
         exit(1)
 
-    # ignore transfer (final) session
+    # Ignore transfer (final) session
     data = data[data['SessionID'] != 9]
 
-    # define distribution and covariance structure for GEE
+    # Define distribution and covariance structure for GEE
     family = sm.families.Binomial()
     covariance_structure = sm.cov_struct.Exchangeable()
 
-    # fit full model
+    # Fit full model
     model = smf.gee(
         "Correct ~ ContrastHeterogeneity + GridCoarseness + SessionID + SessionID*ContrastHeterogeneity + SessionID*GridCoarseness",
         "SubjectID",
@@ -58,12 +58,12 @@ if __name__ == '__main__':
         family=family)
     results_full = model.fit()
 
-    # save results of full model
+    # Save results of full model
     with open('results/statistics/gee_full.pkl', 'wb') as f:
         pickle.dump(results_full, f)
 
     if is_significant(results_full, 'SessionID:ContrastHeterogeneity'):
-        # simple effects of contrast heterogeneity for each session
+        # Simple effects of contrast heterogeneity for each session
         for session in range(1, 9):
             session_data = get_session_data(data, session)
             model = smf.gee("Correct ~ ContrastHeterogeneity",
@@ -73,14 +73,14 @@ if __name__ == '__main__':
                             family=family)
             results = model.fit()
 
-            # save results
+            # Save results
             with open(
                     f'results/statistics/gee_contrast_heterogeneity_{session}.pkl',
                     'wb') as f:
                 pickle.dump(results, f)
 
     if is_significant(results_full, 'SessionID:GridCoarseness'):
-        # simple effects of grid coarseness for each session
+        # Simple effects of grid coarseness for each session
         for session in range(1, 9):
             session_data = get_session_data(data, session)
             model = smf.gee("Correct ~ GridCoarseness",
@@ -90,7 +90,7 @@ if __name__ == '__main__':
                             family=family)
             results = model.fit()
 
-            # save results
+            # Save results
             with open(f'results/statistics/gee_grid_coarseness_{session}.pkl',
                       'wb') as f:
                 pickle.dump(results, f)

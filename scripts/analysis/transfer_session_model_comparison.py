@@ -75,12 +75,12 @@ if __name__ == '__main__':
 
     likelihoods = np.ones(num_training_sessions, dtype=np.float128)
 
-    # loop through the sessions
+    # Loop through the sessions
     for session in range(num_training_sessions):
-        # load the training data
+        # Load the training data
         train_data = get_session_data(experimental_data, session + 1)
 
-        # loop through the subjects
+        # Loop through the subjects
         for subject in train_data['SubjectID'].unique():
             # get the training and test data for the current subject
             subject_train = get_subject_data(train_data, subject)
@@ -89,10 +89,10 @@ if __name__ == '__main__':
             likelihoods[session] *= fit_model_and_calculate_likelihood(
                 subject_train, subject_test)
 
-    # calculate the Akaike Information Criterion (AIC)
+    # Calculate the Akaike Information Criterion (AIC)
     AIC = 2 * num_predictors - 2 * np.log(likelihoods)
 
-    # calculate the relative likelihood and weights of each model
+    # Calculate the relative likelihood and weights of each model
     min_AIC = np.min(AIC)
     delta_AIC = AIC - min_AIC
     relative_likelihood = np.exp(-0.5 * delta_AIC)

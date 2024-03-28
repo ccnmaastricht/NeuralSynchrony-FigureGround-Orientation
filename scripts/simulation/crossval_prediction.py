@@ -262,7 +262,7 @@ def run_learning(fold, learning_rate, num_sessions, experiment_parameters,
 
 if __name__ == '__main__':
 
-    # Load the model, stimulus, simulation, and experiment parameters
+    # Load parameters
     model_parameters, stimulus_parameters, simulation_parameters, crossval_parameters, experiment_parameters = load_configurations(
     )
 

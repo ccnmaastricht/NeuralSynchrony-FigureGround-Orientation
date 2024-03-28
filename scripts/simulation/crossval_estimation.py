@@ -301,15 +301,15 @@ if __name__ == '__main__':
                                             stimulus_conditions,
                                             simulation_classes, indexing)
 
-    # load behavioral Arnold tongues of session 1
+    # Load behavioral Arnold tongues of session 1
     session1_arnold_tongues = np.load(
         'results/empirical/session_1/individual_bats.npy')
 
-    # load behavioral Arnold tongues of session 2
+    # Load behavioral Arnold tongues of session 2
     session2_arnold_tongues = np.load(
         'results/empirical/session_2/individual_bats.npy')
 
-    # create predictors for the psychometric function
+    # Create predictors for the psychometric function
     predictors = np.ones((2, experiment_parameters['num_conditions']))
     predictors[0] = arnold_tongue.mean(axis=0)
 
@@ -347,7 +347,7 @@ if __name__ == '__main__':
 
         weighted_locking_crossval[subject] = weighted_locking
 
-        # remove subject from behavioral Arnold tongues of session 2
+        # Remove subject from behavioral Arnold tongues of session 2
         fold_arnold_tongues = np.delete(session2_arnold_tongues,
                                         subject,
                                         axis=0)

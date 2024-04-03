@@ -225,7 +225,7 @@ def fit_barplot(mean_fit,
     # Create a bar plot
     plt.bar(sessions, mean_fit, yerr=error, capsize=capsize, color=face_color)
 
-    # set the min and max of the y-axis
+    # Set the min and max of the y-axis
     plt.ylim(0, 1)
 
     plt.tick_params(axis='both', which='major', labelsize=tick_fontsize)

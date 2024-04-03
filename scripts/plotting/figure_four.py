@@ -195,7 +195,7 @@ def plot_model_vs_empirical(mean_model_size,
                  capsize=5,
                  capthick=2)
 
-    # plot the mixed effects model
+    # Plot the mixed effects model
     min_x = min(mean_model_size) - 0.1 * min(mean_model_size)
     max_x = max(mean_model_size) + 0.1 * max(mean_model_size)
     x = np.linspace(min_x, max_x, 100)
@@ -289,11 +289,11 @@ if __name__ == '__main__':
     # Panel C - model vs empirical Arnold tongue size
     filename = os.path.join(BASE_PATH, 'panel_c')
 
-    # get slope and intercept of the mixed effects model
+    # Get slope and intercept of the mixed effects model
     intercept, slope = get_intercept_and_slope(
         'results/statistics/mixed_effects_bat_size.pkl')
 
-    # load the empirical data
+    # Load the empirical data
     df = pd.read_csv('results/empirical/learning.csv')
 
     mean_model_size, _ = mean_and_sem(df, 'model_size')

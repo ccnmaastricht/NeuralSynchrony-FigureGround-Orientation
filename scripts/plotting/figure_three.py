@@ -19,7 +19,7 @@ with open('config/plotting/figure_three.toml', 'rb') as f:
 figsize = convert_size(*figure_parameters['general']['figure_size'])
 cmap = figure_parameters['general']['colormap']
 
-# top row - behavioural Arnold tongue (raw) per session
+# Top row - behavioural Arnold tongue (raw) per session
 for session in range(1, figure_parameters['data']['num_sessions'] + 1):
     filename = os.path.join(BASE_PATH, f'top_row_{session}')
     behavioural_arnold_tongue = np.load(
@@ -36,7 +36,7 @@ for session in range(1, figure_parameters['data']['num_sessions'] + 1):
                     colormap=cmap,
                     filename=filename)
 
-# middle row - behavioural Arnold tongue (fitted) per session
+# Middle row - behavioural Arnold tongue (fitted) per session
 for session in range(1, figure_parameters['data']['num_sessions'] + 1):
     filename = os.path.join(BASE_PATH, f'middle_row_{session}')
     fitted_arnold_tongue = np.load(
@@ -77,7 +77,7 @@ for session in range(1, figure_parameters['data']['num_sessions'] + 1):
     heatmap.savefig(filename)
     plt.close(heatmap)
 
-# bottom row - simulated Arnold tongue & transfer session results
+# Bottom row - simulated Arnold tongue & transfer session results
 simulated_arnold_tongue = np.load(
     'results/simulation/highres_arnold_tongues.npy').mean(axis=1)
 
@@ -95,7 +95,7 @@ for session in range(figure_parameters['model']['num_sessions']):
                     colormap=cmap,
                     filename=filename)
 
-# transfer session results
+# Transfer session results
 data = np.load('results/empirical/transfer_model_comparison.npz')
 dAIC = data['delta_AIC']
 session = np.arange(1, figure_parameters['data']['num_sessions'])

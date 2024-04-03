@@ -5,7 +5,6 @@ Results are saved in results/simulation/parameter_space_exploration.npy and corr
 """
 
 import os
-import time
 import tomllib
 import numpy as np
 

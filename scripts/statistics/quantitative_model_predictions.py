@@ -59,7 +59,7 @@ def load_data(config_path, simulation_path):
         The experiment parameters.
     """
 
-    # load configuration
+    # Load configuration
     with open(config_path, 'rb') as f:
         experiment_parameters = tomllib.load(f)
 

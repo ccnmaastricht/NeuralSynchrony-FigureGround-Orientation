@@ -17,7 +17,6 @@ The project is organized into the following directories:
 │   ├── plotting
 │   └── simulation
 ├── data
-├── LICENSE
 ├── notebooks
 ├── results
 ├── scripts

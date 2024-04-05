@@ -34,7 +34,7 @@ This directory contains TOML configuration files for the analysis, plotting, and
 Note that for reasons of reproducibility, the random seed is fixed in the `simulation.toml` config file. This ensures that the results of the simulations can be reproduced exactly.
 
 ## data
-This directory contains the data used in the project. The Snakemake workflow of the project automatically downloads CSV data files from Zenodo and places them in this directory. The data includes human psychophysics data on figure-ground segregation in texture stimuli.
+This directory contains the data used in the project. The Snakemake workflow of the project automatically downloads CSV data files from Zenodo and places them in this directory. The data includes human psychophysics data on figure ground segregation in texture stimuli.
 
 Karimian, M., Mark, R., De Weerd, P., & Senden, M. (2024). Human Psychophysics Dataset on Figure Ground Segregation in Texture Stimuli [Data set]. Zenodo. https://doi.org/10.5281/zenodo.10817187
 

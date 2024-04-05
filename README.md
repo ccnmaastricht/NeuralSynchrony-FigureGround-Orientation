@@ -1,4 +1,4 @@
-# Neural Synchrony for Figure-Ground Segregation
+# Neural Synchrony for Figure Ground Segregation
 
 Analysis and simulation code accompanying the article:
 

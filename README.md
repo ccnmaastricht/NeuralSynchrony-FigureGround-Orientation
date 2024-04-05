@@ -2,7 +2,7 @@
 
 Analysis and simulation code accompanying the article:
 
-Karimian, A., Roberts, M., De Weerd, P., & Senden, M. (n.d.). Adaptive Synchronization of Neural Gamma Oscillations Mediates Figure-Ground Perception in Texture Stimuli. *Manuscript in preparation*.
+Karimian, A., Roberts, M., De Weerd, P., & Senden, M. (n.d.). Adaptive Synchronization of Neural Gamma Oscillations Mediates Figure Ground Perception in Texture Stimuli. *Manuscript in preparation*.
 
 ## Abstract
 Gamma oscillations are ubiquitous in visual cortex, but their role in perception has been questioned because their frequencies are feature dependent. Drawing on the theory of weakly coupled oscillators (TWCO), we demonstrate that feature-dependence is crucial for gamma's functional role in perception. Two factors determine synchronization behaviour among coupled oscillators: dissimilarity of oscillation frequencies and coupling strength. In early visual cortex these factors relate to local features and physical distance between image elements, respectively. We manipulate these factors in a texture segregation experiment and show that performance follows TWCO predictions both qualitatively and quantitatively, as formalized in a computational model. Furthermore, learning-induced changes in the model's synchronization behaviour predict changes in participants' performance in a perceptual learning experiment. These results suggest that feature-dependence of gamma oscillations is critical for a synchronization-based mechanism of visual scene segmentation. Our findings offer insights into the functional role of gamma oscillations in the brain.

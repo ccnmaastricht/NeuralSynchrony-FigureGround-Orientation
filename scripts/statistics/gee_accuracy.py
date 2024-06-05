@@ -49,6 +49,19 @@ if __name__ == '__main__':
     family = sm.families.Binomial()
     covariance_structure = sm.cov_struct.Exchangeable()
 
+    # Fit first session model
+    first_session_data = get_session_data(data, 1)
+    model = smf.gee("Correct ~ ContrastHeterogeneity + GridCoarseness",
+                    "SubjectID",
+                    first_session_data,
+                    cov_struct=covariance_structure,
+                    family=family)
+    results_first = model.fit()
+
+    # Save results of first model
+    with open('results/statistics/gee_first.pkl', 'wb') as f:
+        pickle.dump(results_first, f)
+
     # Fit full model
     model = smf.gee(
         "Correct ~ ContrastHeterogeneity + GridCoarseness + SessionID + SessionID*ContrastHeterogeneity + SessionID*GridCoarseness",

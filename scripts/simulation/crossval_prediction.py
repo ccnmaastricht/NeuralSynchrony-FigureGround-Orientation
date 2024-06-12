@@ -1,13 +1,6 @@
 """
 Runs simulations for seven training sessions (sessions 2-8). The first session corresponds to results from the baseline_simulation.py script.
-Results are saved in ../data/simulation_results/learning_simulation.npy and correspond to section X of the paper.
-
-
-NOTES:
-- save simulated Arnold tongues per session starting from session 2 based on aggregated parameters
-- save results per fold and per session (k-fold cross-validation)
-- decide whether k is 1 (i.e., leave-one-subject-out) or 4 (split-half cross-validation)
-- think about parallelizing the simulations
+Results are saved in ../data/simulation_results/learning_simulation.npy.
 """
 
 BASE_PATH = 'results/empirical/'

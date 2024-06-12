@@ -1,6 +1,6 @@
 """
 This script performs generalized estimating equations (GEE) analysis on the behavioral data.
-Results are saved in results/statistics/ and correspond to section X of the paper.
+Results are saved in results/statistics/.
 """
 import pickle
 import pandas as pd

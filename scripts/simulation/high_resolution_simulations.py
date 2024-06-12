@@ -1,6 +1,6 @@
 """
 This script simulates the first session of the experiment and generate an Arnold Tongue.
-Results are saved in results/arnold_tongue.npy and correspond to section X of the paper.
+Results are saved in results/arnold_tongue.npy.
 """
 import os
 import tomllib

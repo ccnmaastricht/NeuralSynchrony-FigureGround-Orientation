@@ -1,6 +1,6 @@
 """
 This script computes the behavioral Arnold tongue of each subject as well as the average behavioral Arnold tongue.
-Results are saved in results/empirical/ and correspond to section X of the paper.
+Results are saved in results/empirical/.
 """
 import os
 import tomllib

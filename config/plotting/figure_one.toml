@@ -1,0 +1,7 @@
+[general]
+figure_size = [12, 12]
+
+[stimulus]
+stimulus_resolution = 2400
+stimulus_num_pixels = 5760000
+annulus_resolution = 250

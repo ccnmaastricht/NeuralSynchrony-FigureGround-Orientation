@@ -1,6 +1,6 @@
 """
 This script compute fold-specific paramters of a sychometric function linking model synchrony to probability of a correct response of subjects in the first session of the experiment.
-Results are saved in results/arnold_tongue.npy and correspond to section X of the paper.
+Results are saved in results/arnold_tongue.npy.
 """
 
 import os

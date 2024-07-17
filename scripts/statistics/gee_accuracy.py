@@ -51,12 +51,15 @@ if __name__ == '__main__':
 
     # Fit first session model
     first_session_data = get_session_data(data, 1)
-    model = smf.gee("Correct ~ ContrastHeterogeneity + GridCoarseness",
-                    "SubjectID",
-                    first_session_data,
-                    cov_struct=covariance_structure,
-                    family=family)
+    model = smf.gee(
+        "Correct ~ ContrastHeterogeneity + GridCoarseness + ContrastHeterogeneity*GridCoarseness",
+        "SubjectID",
+        first_session_data,
+        cov_struct=covariance_structure,
+        family=family)
     results_first = model.fit()
+
+    print(results_first.summary())
 
     # Save results of first model
     with open('results/statistics/gee_first.pkl', 'wb') as f:
@@ -64,12 +67,14 @@ if __name__ == '__main__':
 
     # Fit full model
     model = smf.gee(
-        "Correct ~ ContrastHeterogeneity + GridCoarseness + SessionID + SessionID*ContrastHeterogeneity + SessionID*GridCoarseness",
+        "Correct ~ ContrastHeterogeneity + GridCoarseness + SessionID + SessionID*ContrastHeterogeneity + SessionID*GridCoarseness + ContrastHeterogeneity*GridCoarseness",
         "SubjectID",
         data,
         cov_struct=covariance_structure,
         family=family)
     results_full = model.fit()
+
+    print(results_full.summary())
 
     # Save results of full model
     with open('results/statistics/gee_full.pkl', 'wb') as f:

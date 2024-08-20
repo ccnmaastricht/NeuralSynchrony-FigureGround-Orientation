@@ -220,6 +220,53 @@ def plot_model_vs_empirical(mean_model_size,
         return figure
 
 
+def plot_sizes(sessions,
+               empirical_sizes,
+               model_sizes,
+               fontsizes,
+               labels,
+               marker_color,
+               figsize,
+               filename=None,
+               dpi=300,
+               filetype='svg'):
+
+    figure = plt.figure(figsize=figsize,
+                        dpi=dpi if filetype != 'svg' else None)
+
+    title, xlabel, ylabel, model_legend, empirical_legend = labels
+    title_fontsize, label_fontsize, tick_fontsize, legend_fontsize = fontsizes
+
+    plt.plot(sessions,
+             model_sizes,
+             'o-',
+             color='black',
+             markerfacecolor=marker_color[0],
+             label=model_legend)
+    plt.plot(sessions,
+             empirical_sizes,
+             's-',
+             color='black',
+             markerfacecolor=marker_color[1],
+             label=empirical_legend)
+
+    plt.xlabel(xlabel, fontsize=label_fontsize)
+    plt.ylabel(ylabel, fontsize=label_fontsize)
+    plt.title(title, fontsize=title_fontsize)
+    plt.legend(fontsize=legend_fontsize)
+
+    plt.xticks(fontsize=tick_fontsize)
+    plt.yticks(fontsize=tick_fontsize)
+
+    plt.tight_layout()
+
+    # Save the figure
+    if filename is not None:
+        filename = f'{filename}.{filetype}'
+        plt.savefig(filename, dpi=dpi if filetype != 'svg' else None)
+        plt.close()
+
+
 if __name__ == '__main__':
 
     # Load the figure parameters
@@ -286,15 +333,33 @@ if __name__ == '__main__':
                 dpi=300,
                 filetype='svg')
 
-    # Panel C - model vs empirical Arnold tongue size
+    # Panel C - Arnold tongue sizes per session
     filename = os.path.join(BASE_PATH, 'panel_c')
+
+    # Load the data
+    df = pd.read_csv('results/empirical/learning.csv')
+
+    sessions = df['session'].unique() + 1
+    # compute average model and empirical sizes for each session (averaged over subjects)
+    model_sizes = df.groupby('session')['model_size'].mean()
+    empirical_sizes = df.groupby('session')['empirical_size'].mean()
+
+    # min-max normalize the sizes
+    model_sizes = min_max_normalize(model_sizes)
+    empirical_sizes = min_max_normalize(empirical_sizes)
+
+    plot_sizes(sessions, empirical_sizes, model_sizes,
+               figure_parameters['panels'][2]['fontsizes'],
+               figure_parameters['panels'][2]['labels'],
+               figure_parameters['panels'][2]['marker_color'], figsize,
+               filename)
+
+    # Panel D - model vs empirical Arnold tongue size
+    filename = os.path.join(BASE_PATH, 'panel_d')
 
     # Get slope and intercept of the mixed effects model
     intercept, slope = get_intercept_and_slope(
         'results/statistics/mixed_effects_bat_size.pkl')
-
-    # Load the empirical data
-    df = pd.read_csv('results/empirical/learning.csv')
 
     mean_model_size, _ = mean_and_sem(df, 'model_size')
     mean_empirical_size, sem_empirical_size = mean_and_sem(
@@ -302,7 +367,7 @@ if __name__ == '__main__':
 
     plot_model_vs_empirical(mean_model_size, mean_empirical_size,
                             sem_empirical_size, intercept, slope,
-                            figure_parameters['panels'][2]['labels'],
+                            figure_parameters['panels'][3]['labels'],
                             figure_parameters['general']['fontsizes'],
-                            figure_parameters['panels'][2]['marker_color'],
+                            figure_parameters['panels'][3]['marker_color'],
                             figsize, filename)

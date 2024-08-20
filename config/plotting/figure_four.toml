@@ -12,5 +12,10 @@ labels = ['', 'Session', 'Correlation']
 labels = ['', 'Session', 'Jaccard similarity']
 
 [[panels]]
+fontsizes = [0, 5, 5, 5]
+marker_color=['#648fff', '#fe6100']
+labels = ['', 'Session', 'Normalised size', 'Model', 'Empirical']
+
+[[panels]]
 marker_color=['#dc267f', '#785ef0']
 labels = ['', 'Model', 'Empirical']

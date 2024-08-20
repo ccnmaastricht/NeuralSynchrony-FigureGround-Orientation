@@ -16,7 +16,7 @@ rule all:
          "results/simulation/highres_arnold_tongues.npy",
          "results/figures/figure_two/panel_d.svg",
          "results/figures/figure_three/bottom_row_transfer.svg",
-         "results/figures/figure_four/panel_c.svg"]
+         "results/figures/figure_four/panel_d.svg"]
 
 rule download_data:
     output:
@@ -134,7 +134,8 @@ rule run_figure_four:
     output:
         ["results/figures/figure_four/panel_a.svg",
         "results/figures/figure_four/panel_b.svg",
-        "results/figures/figure_four/panel_c.svg"]
+        "results/figures/figure_four/panel_c.svg",
+        "results/figures/figure_four/panel_d.svg"]
     shell:
         "python -m scripts.plotting.figure_four"
 

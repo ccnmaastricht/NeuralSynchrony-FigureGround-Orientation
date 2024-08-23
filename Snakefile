@@ -15,8 +15,8 @@ rule all:
          "results/simulation/learning_simulation.npz",
          "results/simulation/highres_arnold_tongues.npy",
          "results/figures/figure_two/panel_d.svg",
-         "results/figures/figure_three/bottom_row_transfer.svg",
-         "results/figures/figure_four/panel_d.svg"]
+         "results/figures/figure_four/bottom_row_transfer.svg",
+         "results/figures/figure_five/panel_d.svg"]
 
 rule download_data:
     output:
@@ -104,8 +104,7 @@ rule create_figure_two:
     input:
         expand("results/empirical/session_{session}/average_bat.npy", session=session_ids) +
         expand("results/empirical/session_{session}/continuous_bat.npy", session=session_ids) +
-        ["results/simulation/parameter_space_exploration.npz",
-        "results/simulation/highres_arnold_tongues.npy"]
+        ["results/simulation/highres_arnold_tongues.npy"]
     output:
         ["results/figures/figure_two/panel_a.svg",
         "results/figures/figure_two/panel_b.svg",
@@ -114,28 +113,36 @@ rule create_figure_two:
     shell:
         "python -m scripts.plotting.figure_two"
 
-rule run_figure_three:
+rule create_figure_three:
+    input:
+        "results/simulation/parameter_space_exploration.npz"
+    output:
+        "results/figures/figure_three/figure_three.svg"
+    shell:
+        "python -m scripts.plotting.figure_three"
+
+rule run_figure_four:
     input:
         ["results/simulation/highres_arnold_tongues.npy",
         "results/empirical/transfer_model_comparison.npz"] +
         expand("results/empirical/session_{session}/average_bat.npy", session=session_ids) +
         expand("results/empirical/session_{session}/continuous_bat.npy", session=session_ids)
     output:
-        "results/figures/figure_three/bottom_row_transfer.svg"
+        "results/figures/figure_four/bottom_row_transfer.svg"
     shell:
-        "python -m scripts.plotting.figure_three"
+        "python -m scripts.plotting.figure_four"
 
-rule run_figure_four:
+rule run_figure_five:
     input:
         ["results/simulation/learning_simulation.npz",
         "results/empirical/learning.csv",
         "results/statistics/mixed_effects_bat_size.pkl"] +
         expand("results/empirical/session_{session}/individual_bats.npy", session=session_ids)
     output:
-        ["results/figures/figure_four/panel_a.svg",
-        "results/figures/figure_four/panel_b.svg",
-        "results/figures/figure_four/panel_c.svg",
-        "results/figures/figure_four/panel_d.svg"]
+        ["results/figures/figure_five/panel_a.svg",
+        "results/figures/figure_five/panel_b.svg",
+        "results/figures/figure_five/panel_c.svg",
+        "results/figures/figure_five/panel_d.svg"]
     shell:
-        "python -m scripts.plotting.figure_four"
+        "python -m scripts.plotting.figure_five"
 

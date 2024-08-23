@@ -67,43 +67,22 @@ filename = f'{filename}.svg'
 heatmap.savefig(filename)
 plt.close(heatmap)
 
-# Panel C - parameter space
+# Panel C - simulated Arnold tongue (low resolution)
 filename = os.path.join(BASE_PATH, 'panel_c')
-exploration_data = np.load(
-    'results/simulation/parameter_space_exploration.npz')
-jaccard_fits = exploration_data['jaccard_fits']
-jaccard_fits = np.flipud(jaccard_fits)
-
-heatmap = colored_heatmap(jaccard_fits,
-                          figsize=figsize,
-                          labels=figure_parameters['panels'][2]['labels'],
-                          fontsizes=figure_parameters['general']['fontsizes'],
-                          ticks=figure_parameters['panels'][2]['ticks'],
-                          bounds=figure_parameters['panels'][2]['bounds'],
-                          colormap=cmap)
-
-ax = heatmap.gca()
-ax.plot(figure_parameters['panels'][2]['vertical_line'][0],
-        figure_parameters['panels'][2]['vertical_line'][1], 'k--')
-ax.plot(figure_parameters['panels'][2]['horizontal_line'][0],
-        figure_parameters['panels'][2]['horizontal_line'][1], 'k--')
-ax.plot(figure_parameters['panels'][2]['marker'][0],
-        figure_parameters['panels'][2]['marker'][1], 'ko')
-
-ax.set_xlim(figure_parameters['panels'][2]['ticks'][0][0],
-            figure_parameters['panels'][2]['ticks'][0][-1])
-ax.set_ylim(figure_parameters['panels'][2]['ticks'][1][-1],
-            figure_parameters['panels'][2]['ticks'][1][0])
-
-heatmap.tight_layout()
-filename = f'{filename}.svg'
-heatmap.savefig(filename)
-plt.close(heatmap)
-
-# Panel D - simulated Arnold tongue
-filename = os.path.join(BASE_PATH, 'panel_d')
 simulated_arnold_tongue = np.load(
     'results/simulation/highres_arnold_tongues.npy')[0].mean(axis=0)
+
+colored_heatmap(simulated_arnold_tongue[::6, ::6],
+                figsize=figsize,
+                labels=figure_parameters['panels'][2]['labels'],
+                fontsizes=figure_parameters['general']['fontsizes'],
+                ticks=figure_parameters['panels'][2]['ticks'],
+                bounds=figure_parameters['panels'][2]['bounds'],
+                colormap=cmap,
+                filename=filename)
+
+# Panel D - simulated Arnold tongue (high resolution)
+filename = os.path.join(BASE_PATH, 'panel_d')
 
 colored_heatmap(simulated_arnold_tongue,
                 figsize=figsize,
@@ -113,3 +92,36 @@ colored_heatmap(simulated_arnold_tongue,
                 bounds=figure_parameters['panels'][3]['bounds'],
                 colormap=cmap,
                 filename=filename)
+
+# Panel E - parameter space
+filename = os.path.join(BASE_PATH, 'panel_e')
+exploration_data = np.load(
+    'results/simulation/parameter_space_exploration.npz')
+jaccard_fits = exploration_data['jaccard_fits']
+jaccard_fits = np.flipud(jaccard_fits)
+
+heatmap = colored_heatmap(jaccard_fits,
+                          figsize=figsize,
+                          labels=figure_parameters['panels'][4]['labels'],
+                          fontsizes=figure_parameters['general']['fontsizes'],
+                          ticks=figure_parameters['panels'][4]['ticks'],
+                          bounds=figure_parameters['panels'][4]['bounds'],
+                          colormap=figure_parameters['panels'][4]['colormap'])
+
+ax = heatmap.gca()
+ax.plot(figure_parameters['panels'][4]['vertical_line'][0],
+        figure_parameters['panels'][4]['vertical_line'][1], 'k--')
+ax.plot(figure_parameters['panels'][4]['horizontal_line'][0],
+        figure_parameters['panels'][4]['horizontal_line'][1], 'k--')
+ax.plot(figure_parameters['panels'][4]['marker'][0],
+        figure_parameters['panels'][4]['marker'][1], 'ko')
+
+ax.set_xlim(figure_parameters['panels'][4]['ticks'][0][0],
+            figure_parameters['panels'][4]['ticks'][0][-1])
+ax.set_ylim(figure_parameters['panels'][4]['ticks'][1][-1],
+            figure_parameters['panels'][4]['ticks'][1][0])
+
+heatmap.tight_layout()
+filename = f'{filename}.svg'
+heatmap.savefig(filename)
+plt.close(heatmap)

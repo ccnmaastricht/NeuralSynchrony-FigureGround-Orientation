@@ -1,10 +1,17 @@
+[general]
 figure_size = [89, 89]
 fontsizes = [0, 5, 5, 5]
-colormap = "PRGn"
-labels = ['','Coupling decay factor', 'Maximum coupling strength',
-          'Weighted Jaccard similarity']
+colormap="coolwarm"
 ticks = [[0.0, 0.15, 0.3 , 0.45, 0.6], [60.0, 45.0, 30.0, 15.0, 0.0]]
-bounds = [0.0, 1.0]
 vertical_line = [[0.22, 0.22],[0, 24.63]]
 horizontal_line = [[0, 0.22],[24.64, 24.63]]
 marker = [0.22, 24.64]
+bounds = [0.0, 1.0]
+
+[[panels]]
+labels = ['','Coupling decay factor', 'Maximum coupling strength',
+          'Pearson correlation']
+
+[[panels]]
+labels = ['','Coupling decay factor', 'Maximum coupling strength',
+          'Weighted Jaccard similarity']

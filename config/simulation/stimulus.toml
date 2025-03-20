@@ -3,5 +3,10 @@ stimulus_num_pixels = 230400
 stimulus_eccentricity = 7
 stimulus_side_length = 6.7
 annulus_diameter = 0.7
-annulus_frequency = 5.7
-annulus_resolution = 50
+
+patch_resolution = 50
+patch_type = 'orientation'
+reference_orientation = 45
+heterogeneity = 0.2
+orientation_frequency = 5.7
+orientation_diameter = 1

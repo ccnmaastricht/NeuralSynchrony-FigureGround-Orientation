@@ -1,4 +1,5 @@
-num_populations = 400
+num_hypercolumns = 400
+num_orientations = 4
 decay_rate = 0.22 			# 0.22 = macaque (default); 0.062 = optimal 
 max_coupling = 24.63
 contrast_slope = 0.25
@@ -6,3 +7,9 @@ contrast_intercept = 25
 receptive_field_slope = 0.172
 receptive_field_intercept = -0.25
 receptive_field_minimum_size = 1
+
+orientation_slope = 37.5 # Hz
+
+tuning_sigma = 0.2967
+
+coupling_sigma = 0.6457

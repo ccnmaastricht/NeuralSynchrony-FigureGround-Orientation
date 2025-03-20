@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.integrate import odeint
 
-from src.model_utils import gaussian, threshold_linear, inverse_complex_log_transform, pairwise_distance
+from src.model_utils import *
 
 
 class V1Model:
@@ -12,14 +12,25 @@ class V1Model:
         self.omega = None
         self.decay_rate = model_parameters['decay_rate']
         self.max_coupling = model_parameters['max_coupling']
-        self.num_populations = model_parameters['num_populations']
+        self.num_hypercolumns = model_parameters['num_hypercolumns']
+        self.num_orientations = model_parameters['num_orientations']
+        self.num_populations = self.num_hypercolumns * self.num_orientations
+
         self.contrast_slope = model_parameters['contrast_slope']
         self.contrast_intercept = model_parameters['contrast_intercept']
+        self.orientation_slope = model_parameters['orientation_slope']
         self.receptive_field_slope = model_parameters['receptive_field_slope']
         self.receptive_field_intercept = model_parameters[
             'receptive_field_intercept']
         self.receptive_field_minimum_size = model_parameters[
             'receptive_field_minimum_size']
+        self.tuning_sigma = model_parameters['tuning_sigma']
+
+        self.coupling_sigma = model_parameters['coupling_sigma']
+
+        self.filter_bank_frequency = convert_frequencies(stimulus_parameters)
+        self.filter_bank_sigma = compute_sigma(self.filter_bank_frequency)
+
         self.effective_learning_rate = None
 
         self._generate_receptive_fields(stimulus_parameters)
@@ -34,12 +45,19 @@ class V1Model:
         stimulus : array_like
             The stimulus.
         """
-        mean_luminance = np.mean(stimulus)
-        normalized_luminance = (stimulus - mean_luminance)**2 / (mean_luminance
-                                                                 **2)
-        contrast = np.sqrt(
-            np.matmul(self.receptive_fields, normalized_luminance)) * 100
-        frequency = self.contrast_slope * contrast + self.contrast_intercept
+
+        orientation_map = gabor_filter_bank(
+            stimulus, self.filter_bank_frequency,
+            np.unique(self.preferred_orientations), self.filter_bank_sigma)
+
+        weighted_kuramoto_order = weighted_kuramoto(orientation_map,
+                                                    self.receptive_fields)
+
+        response = orientation_response(self.preferred_orientations,
+                                        weighted_kuramoto_order,
+                                        self.tuning_sigma)
+
+        frequency = self.orientation_slope * response
         self.omega = 2 * np.pi * frequency
 
     def generate_coupling(self):
@@ -47,9 +65,30 @@ class V1Model:
         Generate the coupling matrix.
         """
         X_cortex, Y_cortex = inverse_complex_log_transform(self.X, self.Y)
-        distances = pairwise_distance(X_cortex, Y_cortex)
-        self.coupling = np.exp(
-            -self.decay_rate * distances) * self.max_coupling
+
+        X_cortex = np.repeat(X_cortex[:, np.newaxis],
+                             self.num_orientations,
+                             axis=1).flatten()
+        Y_cortex = np.repeat(Y_cortex[:, np.newaxis],
+                             self.num_orientations,
+                             axis=1).flatten()
+
+        spatial_distances = pairwise_distance(X_cortex, Y_cortex)
+        distance_coupling = np.exp(
+            -self.decay_rate * spatial_distances) * self.max_coupling
+
+        preferred_orientations = np.repeat(np.linspace(
+            0, 180, self.num_orientations, endpoint=False)[np.newaxis, :],
+                                           self.num_hypercolumns,
+                                           axis=0).flatten()
+        self.preferred_orientations = np.radians(preferred_orientations)
+
+        angular_differences = compute_angular_differences(
+            self.preferred_orientations)
+        angular_coupling = np.exp(-angular_differences**2 /
+                                  (2 * self.coupling_sigma**2))
+
+        self.coupling = distance_coupling * angular_coupling
 
     def update_coupling(self, weighted_locking):
         """
@@ -120,7 +159,7 @@ class V1Model:
         lower_bound = xy_offset - stimulus_side_length / 2
         upper_bound = xy_offset + stimulus_side_length / 2
         r = np.linspace(lower_bound, upper_bound,
-                        int(np.sqrt(self.num_populations)))
+                        int(np.sqrt(self.num_hypercolumns)))
         X, Y = np.meshgrid(r, r)
         self.X = X.flatten()
         self.Y = Y[::-1].flatten()
@@ -141,9 +180,10 @@ class V1Model:
 
         self.receptive_fields = np.zeros(
             (self.num_populations, stimulus_num_pixels))
-        for i in range(self.num_populations):
+        for i in range(self.num_hypercolumns):
             rf = gaussian(X, Y, self.X[i], self.Y[i], sigma[i])
-            self.receptive_fields[i, :] = rf / np.sum(rf)
+            self.receptive_fields[i * self.num_orientations:(i + 1) *
+                                  self.num_orientations] = rf / np.sum(rf)
 
     def _dynamics(self, state, t):
         """
